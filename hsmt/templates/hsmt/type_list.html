@@ -1,0 +1,31 @@
+{% extends 'hsmt/base.html' %}
+
+{% block data %}
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Content Column -->
+        <div class="col-lg-12 mb-4">
+            <!-- Project Card Example -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Danh sách các loại hồ sơ
+                        <a href="{% url 'hsmt-type-create' %}" class="float-right">
+                            Tạo mới
+                        </a>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for xfiletype in xfiletype_list %}
+                        <h4 class="small font-weight-bold">
+                            {{xfiletype.name}} 
+                            <a href="{% url 'hsmt-type-detail' xfiletype.id %}" class="float-right">
+                                Chi tiết
+                            </a>
+                        </h4>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock data %}

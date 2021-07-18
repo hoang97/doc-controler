@@ -1,0 +1,62 @@
+{% extends 'users/base.html' %}
+{% block title %}
+    <title>Blog Sign Up</title>
+{% endblock title %}
+
+{% block card-image %}
+    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+{% endblock card-image %}
+
+{% block card-title %}
+    <div class="text-center">
+        <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+    </div>
+{% endblock card-title %}
+
+{% block card-body %}
+    <form class="user" action="." method="POST">
+        {% csrf_token %}
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="text" class="form-control form-control-user" id="exampleFirstName"
+                    placeholder="First Name" name="first_name">
+            </div>
+            <div class="col-sm-6">
+                <input type="text" class="form-control form-control-user" id="exampleLastName"
+                    placeholder="Last Name" name="last_name">
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control form-control-user" id="exampleInputEmail"
+                placeholder="User Name" name="username">
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-6 mb-3 mb-sm-0">
+                <input type="password" class="form-control form-control-user"
+                    id="exampleInputPassword" placeholder="Password" name="password1">
+            </div>
+            <div class="col-sm-6">
+                <input type="password" class="form-control form-control-user"
+                    id="exampleRepeatPassword" placeholder="Repeat Password" name="password2">
+            </div>
+        </div>
+        <button class="btn btn-primary btn-user btn-block">
+            Register Account
+        </button>
+        <hr>
+        <a href="index.html" class="btn btn-google btn-user btn-block">
+            <i class="fab fa-google fa-fw"></i> Register with Google
+        </a>
+        <a href="index.html" class="btn btn-facebook btn-user btn-block">
+            <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
+        </a>
+    </form>
+    <hr>
+    <div class="text-center">
+        <a class="small" href="forgot-password.html">Forgot Password?</a>
+    </div>
+    <div class="text-center">
+        <a class="small" href="{% url 'user-login' %}">Already have an account? Login!</a>
+    </div>
+
+{% endblock card-body %}
