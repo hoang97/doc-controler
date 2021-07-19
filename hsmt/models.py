@@ -174,6 +174,9 @@ class XFileChange(models.Model):
     date_edited = models.DateField(blank=True, null=True)
     date_checked = models.DateField(blank=True, null=True)
     date_approved = models.DateField(blank=True, null=True)
+    editor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='changes_edited', null=True)
+    checker = models.ForeignKey(User, on_delete=models.PROTECT, related_name='changes_checked', null=True)
+    approver = models.ForeignKey(User, on_delete=models.PROTECT, related_name='changes_approved', null=True)
     file = models.ForeignKey(XFile, on_delete=models.CASCADE, related_name='changes')
 
     # Nội dung được User chỉnh sửa
@@ -239,7 +242,7 @@ class XFileChange(models.Model):
     def set_approving(self):
         '''
         Thay đổi XFile.status -> APPROVING, 
-        lưu lại thời gian lần cuối file được check
+        lưu lại thời gian lần cuối file được check,
         '''
         self.file.status = STATUS.APPROVING
         self.date_checked = timezone.now()
