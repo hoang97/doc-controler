@@ -25,7 +25,10 @@ class XFileCreateView(CreateView):
     def form_valid(self, form):
         form.instance.department = self.request.user.info.department
         form.instance.content = form.instance.type.example_content
-        return super().form_valid(form)
+        httpresponse = super().form_valid(form)
+        form.instance.create_change(change_name='Khởi tạo', by=self.request.user)
+        form.save()
+        return httpresponse
 
 class XFileListView(ListView):
     template_name = 'hsmt/list.html'

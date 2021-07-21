@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import Department
 from .utils import decode
+from django_fsm import FSMField, transition, RETURN_VALUE, GET_STATE
 
 # Choices
 class STATUS(models.TextChoices):
@@ -60,9 +61,11 @@ class XFile(models.Model):
     # Nội dung bìa
     code = models.CharField(max_length=120)
     description = models.TextField(blank=True)
-    status = models.CharField(max_length=2, 
-        choices=STATUS.choices, 
-        default=STATUS.EDITING
+    status = FSMField(
+        max_length = 2,
+        choices = STATUS.choices,
+        default = STATUS.INIT,
+        protected = True
     )
     date_created = models.DateField(default=timezone.now)
     type = models.ForeignKey(XFileType, on_delete=models.CASCADE)
@@ -164,6 +167,144 @@ class XFile(models.Model):
         
         return change
 
+    # Permisions control
+    def can_view(self, user=None):
+        if not user:
+            return False
+        accepted_user = []
+        if self.status == STATUS.EDITING:
+            accepted_user.extend(list(self.editors.all()))
+        if self.status == STATUS.CHECKING:
+            accepted_user.extend(list(self.checkers.all()))
+        if self.status == STATUS.APPROVING:
+            accepted_user.extend(list(self.approvers.all()))
+        if self.status == STATUS.DONE:
+            accepted_user.extend(list(User.objects.filter(department__alias = 'giamdoc')))
+        if user in accepted_user:
+            return True
+        return False
+
+    def can_edit(self, user=None):
+        if not user:
+            return False
+        if self.status == STATUS.EDITING and user in list(self.editors.all()):
+            return True
+        return False
+
+    def can_check(self, user=None):
+        if not user:
+            return False
+        if self.status == STATUS.CHECKING and user in list(self.checkers.all()):
+            return True
+        return False
+
+    def can_approve(self, user=None):
+        if not user:
+            return False
+        if self.status == STATUS.APPROVING and user in list(self.approvers.all()):
+            return True
+        return False
+
+    # Finite-state machine
+    @transition(
+        field=status,
+        source= STATUS.EDITING,
+        target= STATUS.CHECKING,
+        permission=can_edit
+    )
+    def submit_change(self, by=None):
+        '''
+        Notify checkers, save XFileChange.editor, XFileChange.date_edited
+        '''
+        xfilechange = self.changes.get(version = self.version)
+        xfilechange.editor = by
+        xfilechange.date_edited = timezone.now()
+        xfilechange.save()
+
+    @transition(
+        field=status,
+        source= STATUS.CHECKING,
+        target= STATUS.APPROVING,
+        permission=can_check
+    )
+    def check_change(self, by=None):
+        '''
+        Notify approvers, save XFileChange.checker, XFileChange.date_checked
+        '''
+        xfilechange = self.changes.get(version = self.version)
+        xfilechange.checker = by
+        xfilechange.date_checked = timezone.now()
+        xfilechange.save()
+
+    @transition(
+        field=status,
+        source= STATUS.APPROVING,
+        target= STATUS.DONE,
+        permission=can_approve
+    )
+    def approve_change(self, by=None):
+        '''
+        Notify giamdoc, save XFileChange.approver, XFileChange.date_approved
+        '''
+        xfilechange = self.changes.get(version = self.version)
+        xfilechange.approver = by
+        xfilechange.date_approved = timezone.now()
+        xfilechange.save()
+
+    @transition(
+        field=status,
+        source= [STATUS.INIT, STATUS.DONE],
+        target= STATUS.EDITING,
+        permission=can_edit
+    )
+    def create_change(self, change_name, by=None):
+        '''
+        Notify editors, create new XFileChange, XFileChange.date_created,
+        Apply change to XFile
+        '''
+        new_change = self.changes.create(name = change_name)
+        new_change.date_created = timezone.now()
+        new_change.apply_to_xfile()
+        new_change.save()
+
+    @transition(
+        field=status,
+        source= STATUS.CHECKING,
+        target= STATUS.EDITING,
+        permission=can_check
+    )
+    def reject_check(self, by=None):
+        '''
+        Notify editors
+        '''
+        pass
+
+    @transition(
+        field=status,
+        source= STATUS.APPROVING,
+        target= STATUS.CHECKING,
+        permission=can_approve
+    )
+    def reject_approve(self, by=None):
+        '''
+        Notify checkers
+        '''
+        pass
+
+    @transition(
+        field=status,
+        source= STATUS.EDITING,
+        target= STATUS.DONE,
+        permission=can_edit
+    )
+    def cancel_change(self, by=None):
+        '''
+        Notify editors, reverse change from XFile, delete XFileChange
+        '''
+        xfilechange = self.changes.get(version = self.version)
+        xfilechange.apply_to_xfile(backward = True)
+        xfilechange.delete()
+
 class XFileChange(models.Model):
     '''
     Biểu diễn thay đổi của XFile
@@ -196,12 +337,17 @@ class XFileChange(models.Model):
     # Chức năng riêng
     def apply_to_xfile(self, backward=False):
         '''
-        Áp dụng thay đổi vào XFile, XFile.version = version
+        Áp dụng thay đổi vào XFile
         '''
         xfile = self.file
         general_content = ['code', 'description', 'targets', 'department']
         secret_content = json.loads(xfile.content)
-        change = json.loads(self.content)
+        xfile.version = self.version - backward
+        try:
+            change = json.loads(self.content)
+        except:
+            # Nếu change.content = '' -> giữ nguyên -> thoát
+            return
         for field, record in change.items():
             # Nếu không có record -> lỗi -> bỏ qua và tiếp tục
             if record == None:
@@ -225,54 +371,14 @@ class XFileChange(models.Model):
                 secret_content[field] = record
 
         xfile.content = json.dumps(secret_content)
-        xfile.version = self.version - backward
-
-    def set_done(self):
-        '''
-        Áp dụng thay đổi vào XFile, Thay đổi XFile.status -> Done, XFile.version = version
-        Lưu lại thời gian lần cuối file được approve
-        '''
-        xfile = self.file
-        self.apply_to_xfile()
-        
-        self.date_approved = timezone.now()
-        xfile.status = STATUS.DONE
-        xfile.save()
-
-    def set_approving(self):
-        '''
-        Thay đổi XFile.status -> APPROVING, 
-        lưu lại thời gian lần cuối file được check,
-        '''
-        self.file.status = STATUS.APPROVING
-        self.date_checked = timezone.now()
-        self.file.save()
-        self.save()
-
-    def set_checking(self):
-        '''
-        XFile.status -> CHECKING
-        '''
-        self.file.status = STATUS.CHECKING
-        self.file.save()
-
-    def set_editing(self):
-        '''
-        XFile.status -> EDITING
-        '''
-        self.file.status = STATUS.EDITING
-        self.file.save()
 
     def update(self, dict_content):
         '''
-        Chuyển đổi JSON dict thành JSON string và lưu vào XFileChange.content, 
-        Lưu lại thời gian lần cuối file được edit
+        Chuyển đổi JSON dict thành JSON string và lưu vào XFileChange.content
         '''
-        self.date_edited = timezone.now()
         for field, record in dict_content.items():
-            # Nếu không có record -> lỗi -> xóa khỏi change và tiếp tục
+            # Nếu không có record -> lỗi -> bỏ qua
             if record == None:
-                dict_content.pop(field)
                 continue
             type = record['type']
             old_value = record['old']
