@@ -17,6 +17,16 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
+class Position(models.Model):
+    '''
+    Biểu diễn chức vụ trong tổ chức
+    '''
+    name = models.TextField()
+    alias = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class UserInfor(models.Model):
     '''
     Thông tin thêm về User
@@ -33,6 +43,7 @@ class UserInfor(models.Model):
     layout_config = models.TextField(blank=True)
 
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
+    position = models.ForeignKey(Position, on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
         return f"Thông tin thêm về {self.user.username}"
