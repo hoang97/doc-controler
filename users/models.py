@@ -46,4 +46,4 @@ class UserInfor(models.Model):
     position = models.ForeignKey(Position, on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
-        return f"Thông tin thêm về {self.user.username}"
+        return f"Tài khoản {self.user.username}"

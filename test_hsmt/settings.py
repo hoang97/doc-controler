@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # my own apps
     'users',
     'hsmt',
+    'notifications',
 ]
 
 MIDDLEWARE = [
