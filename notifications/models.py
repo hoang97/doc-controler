@@ -4,7 +4,20 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from hsmt.models import XFile
+from django.utils.translation import gettext_lazy as _
+
+class VERB(models.TextChoices):
+    '''
+    Những hành động của User
+    '''
+    CHANGE = 'change', _('sửa đổi')
+    SEND = 'send', _('gửi kiểm định')
+    CHECK = 'check', _('kiểm định')
+    APPROVE = 'approve', _('phê duyệt')
+    CREATE = 'create', _('tạo mới')
+    REJECT_CHECK = 'reject check', _('yêu cầu sửa lại')
+    REJECT_APPROVE = 'reject approve', _('yêu cầu kiểm định lại')
+    CANCLE_CHANGE = 'cancle change', _('hủy bỏ sửa đổi')
 
 # Create your models here.
 class Log(models.Model):

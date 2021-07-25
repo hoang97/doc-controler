@@ -10,8 +10,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import Department
-from .utils import decode
+from .utils import decode, notify
 from django_fsm import FSMField, transition, RETURN_VALUE, GET_STATE
+from notifications.models import VERB
 
 # Choices
 class STATUS(models.TextChoices):
@@ -82,7 +83,7 @@ class XFile(models.Model):
     approvers = models.ManyToManyField(User, related_name='xfiles_can_approve')
     
     def __str__(self):
-        return f'{self.code} (phiên bản {self.version})'
+        return f'hồ sơ {self.code} (ver {self.version})'
 
     # Chức năng riêng
     def get_xfile_content(self):
@@ -179,7 +180,7 @@ class XFile(models.Model):
         if self.status == STATUS.APPROVING:
             accepted_user.extend(list(self.approvers.all()))
         if self.status == STATUS.DONE:
-            accepted_user.extend(list(User.objects.filter(department__alias = 'giamdoc')))
+            accepted_user.extend(list(User.objects.filter(info__department__alias = 'giamdoc')))
         if user in accepted_user:
             return True
         return False
@@ -220,6 +221,7 @@ class XFile(models.Model):
         xfilechange.editor = by
         xfilechange.date_edited = timezone.now()
         xfilechange.save()
+        notify(actor=by, target=self, verb=VERB.SEND.label, notify_to=list(self.checkers.all()))
 
     @transition(
         field=status,
@@ -235,6 +237,7 @@ class XFile(models.Model):
         xfilechange.checker = by
         xfilechange.date_checked = timezone.now()
         xfilechange.save()
+        notify(actor=by, target=self, verb=VERB.CHECK.label, notify_to=list(self.approvers.all()))
 
     @transition(
         field=status,
@@ -250,6 +253,12 @@ class XFile(models.Model):
         xfilechange.approver = by
         xfilechange.date_approved = timezone.now()
         xfilechange.save()
+        notify(
+            actor=by, 
+            target=self, 
+            verb=VERB.APPROVE.label, 
+            notify_to=list(User.objects.filter(info__department__alias='giamdoc'))
+        )
 
     @transition(
         field=status,
@@ -266,6 +275,7 @@ class XFile(models.Model):
         new_change.date_created = timezone.now()
         new_change.apply_to_xfile()
         new_change.save()
+        notify(actor=by, target=self, verb=VERB.CHANGE.label, notify_to=list(self.editors.all()))
 
     @transition(
         field=status,
@@ -277,7 +287,7 @@ class XFile(models.Model):
         '''
         Notify editors
         '''
-        pass
+        notify(actor=by, target=self, verb=VERB.REJECT_CHECK.label, notify_to=list(self.editors.all()))
 
     @transition(
         field=status,
@@ -289,7 +299,7 @@ class XFile(models.Model):
         '''
         Notify checkers
         '''
-        pass
+        notify(actor=by, target=self, verb=VERB.REJECT_APPROVE.label, notify_to=list(self.checkers.all()))
 
     @transition(
         field=status,
@@ -304,6 +314,7 @@ class XFile(models.Model):
         xfilechange = self.changes.get(version = self.version)
         xfilechange.apply_to_xfile(backward = True)
         xfilechange.delete()
+        notify(actor=by, target=self, verb=VERB.CANCLE_CHANGE.label, notify_to=list(self.editors.all()))
 
 class XFileChange(models.Model):
     '''

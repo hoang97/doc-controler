@@ -2,10 +2,19 @@ import json
 import logging
 from datetime import date, datetime
 from copy import deepcopy
+from notifications.models import Log
 
 
 def decode(content, key):
     return content
+
+def notify(actor, target, verb, notify_to):
+    '''
+    Create new log and publish notification to channel
+    '''
+    new_log = Log.objects.create(actor=actor, target=target, verb=verb)
+    new_log.notify_to.set(notify_to)
+    text = str(new_log)
 
 
 if __name__ == '__main__':
