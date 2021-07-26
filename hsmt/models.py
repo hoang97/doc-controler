@@ -426,3 +426,16 @@ class Comment(models.Model):
     def __str__(self):
         return f'Comment by {self.author}'
 
+class AttackLog(models.Model):
+    '''
+    Biểu diễn bảng IV: theo dõi quá trình theo dõi/tấn công
+    '''
+    timestamp = models.DateField()
+    name = models.TextField(blank=True)
+    content = models.TextField(blank=True)
+    attacker = models.TextField(blank=True)
+
+    file = models.ForeignKey(XFile, on_delete=models.CASCADE, related_name='attack_logs')
+
+    def __str__(self):
+        return f'quá trình {self.name}'
