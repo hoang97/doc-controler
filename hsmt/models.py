@@ -172,16 +172,13 @@ class XFile(models.Model):
     def can_view(self, user=None):
         if not user:
             return False
-        accepted_user = []
-        if self.status == STATUS.EDITING:
-            accepted_user.extend(list(self.editors.all()))
-        if self.status == STATUS.CHECKING:
-            accepted_user.extend(list(self.checkers.all()))
-        if self.status == STATUS.APPROVING:
-            accepted_user.extend(list(self.approvers.all()))
-        if self.status == STATUS.DONE:
-            accepted_user.extend(list(User.objects.filter(info__department__alias = 'giamdoc')))
-        if user in accepted_user:
+        if user in list(self.editors.all()):
+            return True
+        if user in list(self.checkers.all()) and self.status != STATUS.INIT:
+            return True
+        if user in list(self.approvers.all()) and self.status not in [STATUS.INIT, STATUS.CHECKING]:
+            return True
+        if user in list(User.objects.filter(info__department__alias='giamdoc')) and self.status == STATUS.DONE:
             return True
         return False
 
