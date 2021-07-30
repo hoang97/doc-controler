@@ -11,10 +11,22 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import Department
 from .utils import decode, notify
-from django_fsm import FSMField, transition, RETURN_VALUE, GET_STATE
-from notifications.models import VERB
+from django_fsm import FSMField, transition
 
 # Choices
+class VERB(models.TextChoices):
+    '''
+    Những hành động của User
+    '''
+    CHANGE = 'change', _('sửa đổi')
+    SEND = 'send', _('gửi kiểm định')
+    CHECK = 'check', _('kiểm định')
+    APPROVE = 'approve', _('phê duyệt')
+    CREATE = 'create', _('tạo mới')
+    REJECT_CHECK = 'reject check', _('yêu cầu sửa lại')
+    REJECT_APPROVE = 'reject approve', _('yêu cầu kiểm định lại')
+    CANCLE_CHANGE = 'cancle change', _('hủy bỏ sửa đổi')
+
 class STATUS(models.TextChoices):
     '''
     Những trạng thái của XFile
@@ -43,6 +55,10 @@ class XFileType(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = self.username.lower()
+        return super(User, self).save(*args, **kwargs)
 
 class Target(models.Model):
     '''
@@ -105,7 +121,7 @@ class XFile(models.Model):
             record['value'] = value
             content[field] = record
         
-        secret_content = decode(self.content)
+        secret_content = decode(self.content, key=None)
         secret_content = json.loads(secret_content)
         for field, record in secret_content.items():
             if record.get('type') == 'datetime':
@@ -185,21 +201,21 @@ class XFile(models.Model):
     def can_edit(self, user=None):
         if not user:
             return False
-        if self.status == STATUS.EDITING and user in list(self.editors.all()):
+        if user in list(self.editors.all()):
             return True
         return False
 
     def can_check(self, user=None):
         if not user:
             return False
-        if self.status == STATUS.CHECKING and user in list(self.checkers.all()):
+        if user in list(self.checkers.all()):
             return True
         return False
 
     def can_approve(self, user=None):
         if not user:
             return False
-        if self.status == STATUS.APPROVING and user in list(self.approvers.all()):
+        if user in list(self.approvers.all()):
             return True
         return False
 
@@ -334,7 +350,7 @@ class XFileChange(models.Model):
     comments = GenericRelation('Comment')
 
     def __str__(self):
-        return f'{self.name} of {self.file.code}'
+        return f'thay đổi {self.version} của {str(self.file)}'
 
     # Default version = xfile.version + 1
     def save(self, *args, **kwargs):
