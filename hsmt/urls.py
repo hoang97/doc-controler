@@ -7,7 +7,15 @@ from .views import (
     XFileTypeListView,
     XFileTypeCreateView,
     XFileTypeDetailView,
-    XFileChangeDetailView
+    XFileChangeDetailView,
+    get_permission_user_xfile,
+    create_change_xfile,
+    cancel_change_xfile,
+    submit_change_xfile,
+    check_change_xfile,
+    reject_check_xfile,
+    approve_change_xfile,
+    reject_approve_xfile
 )
 
 # just for debug
@@ -20,6 +28,14 @@ urlpatterns = [
     path('create/',XFileCreateView.as_view(), name='hsmt-create'),
     path('xfile/<int:pk>/',XFileDetailView.as_view(), name='hsmt-detail'),
     path('xfile/<int:pk>/delete/',XFileDeleteView.as_view(), name='hsmt-delete'),
+    path('xfile/<int:pk>/perm/',get_permission_user_xfile, name='hsmt-perm'),
+    path('xfile/<int:pk>/create-change/',create_change_xfile, name='hsmt-create-change'),
+    path('xfile/<int:pk>/cancel-change/',cancel_change_xfile, name='hsmt-cancel-change'),
+    path('xfile/<int:pk>/submit/',submit_change_xfile, name='hsmt-submit'),
+    path('xfile/<int:pk>/check/',check_change_xfile, name='hsmt-check'),
+    path('xfile/<int:pk>/reject-check/',reject_check_xfile, name='hsmt-reject-check'),
+    path('xfile/<int:pk>/approve/',approve_change_xfile, name='hsmt-approve'),
+    path('xfile/<int:pk>/reject-approve/',reject_approve_xfile, name='hsmt-reject-approve'),
 
     path('change/<int:pk>/',XFileChangeDetailView.as_view(), name='hsmt-change-detail'),
 

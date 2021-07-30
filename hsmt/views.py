@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.http.response import JsonResponse
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import (
@@ -8,6 +10,7 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
+from django_fsm import can_proceed, has_transition_perm
 from .models import (
     XFile, 
     XFileChange, 
@@ -97,3 +100,101 @@ class XFileTypeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Chi tiết về loại hồ sơ'
         return context
+
+@login_required
+def get_permission_user_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    data = {
+        'view': xfile.can_view(user),
+        'createChange': has_transition_perm(xfile.create_change, user),
+        'edit': has_transition_perm(xfile.cancel_change, user),
+        'cancel': has_transition_perm(xfile.cancel_change, user),
+        'submit': has_transition_perm(xfile.submit_change, user),
+        'check': has_transition_perm(xfile.check_change, user),
+        'rejectCheck': has_transition_perm(xfile.reject_check, user),
+        'approve': has_transition_perm(xfile.approve_change, user),
+        'rejectApprove': has_transition_perm(xfile.reject_approve, user),
+    }
+    return JsonResponse(data)
+
+@login_required
+def create_change_xfile(request, pk):
+    if request.method == 'POST':
+        xfile = get_object_or_404(XFile, id=pk)
+        user = request.user
+        if has_transition_perm(xfile.create_change, user):
+            change_name = request.POST.get("change_name","")
+            if not change_name:
+                return JsonResponse({'msg': 'change_name cant be empty'})
+            xfile.create_change(change_name, by=user)
+            xfile.save()
+            return redirect('hsmt-detail', pk=pk)
+        else:
+            return JsonResponse({'msg': 'permission denie'})
+
+@login_required
+def cancel_change_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    if has_transition_perm(xfile.cancel_change, user):
+        xfile.cancel_change(by=user)
+        xfile.save()
+        return redirect('hsmt-detail', pk=pk)
+    else:
+        return JsonResponse({'msg': 'permission denie'})
+
+@login_required
+def submit_change_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    if has_transition_perm(xfile.submit_change, user):
+        xfile.submit_change(by=user)
+        xfile.save()
+        return redirect('hsmt-detail', pk=pk)
+    else:
+        return JsonResponse({'msg': 'permission denie'})
+
+@login_required
+def check_change_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    if has_transition_perm(xfile.check_change, user):
+        xfile.check_change(by=user)
+        xfile.save()
+        return redirect('hsmt-detail', pk=pk)
+    else:
+        return JsonResponse({'msg': 'permission denie'})
+
+@login_required
+def reject_check_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    if has_transition_perm(xfile.reject_check, user):
+        xfile.reject_check(by=user)
+        xfile.save()
+        return redirect('hsmt-detail', pk=pk)
+    else:
+        return JsonResponse({'msg': 'permission denie'})
+
+@login_required
+def approve_change_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    if has_transition_perm(xfile.approve_change, user):
+        xfile.approve_change(by=user)
+        xfile.save()
+        return redirect('hsmt-detail', pk=pk)
+    else:
+        return JsonResponse({'msg': 'permission denie'})
+
+@login_required
+def reject_approve_xfile(request, pk):
+    xfile = get_object_or_404(XFile, id=pk)
+    user = request.user
+    if has_transition_perm(xfile.reject_approve, user):
+        xfile.reject_approve(by=user)
+        xfile.save()
+        return redirect('hsmt-detail', pk=pk)
+    else:
+        return JsonResponse({'msg': 'permission denie'})
