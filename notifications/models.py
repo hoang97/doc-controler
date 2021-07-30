@@ -1,23 +1,15 @@
 from django.db import models
 from django.db.models.fields.related import ForeignKey
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.utils.translation import gettext_lazy as _
 
-class VERB(models.TextChoices):
-    '''
-    Những hành động của User
-    '''
-    CHANGE = 'change', _('sửa đổi')
-    SEND = 'send', _('gửi kiểm định')
-    CHECK = 'check', _('kiểm định')
-    APPROVE = 'approve', _('phê duyệt')
-    CREATE = 'create', _('tạo mới')
-    REJECT_CHECK = 'reject check', _('yêu cầu sửa lại')
-    REJECT_APPROVE = 'reject approve', _('yêu cầu kiểm định lại')
-    CANCLE_CHANGE = 'cancle change', _('hủy bỏ sửa đổi')
+class DETAIL_URL(models.TextChoices):
+    USER = 'user', 'user-profile'
+    XFILE = 'x file', 'hsmt-detail'
 
 # Create your models here.
 class Log(models.Model):
@@ -45,6 +37,12 @@ class Log(models.Model):
 
     def __str__(self):
         return f'{str(self.actor)} đã {self.verb} {str(self.target)}'
+
+    def get_target_url(self):
+        '''
+        Trả lại url đến trang web chi tiết về target
+        '''
+        return reverse(DETAIL_URL(self.target_ct.name).label, args=[self.target_id])
 
 class Notification(models.Model):
     '''

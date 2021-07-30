@@ -2,8 +2,10 @@ import json
 import logging
 from datetime import date, datetime
 from copy import deepcopy
-from notifications.models import Log
+from asgiref.sync import async_to_sync
 
+from channels.layers import get_channel_layer
+from notifications.models import Log
 
 def decode(content, key):
     return content
@@ -12,9 +14,21 @@ def notify(actor, target, verb, notify_to):
     '''
     Create new log and publish notification to channel
     '''
+    channel_layer = get_channel_layer()
     new_log = Log.objects.create(actor=actor, target=target, verb=verb)
     new_log.notify_to.set(notify_to)
-    text = str(new_log)
+    for notification in new_log.notification_set.all():
+        async_to_sync(channel_layer.group_send)(
+            'notifications',
+            {
+                'type': 'notify.user',
+                'notification_id': notification.id,
+                'seen': notification.seen,
+                'user_id': notification.recipient.id,
+                'message': str(notification.log),
+                'timestamp': datetime.strftime(notification.log.timestamp, '%b %d, %Y, %I:%M %p'),
+            }
+        )
 
 
 if __name__ == '__main__':

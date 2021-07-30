@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 3rd party apps
     'django_fsm',
+    'channels',
     # my own apps
     'users',
     'hsmt',
@@ -74,7 +75,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'test_hsmt.wsgi.application'
-
+ASGI_APPLICATION = 'test_hsmt.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

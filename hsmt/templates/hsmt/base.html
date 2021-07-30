@@ -198,48 +198,15 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <!-- Counter - Alerts -->
-                                <span class="badge badge-danger badge-counter">3+</span>
+                                <span class="badge badge-danger badge-counter" id="numNotifications" hidden>0</span>
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="alertsDropdown">
-                                <h6 class="dropdown-header">
-                                    Alerts Center
+                                <h6 class="dropdown-header" id="notificationCenterTitle">
+                                    Notifications Center
                                 </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 12, 2019</div>
-                                        <span class="font-weight-bold">A new monthly report is ready to download!</span>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-success">
-                                            <i class="fas fa-donate text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 7, 2019</div>
-                                        $290.29 has been deposited into your account!
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-warning">
-                                            <i class="fas fa-exclamation-triangle text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 2, 2019</div>
-                                        Spending Alert: We've noticed unusually high spending for your account.
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Notifications</a>
                             </div>
                         </li>
 
@@ -412,4 +379,81 @@
             </div>
         </div>
     </div>
+    <script>
+        const notificationSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/notifications/'
+        );
+        const update_num_notification = (x) =>{
+            let numNotifications = document.querySelector('#numNotifications');
+            let num = +numNotifications.innerText;
+            num += x;
+            numNotifications.innerText = num;
+            numNotifications.hidden = (num == 0);
+        }
+
+        const create_notification = (data) =>{
+            let x = +!data['seen'];
+            update_num_notification(x);
+            let title = document.querySelector('#notificationCenterTitle');
+            let notification = document.createElement('a');
+            notification.classList.add('dropdown-item', 'd-flex', 'align-items-center');
+            notification.href = data['target_url'];
+            notification.innerHTML = `
+                <div class="mr-3">
+                    <div class="icon-circle bg-primary">
+                        <i class="fas fa-file-alt text-white"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="small text-gray-500">${data['timestamp']}</div>
+                    <span class="">${data['message']}</span>
+                </div>
+            `;
+
+            if (!data['seen']) 
+                notification.querySelector('div:nth-child(2) > span').classList.add('font-weight-bold');
+
+            notification.onclick = (e) => {
+                notificationSocket.send(JSON.stringify({'notification_id': data['notification_id']}));
+                notification.querySelector('div:nth-child(2) > span').classList.remove('font-weight-bold');
+                update_num_notification(-x);
+                x = 0;
+            }
+            title.after(notification);
+        }
+
+        notificationSocket.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            console.log('Receive a notification')
+            // check if notification is for this user
+            if (data['user_id'] == {{request.user.id}}) {
+                create_notification(data);
+            };
+        };
+
+        notificationSocket.onclose = (e) => {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        async function getData(url = '', data = {}) {
+            // fetch data from url
+            const response = await fetch(url);
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+        getData("{% url 'get-notifications' %}")
+            .then(data => {
+                //console.log(data); // JSON data parsed by `data.json()` call
+
+                for (let id in data['notifications'])
+                    create_notification(data['notifications'][id])
+
+                let numNotifications = document.querySelector('#numNotifications');
+                numNotifications.innerText = data['num'];
+                update_num_notification(0)
+            });
+        
+    </script>
 {% endblock content %}
