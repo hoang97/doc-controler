@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import Department
 from .utils import decode, notify
-from django_fsm import FSMField, transition
+from django_fsm import FSMField, transition, GET_STATE
 
 # Choices
 class VERB(models.TextChoices):
@@ -317,7 +317,11 @@ class XFile(models.Model):
     @transition(
         field=status,
         source= STATUS.EDITING,
-        target= STATUS.DONE,
+        # target= STATUS.DONE,
+        target= GET_STATE(
+            lambda self, **kwargs: STATUS.INIT if self.version == 0 else STATUS.DONE,
+            states=[STATUS.DONE, STATUS.INIT]
+        ),
         permission=can_edit
     )
     def cancel_change(self, by=None):

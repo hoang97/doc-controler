@@ -1,0 +1,21 @@
+digraph {
+	subgraph cluster_hsmt_XFile_status {
+		graph [label="hsmt.XFile.status"]
+		"hsmt.x_file.status.CH" [label=CH shape=circle]
+		"hsmt.x_file.status.ED" [label=ED shape=circle]
+		"hsmt.x_file.status.IN" [label=IN shape=circle]
+		"hsmt.x_file.status._initial" [label="" shape=point]
+		"hsmt.x_file.status._initial" -> "hsmt.x_file.status.IN"
+		"hsmt.x_file.status.DO" [label=DO shape=circle]
+		"hsmt.x_file.status.AP" [label=AP shape=circle]
+		"hsmt.x_file.status.AP" -> "hsmt.x_file.status.DO" [label=approve_change]
+		"hsmt.x_file.status.CH" -> "hsmt.x_file.status.AP" [label=check_change]
+		"hsmt.x_file.status.CH" -> "hsmt.x_file.status.ED" [label=reject_check]
+		"hsmt.x_file.status.DO" -> "hsmt.x_file.status.ED" [label=create_change]
+		"hsmt.x_file.status.IN" -> "hsmt.x_file.status.ED" [label=create_change]
+		"hsmt.x_file.status.ED" -> "hsmt.x_file.status.CH" [label=submit_change]
+		"hsmt.x_file.status.ED" -> "hsmt.x_file.status.DO" [label=cancel_change]
+		"hsmt.x_file.status.AP" -> "hsmt.x_file.status.CH" [label=reject_approve]
+		"hsmt.x_file.status.ED" -> "hsmt.x_file.status.IN" [label=cancel_change]
+	}
+}
