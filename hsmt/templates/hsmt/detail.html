@@ -214,7 +214,7 @@
             let functionsBar = document.querySelector('#functionsBar')
             getData("{% url 'hsmt-perm' request.resolver_match.kwargs.pk %}")
                 .then(data => {
-                    console.log(data)
+                    //console.log(data)
                     for (perm in data)
                         if (data[perm]) {
                             let btn = document.getElementById(perm+'Btn')

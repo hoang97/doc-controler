@@ -12,24 +12,28 @@ def decode(content, key):
 
 def notify(actor, target, verb, notify_to):
     '''
-    Create new log and publish notification to channel
+    Create new log and send notification to user
     '''
     channel_layer = get_channel_layer()
     new_log = Log.objects.create(actor=actor, target=target, verb=verb)
     new_log.notify_to.set(notify_to)
+
+    # Broadcast notification to each user
     for notification in new_log.notification_set.all():
+        user_id = notification.recipient.id
+        user_group = f'user_{user_id}'
         async_to_sync(channel_layer.group_send)(
-            'notifications',
+            user_group,
             {
                 'type': 'notify.user',
-                'notification_id': notification.id,
+                'message_type': 'new',
                 'seen': notification.seen,
-                'user_id': notification.recipient.id,
-                'message': str(notification.log),
-                'timestamp': datetime.strftime(notification.log.timestamp, '%b %d, %Y, %I:%M %p'),
+                'message': str(new_log),
+                'timestamp': datetime.strftime(new_log.timestamp, '%b %d, %Y, %I:%M %p'),
+                'notification_id': notification.id,
+                'target_url': new_log.get_target_url(),
             }
         )
-
 
 if __name__ == '__main__':
     # Test

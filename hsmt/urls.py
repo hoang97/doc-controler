@@ -24,10 +24,12 @@ from django.conf.urls.static import static
 #--------------------------#
 
 urlpatterns = [
+    # xfile views
     path('',XFileListView.as_view(), name='hsmt-list'),
     path('create/',XFileCreateView.as_view(), name='hsmt-create'),
     path('xfile/<int:pk>/',XFileDetailView.as_view(), name='hsmt-detail'),
     path('xfile/<int:pk>/delete/',XFileDeleteView.as_view(), name='hsmt-delete'),
+    # xfile functions
     path('xfile/<int:pk>/perm/',get_permission_user_xfile, name='hsmt-perm'),
     path('xfile/<int:pk>/create-change/',create_change_xfile, name='hsmt-create-change'),
     path('xfile/<int:pk>/cancel-change/',cancel_change_xfile, name='hsmt-cancel-change'),
@@ -36,9 +38,9 @@ urlpatterns = [
     path('xfile/<int:pk>/reject-check/',reject_check_xfile, name='hsmt-reject-check'),
     path('xfile/<int:pk>/approve/',approve_change_xfile, name='hsmt-approve'),
     path('xfile/<int:pk>/reject-approve/',reject_approve_xfile, name='hsmt-reject-approve'),
-
+    # change views
     path('change/<int:pk>/',XFileChangeDetailView.as_view(), name='hsmt-change-detail'),
-
+    # type views
     path('type/',XFileTypeListView.as_view(), name='hsmt-type-list'),
     path('type/create/',XFileTypeCreateView.as_view(), name='hsmt-type-create'),
     path('type/<int:pk>/',XFileTypeDetailView.as_view(), name='hsmt-type-detail'),
