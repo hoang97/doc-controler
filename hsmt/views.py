@@ -3,6 +3,7 @@ from django.http.response import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
+from hsmt.utils import notify, VERB
 from django.views.generic import (
     ListView,
     DetailView,
@@ -26,11 +27,11 @@ class XFileCreateView(CreateView):
     success_url = reverse_lazy('hsmt-list')
 
     def form_valid(self, form):
-        form.instance.department = self.request.user.info.department
-        form.instance.content = form.instance.type.example_content
+        xfile = form.instance
+        xfile.department = self.request.user.info.department
+        xfile.content = xfile.type.example_content
         httpresponse = super().form_valid(form)
-        form.instance.create_change(change_name='Khởi tạo', by=self.request.user)
-        form.save()
+        notify(actor=self.request.user, target=xfile, verb=VERB.CREATE, notify_to=list(xfile.editors.all()))
         return httpresponse
 
 class XFileListView(ListView):

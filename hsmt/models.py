@@ -10,40 +10,27 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import Department
-from .utils import decode, notify
-from django_fsm import FSMField, transition, GET_STATE
+from .utils import decode, notify, VERB
+from django_fsm import transition, GET_STATE, FSMIntegerField
 
 # Choices
-class VERB(models.TextChoices):
-    '''
-    Những hành động của User
-    '''
-    CHANGE = 'change', _('sửa đổi')
-    SEND = 'send', _('gửi kiểm định')
-    CHECK = 'check', _('kiểm định')
-    APPROVE = 'approve', _('phê duyệt')
-    CREATE = 'create', _('tạo mới')
-    REJECT_CHECK = 'reject check', _('yêu cầu sửa lại')
-    REJECT_APPROVE = 'reject approve', _('yêu cầu kiểm định lại')
-    CANCLE_CHANGE = 'cancle change', _('hủy bỏ sửa đổi')
-
-class STATUS(models.TextChoices):
+class STATUS(models.IntegerChoices):
     '''
     Những trạng thái của XFile
     '''
-    INIT = 'IN', _('khởi tạo')
-    EDITING = 'ED', _('đang sửa đổi')
-    CHECKING = 'CH', _('đang kiểm định')
-    APPROVING = 'AP', _('đang phê duyệt')
-    DONE = 'DO', _('đã hoàn thiện')
+    INIT = 0, _('khởi tạo')
+    EDITING = 1, _('đang sửa đổi')
+    CHECKING = 2, _('đang kiểm định')
+    APPROVING = 3, _('đang phê duyệt')
+    DONE = 4, _('đã hoàn thiện')
     
-class TARGET_TYPES(models.TextChoices):
+class TARGET_TYPES(models.IntegerChoices):
     '''
     Những loại của Target
     '''
-    DIRECTION = 'D', _('hướng'),
-    GROUP = 'G', _('nhóm'),
-    AREA = 'A', _('địa bàn'),
+    DIRECTION = 0, _('hướng'),
+    GROUP = 1, _('nhóm'),
+    AREA = 2, _('địa bàn'),
 
 # Models here.
 class XFileType(models.Model):
@@ -66,7 +53,7 @@ class Target(models.Model):
     '''
     name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
-    type = models.CharField(max_length=1, choices=TARGET_TYPES.choices)
+    type = models.PositiveIntegerField(choices=TARGET_TYPES.choices)
 
     def __str__(self):
         return f'{self.get_type_display()} {self.name}'
@@ -78,7 +65,7 @@ class XFile(models.Model):
     # Nội dung bìa
     code = models.CharField(max_length=120)
     description = models.TextField(blank=True)
-    status = FSMField(
+    status = FSMIntegerField(
         max_length = 2,
         choices = STATUS.choices,
         default = STATUS.INIT,

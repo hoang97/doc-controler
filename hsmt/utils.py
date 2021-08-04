@@ -3,9 +3,24 @@ import logging
 from datetime import date, datetime
 from copy import deepcopy
 from asgiref.sync import async_to_sync
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from channels.layers import get_channel_layer
 from notifications.models import Log
+
+class VERB(models.TextChoices):
+    '''
+    Những hành động của User
+    '''
+    CHANGE = 'change', _('sửa đổi')
+    SEND = 'send', _('gửi kiểm định')
+    CHECK = 'check', _('kiểm định')
+    APPROVE = 'approve', _('phê duyệt')
+    CREATE = 'create', _('tạo mới')
+    REJECT_CHECK = 'reject check', _('yêu cầu sửa lại')
+    REJECT_APPROVE = 'reject approve', _('yêu cầu kiểm định lại')
+    CANCLE_CHANGE = 'cancle change', _('hủy bỏ sửa đổi')
 
 def decode(content, key):
     return content
