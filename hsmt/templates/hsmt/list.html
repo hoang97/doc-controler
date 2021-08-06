@@ -18,7 +18,7 @@
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <a class="btn m-0 p-0 font-weight-bold text-primary" href="{% url 'hsmt-detail' xfile.id %}">
-                            {{ xfile }}
+                            {{ xfile }} (ver {{xfile.version}})
                         </a>
                         <span class="float-right text-primary font-weight-bold"> Trạng thái: {{ xfile.get_status_display }}</span>
                     </div>

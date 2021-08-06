@@ -85,7 +85,7 @@ class XFile(models.Model):
     approvers = models.ManyToManyField(User, related_name='xfiles_can_approve')
     
     def __str__(self):
-        return f'hồ sơ {self.code} (ver {self.version})'
+        return f'hồ sơ {self.code}'
 
     # Chức năng riêng
     def get_xfile_content(self):
@@ -147,8 +147,8 @@ class XFile(models.Model):
 
     def get_change_content(self, new_content):
         '''
-        So sánh với JSON dict, trả lại JSON dict thể hiện thay đổi theo cấu trúc
-        Nội dung của 2 file phải cùng dạng
+        - So sánh với JSON dict, trả lại JSON dict thể hiện thay đổi theo cấu trúc
+        - Nội dung của 2 file phải cùng dạng
         '''
         old_content = self.get_xfile_content()
 
@@ -214,7 +214,8 @@ class XFile(models.Model):
     )
     def submit_change(self, by=None):
         '''
-        Notify checkers, save XFileChange.editor, XFileChange.date_edited
+        - Notify checkers
+        - Save XFileChange.editor, XFileChange.date_edited
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.editor = by
@@ -230,7 +231,8 @@ class XFile(models.Model):
     )
     def check_change(self, by=None):
         '''
-        Notify approvers, save XFileChange.checker, XFileChange.date_checked
+        - Notify approvers
+        - Save XFileChange.checker, XFileChange.date_checked
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.checker = by
@@ -246,7 +248,8 @@ class XFile(models.Model):
     )
     def approve_change(self, by=None):
         '''
-        Notify giamdoc, save XFileChange.approver, XFileChange.date_approved
+        - Notify giamdoc
+        - Save XFileChange.approver, XFileChange.date_approved
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.approver = by
@@ -267,8 +270,9 @@ class XFile(models.Model):
     )
     def create_change(self, change_name, by=None):
         '''
-        Notify editors, create new XFileChange, XFileChange.date_created,
-        Apply change to XFile
+        - Notify editors
+        - Create new XFileChange, XFileChange.date_created,
+        - Apply change to XFile
         '''
         new_change = self.changes.create(name = change_name)
         new_change.date_created = timezone.now()
@@ -312,7 +316,9 @@ class XFile(models.Model):
     )
     def cancel_change(self, by=None):
         '''
-        Notify editors, reverse change from XFile, delete XFileChange
+        - Notify editors
+        - Reverse change from XFile
+        - Delete XFileChange
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.apply_to_xfile(backward = True)

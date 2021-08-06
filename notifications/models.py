@@ -15,9 +15,9 @@ class DETAIL_URL(models.TextChoices):
 class Log(models.Model):
     '''
     Biểu diễn 1 sự kiện của hệ thống
-    vd: 
-    trưởng phòng A (actor) đã phê duyệt (verb) hồ sơ B (target) lúc 11h30 22/1/2021 (timestamp)
-    giám đốc (actor) đã tạo mới (verb) tài khoản C (target) lúc 20h21 20/1/2021 (timestamp)
+    - vd: 
+        - trưởng phòng A (actor) đã phê duyệt (verb) hồ sơ B (target) lúc 11h30 22/1/2021 (timestamp)
+        - giám đốc (actor) đã tạo mới (verb) tài khoản C (target) lúc 20h21 20/1/2021 (timestamp)
     '''
     timestamp = models.DateTimeField(default=timezone.now)
     # actor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')

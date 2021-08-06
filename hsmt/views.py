@@ -31,7 +31,7 @@ class XFileCreateView(CreateView):
         xfile.department = self.request.user.info.department
         xfile.content = xfile.type.example_content
         httpresponse = super().form_valid(form)
-        notify(actor=self.request.user, target=xfile, verb=VERB.CREATE, notify_to=list(xfile.editors.all()))
+        notify(actor=self.request.user, target=xfile, verb=VERB.CREATE.label, notify_to=list(xfile.editors.all()))
         return httpresponse
 
 class XFileListView(ListView):
