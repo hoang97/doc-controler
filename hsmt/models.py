@@ -66,7 +66,6 @@ class XFile(models.Model):
     code = models.CharField(max_length=120)
     description = models.TextField(blank=True)
     status = FSMIntegerField(
-        max_length = 2,
         choices = STATUS.choices,
         default = STATUS.INIT,
         protected = True
