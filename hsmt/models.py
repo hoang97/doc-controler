@@ -3,14 +3,13 @@ import json
 import logging
 from datetime import datetime, date
 from django.db import models
-from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from users.models import Department
-from .utils import decode, notify, VERB
+from .utils import decode
 from django_fsm import transition, GET_STATE, FSMIntegerField
 
 # Choices
@@ -214,14 +213,13 @@ class XFile(models.Model):
     )
     def submit_change(self, by=None):
         '''
-        - Notify checkers
+        - Change status to CHECKING
         - Save XFileChange.editor, XFileChange.date_edited
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.editor = by
         xfilechange.date_edited = timezone.now()
         xfilechange.save()
-        notify(actor=by, target=self, verb=VERB.SEND.label, notify_to=list(self.checkers.all()))
 
     @transition(
         field=status,
@@ -231,14 +229,13 @@ class XFile(models.Model):
     )
     def check_change(self, by=None):
         '''
-        - Notify approvers
+        - Change status to APPROVING
         - Save XFileChange.checker, XFileChange.date_checked
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.checker = by
         xfilechange.date_checked = timezone.now()
         xfilechange.save()
-        notify(actor=by, target=self, verb=VERB.CHECK.label, notify_to=list(self.approvers.all()))
 
     @transition(
         field=status,
@@ -248,19 +245,13 @@ class XFile(models.Model):
     )
     def approve_change(self, by=None):
         '''
-        - Notify giamdoc
+        - Change status to DONE
         - Save XFileChange.approver, XFileChange.date_approved
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.approver = by
         xfilechange.date_approved = timezone.now()
         xfilechange.save()
-        notify(
-            actor=by, 
-            target=self, 
-            verb=VERB.APPROVE.label, 
-            notify_to=list(User.objects.filter(info__department__alias='giamdoc'))
-        )
 
     @transition(
         field=status,
@@ -270,7 +261,7 @@ class XFile(models.Model):
     )
     def create_change(self, change_name, by=None):
         '''
-        - Notify editors
+        - Change status to EDITING
         - Create new XFileChange, XFileChange.date_created,
         - Apply change to XFile
         '''
@@ -278,7 +269,6 @@ class XFile(models.Model):
         new_change.date_created = timezone.now()
         new_change.apply_to_xfile()
         new_change.save()
-        notify(actor=by, target=self, verb=VERB.CHANGE.label, notify_to=list(self.editors.all()))
 
     @transition(
         field=status,
@@ -288,9 +278,9 @@ class XFile(models.Model):
     )
     def reject_check(self, by=None):
         '''
-        Notify editors
+        Change status to EDITING
         '''
-        notify(actor=by, target=self, verb=VERB.REJECT_CHECK.label, notify_to=list(self.editors.all()))
+        pass
 
     @transition(
         field=status,
@@ -300,14 +290,13 @@ class XFile(models.Model):
     )
     def reject_approve(self, by=None):
         '''
-        Notify checkers
+        Change status to CHECKING
         '''
-        notify(actor=by, target=self, verb=VERB.REJECT_APPROVE.label, notify_to=list(self.checkers.all()))
+        pass
 
     @transition(
         field=status,
         source= STATUS.EDITING,
-        # target= STATUS.DONE,
         target= GET_STATE(
             lambda self, **kwargs: STATUS.INIT if self.version == 0 else STATUS.DONE,
             states=[STATUS.DONE, STATUS.INIT]
@@ -316,14 +305,13 @@ class XFile(models.Model):
     )
     def cancel_change(self, by=None):
         '''
-        - Notify editors
+        - Change status to INIT or DONE according to (xfile.version = 0 or not)
         - Reverse change from XFile
         - Delete XFileChange
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.apply_to_xfile(backward = True)
         xfilechange.delete()
-        notify(actor=by, target=self, verb=VERB.CANCLE_CHANGE.label, notify_to=list(self.editors.all()))
 
 class XFileChange(models.Model):
     '''
