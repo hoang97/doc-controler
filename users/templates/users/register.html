@@ -1,62 +1,103 @@
-{% extends 'users/base.html' %}
-{% block title %}
-    <title>Blog Sign Up</title>
-{% endblock title %}
+{% extends "users/base.html" %}
 
-{% block card-image %}
-    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
-{% endblock card-image %}
+{% load static %}
 
-{% block card-title %}
-    <div class="text-center">
-        <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
-    </div>
-{% endblock card-title %}
 
-{% block card-body %}
-    <form class="user" action="." method="POST">
-        {% csrf_token %}
-        <div class="form-group row">
-            <div class="col-sm-6 mb-3 mb-sm-0">
-                <input type="text" class="form-control form-control-user" id="exampleFirstName"
-                    placeholder="First Name" name="first_name">
-            </div>
-            <div class="col-sm-6">
-                <input type="text" class="form-control form-control-user" id="exampleLastName"
-                    placeholder="Last Name" name="last_name">
-            </div>
+{% block body %}
+
+<div class="card" >
+    <div class="card-body register-card-body">
+      <p class="login-box-msg">Đăng ký tài khoản</p>
+      {% if msg %}
+      <p style="color: red;">Lỗi: {{msg}}</p>
+      {% endif %}
+      <form class="needs-validation" action="" id="formDangKi"  method="post" name="formDangKi" novalidate >{% csrf_token %}
+        <div class="form-group">
+          Username<input type="text" id = "username" name = "username" class="form-control" required autofocus>
+          <div class="valid-feedback">Hợp lệ</div>
+          <div class="invalid-feedback">Nhập vào tài khoản</div>
         </div>
         <div class="form-group">
-            <input type="text" class="form-control form-control-user" id="exampleInputEmail"
-                placeholder="User Name" name="username">
+          Password<input type="password" id="password" name = "password" class="form-control pwds" pattern="^[a-zA-Z0-9]{8,100}$" required>
+          <div class="valid-feedback">Hợp lệ</div>
+          <div class="invalid-feedback">Ít nhất 8 kí tự</div>
         </div>
-        <div class="form-group row">
-            <div class="col-sm-6 mb-3 mb-sm-0">
-                <input type="password" class="form-control form-control-user"
-                    id="exampleInputPassword" placeholder="Password" name="password1">
-            </div>
-            <div class="col-sm-6">
-                <input type="password" class="form-control form-control-user"
-                    id="exampleRepeatPassword" placeholder="Repeat Password" name="password2">
-            </div>
+        <div class="form-group">
+          Confirm Password<input type="password" id="password2" name = "password2" class="form-control pwds" pattern="^[a-zA-Z0-9]{8,100}$" required>
+          <div id="cPwdValid" class="valid-feedback">Hợp lệ</div>
+          <div id="cPwdInvalid" class="invalid-feedback"> Ít nhất 8 kí tự</div>
         </div>
-        <button class="btn btn-primary btn-user btn-block">
-            Register Account
-        </button>
-        <hr>
-        <a href="index.html" class="btn btn-google btn-user btn-block">
-            <i class="fab fa-google fa-fw"></i> Register with Google
-        </a>
-        <a href="index.html" class="btn btn-facebook btn-user btn-block">
-            <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-        </a>
-    </form>
-    <hr>
-    <div class="text-center">
-        <a class="small" href="forgot-password.html">Forgot Password?</a>
-    </div>
-    <div class="text-center">
-        <a class="small" href="{% url 'user-login' %}">Already have an account? Login!</a>
-    </div>
+      
+        <div class="form-group">
+          Họ và tên<input type="text" id = "fullname" name = "fullname" class="form-control" pattern="^(?!\s*$).+" required autofocus>
+          <div class="valid-feedback">Hợp lệ</div>
+          <div class="invalid-feedback">Nhập họ tên đầy đủ</div>
+        </div>
+        
+        <div class="input-group mb-3">
+          <select class="custom-select" id="inputGroupSelect01" id="phong" name="phong" required>
+              <option class="py-3" value="">Chọn Phòng...</option>
+              {% for department in department_list %}
+                <option class="py-3" value="{{department.id}}">{{department.name}}</option>
+              {% endfor %}
 
-{% endblock card-body %}
+            </select>
+            <div class="valid-feedback">Hợp lệ</div>
+            <div class="invalid-feedback">Chọn phòng</div>
+  
+        </div>
+
+
+
+        <div class="form-group">
+          <button id="submitBtn" type="submit" class="btn btn-primary submit-button" disabled>Submit</button>
+        </div>
+
+
+
+
+
+
+      </form>
+
+      <!-- <div class="social-auth-links text-center">
+        <p>- OR -</p>
+        <a href="#" class="btn btn-block btn-primary">
+          <i class="fab fa-facebook mr-2"></i>
+          Sign up using Facebook
+        </a>
+        <a href="#" class="btn btn-block btn-danger">
+          <i class="fab fa-google-plus mr-2"></i>
+          Sign up using Google+
+        </a>
+      </div> -->
+
+
+
+
+
+
+
+
+
+
+      <a href="{% url 'user-login' %}" class="text-center">Tôi đã có tài khoản</a>
+    </div>
+    <!-- /.form-box -->
+  </div><!-- /.card -->
+
+  {% endblock %}
+
+ 
+  {% block script %}
+  <script src="{% static 'js/register.js' %}"></script>
+  
+
+  <script >
+     
+ 
+
+  </script>
+
+
+  {% endblock %}

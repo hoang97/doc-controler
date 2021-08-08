@@ -1,37 +1,68 @@
-{% extends 'project/base.html' %}
+{% load static %}
 
-{% block content %}
-    <div class="bg-gradient-primary">
-        <div class="container">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{h1header}}</title>
 
-            <!-- Outer Row -->
-            <div class="row justify-content-center">
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" type="text/css" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" type="text/css" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  
+  <!-- Theme style -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/adminlte.min.css' %}">
+  <style>
+    .logo-software {
+                 width:15%;
+                 height:15%;
+             }
+       .center {
+             width:100%;
+             height:100%; 
+             display: block;
+             margin-left: auto;
+             margin-right: auto;
+            object-fit: contain;
+             }
+ </style>
+</head>
+<body class="hold-transition login-page">
 
-                <div class="col-xl-10 col-lg-12 col-md-9">
-
-                    <div class="card o-hidden border-0 shadow-lg my-5">
-                        <div class="card-body p-0">
-                            <!-- Nested Row within Card Body -->
-                            <div class="row">
-                                {% block card-image %}{% endblock card-image %}
-                                <div class="col-lg-6">
-                                    <div class="p-5">
-                                        {% block card-title %}{% endblock card-title %}
-                                        {% if messages %}
-                                            {% for message in messages %}
-                                                <div class="alert alert-{{message.tags}}">
-                                                    {{message}}
-                                                </div>
-                                            {% endfor %}
-                                        {% endif %}
-                                        {% block card-body %}{% endblock card-body %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="logo-software">
+    <img class = 'center' src="{% static 'img/logo-2.png' %}">
+  </div>
+  <div class="login-box">
+   
+    <div class="login-logo">
+      <!-- <p>    <b>Công </b>Ty1</p> -->
+      <p>     <b>Trang quản lý HSMT</b></p>
     </div>
-{% endblock content %}
+    <!-- /.login-logo -->
+    {% block body %}
+
+    {% endblock %}
+  </div>
+  
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'plugins/jquery/jquery.validate.min.js' %}"></script>
+
+
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- AdminLTE App -->
+<script src="{% static 'js/adminlte.min.js' %}"></script>
+  {% block script %}
+
+  {% endblock %}
+</body>
+
+</html>

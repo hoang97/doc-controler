@@ -152,3 +152,4 @@ from django.contrib import messages
 MESSAGE_TAGS = {
 	messages.constants.ERROR :'danger',
 }
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']

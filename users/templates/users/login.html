@@ -1,52 +1,50 @@
-{% extends 'users/base.html' %}
-{% block title %}
-    <title>Blog Sign In</title>
-{% endblock title %}
+{% extends "users/base.html" %}
 
-{% block card-image %}
-    <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-{% endblock card-image %}
+{% block body %}
+<div class="card">
+  <div class="card-body login-card-body">
+    <p class="login-box-msg">Đăng nhập</p>
+    {% if msg %}
+    <p style="color: red;">Lỗi: {{msg}}</p>
+    {% endif %}
 
-{% block card-title %}
-    <div class="text-center">
-        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-    </div>
-{% endblock card-title %}
+    <form action="{% url 'user-login' %}" method="post">
+      {% csrf_token %}
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Tài khoản" name="username">
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-envelope"></span>
+          </div>
+        </div>
+      </div>
+      <div class="input-group mb-3">
+        <input type="password" class="form-control" placeholder="Mật khẩu" name="password">
+        <div class="input-group-append">
+          <div class="input-group-text">
+            <span class="fas fa-lock"></span>
+          </div>
+        </div>
+      </div>
 
-{% block card-body %}
-    <form class="user" method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-            <input type="text" class="form-control form-control-user"
-                id="exampleInputEmail" placeholder="User Name" name="username">
+
+      <div class="row">
+        <!-- /.col -->
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary btn-block my-2">Đăng nhập</button>
         </div>
-        <div class="form-group">
-            <input type="password" class="form-control form-control-user"
-                id="exampleInputPassword" placeholder="Password" name="password">
-        </div>
-        <div class="form-group">
-            <div class="custom-control custom-checkbox small">
-                <input type="checkbox" class="custom-control-input" id="customCheck">
-                <label class="custom-control-label" for="customCheck">Remember
-                    Me</label>
-            </div>
-        </div>
-        <button class="btn btn-primary btn-user btn-block">
-            Login
-        </button>
-        {% comment %} <hr>
-        <a href="#" class="btn btn-google btn-user btn-block">
-            <i class="fab fa-google fa-fw"></i> Login with Google
-        </a>
-        <a href="#" class="btn btn-facebook btn-user btn-block">
-            <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
-        </a> {% endcomment %}
+        <!-- /.col -->
+      </div>
     </form>
-    <hr>
-    <div class="text-center">
-        <a class="small" href="#">Forgot Password?</a>
-    </div>
-    <div class="text-center">
-        <a class="small" href="{% url 'user-register' %}">Create an Account!</a>
-    </div>
-{% endblock card-body %}
+
+
+    <!-- <p class="mb-1">
+      <a href="forgot-password.html">Quên mật khẩu?</a>
+    </p> -->
+    <p class="mb-0">
+      <a href="{% url 'user-register' %}" class="text-center">Đăng ký tài khoản</a>
+    </p>
+  </div>
+  <!-- /.login-card-body -->
+</div>
+{% endblock %}

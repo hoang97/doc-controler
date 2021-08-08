@@ -1,8 +1,12 @@
-from users.models import UserInfor
-from django.shortcuts import render
+from django.urls.base import reverse
+from users.models import Department, Position, UserInfor
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import FormView, CreateView, DetailView, UpdateView
+from django.http import JsonResponse
+from django.views.generic import CreateView, DetailView, UpdateView
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
@@ -33,7 +37,7 @@ class UserLogoutView(LogoutView):
     template_name = 'users/logout.html'
     next_page = 'user-login'
     extra_context = {
-        'title': 'Blog Controller Login'
+        'title': 'Blog Controller Logout'
     }
 
 class UserRegisterView(CreateView):
@@ -83,3 +87,111 @@ class UserProfileUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         user = self.get_object()
         return self.request.user == user
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+
+    # Handle if there's a POST requets
+    msg = ''
+    if request.method == "POST":
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
+        if username and password:
+            user = authenticate(request, username=username, password=password )
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect('/')
+                else:
+                    msg = 'Tài khoản chưa kích hoạt. Hãy liên hệ với trưởng phòng để xác nhận!'
+            else:
+                msg = 'Tài khoản hoặc mật khẩu không đúng'
+        else:
+            msg = 'Hãy nhập tài khoản và mật khẩu.'
+
+    # Render login template by default 
+    context = {
+        'msg': msg,
+        'h1header': 'Đăng nhập'
+    }
+    return render(request, 'users/login.html', context)
+
+def logout_view(request):
+    logout(request)
+    return redirect('user-login')
+
+def success_view(request):
+    departmentNumber = request.GET.get('departmentNumber', '')
+    context = {
+        'h1header': 'Đăng ký thành công',
+        'departmentNumber': departmentNumber
+    }
+    return render(request, 'users/success.html', context)
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+
+    # Handle if there's a POST requets
+    msg = ''
+    if request.method == 'POST':
+        username = request.POST.get('username', '')
+        password=request.POST.get('password', '')
+        departmentNumber=request.POST.get('phong', '')
+        fullname=request.POST.get('fullname', '')
+        # Validate POST data
+        if username and password and departmentNumber and fullname:
+            if User.objects.filter(username=username).count() > 0:
+                msg="Tên tài khoản đã tồn tại"
+            elif Department.objects.filter(id=departmentNumber).count() == 0:
+                msg="Không có phòng này tồn tại"
+        else:
+            msg="Hãy điền đầy đủ thông tin"
+        # Create User if data is validated
+        if msg == '':
+            user = User.objects.create_user(username=username, password=password, first_name=fullname, is_active=False)
+            user.info.department = Department.objects.get(id=departmentNumber)
+            user.info.position = Position.objects.get(alias='tk')
+            user.info.save()
+            return redirect(reverse('user-success') + f'?departmentNumber={departmentNumber}')
+
+    context = {
+        'msg': msg,
+        'h1header': 'Đăng ký tài khoản',
+        'department_list': Department.objects.exclude(alias='giamdoc')
+    }
+    return render(request, 'users/register.html', context)
+
+# API here
+def JsonResponseError(msg):
+    ''' Trả về ({"status":-1,"msg":msg}) '''
+    return JsonResponse({"status":-1,"msg":msg})
+def JsonResponseSuccess(data):
+    ''' Trả về ({"status":0,"data":data}) '''
+    return JsonResponse({"status":0,"data":data})
+
+@login_required
+def register_api(request):
+    '''
+    - Create new user (has same department as creater)
+    '''
+    msg = ''
+    if request.method == 'POST':
+        username = request.POST.get('username', '')
+        password=request.POST.get('password', '')
+        fullname=request.POST.get('fullname', '')
+        # Validate POST data
+        if username and password and fullname:
+            if User.objects.filter(username=username).count() > 0:
+                msg="Tên tài khoản đã tồn tại"
+        else:
+            msg="Hãy điền đầy đủ thông tin"
+        # Create User if data is validated
+        if msg == '':
+            user = User.objects.create_user(username=username, password=password, first_name=fullname, is_active=False)
+            user.info.department = request.user.info.department
+            user.info.position = Position.objects.get(alias='tk')
+            user.info.save()
+            return JsonResponseSuccess('Tạo tài khoản thành công!')
+    return JsonResponseError(msg)
