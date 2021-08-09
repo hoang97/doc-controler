@@ -1,0 +1,265 @@
+
+{% extends "layout.html" %}
+{% load static %}
+
+
+{% block header %}{{ h1header }}{% endblock %}
+{% block breadcrumb-text %}{{ breadcrumb }}{% endblock %}
+
+
+{% block customcss %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/select2/css/select2.min.css' %}">
+{% endblock %}
+{% block body %}
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">HSMT</h3>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                              <label>Kiểu hồ sơ</label>
+                              <select class="py-2" style="width: 100%;" tabindex="-1" aria-hidden="true" id="xfileType" >
+                                <option value="0" selected>Chọn..</option>  
+                                <option value="1">Hồ sơ TM</option>
+                                <option value="2">Hồ sơ TC</option>
+                                <option value="3">Hồ sơ ĐT</option>
+                              </select>
+                              <div id='xfileTypeError' style="color: red;display: none;" >
+                                Bạn phải chọn loại HSMT
+                              </div>
+                            </div>
+                          <!-- /.form-group -->
+                      </div>
+                        <div class="col-lg-8">
+                          <div class="form-group">
+                            <label for="xfileName" class="col-form-label">Tên hồ sơ:</label>
+                            <input type="text" class="form-control" id="xfileName">
+                            <div id='nameError' style="color: red;display: none;" >
+                              Không để trống tên HSMT
+                            </div>
+                          </div>
+                         
+                        </div>
+                        <div class="col-lg-4">
+                          <div class="form-group">
+                            <label for="xfileCode" class="col-form-label">Mã số:</label>
+                            <input type="text" class="form-control" id="xfileCode" value="xxx/HSC">
+                            <div id='nameError' style="color: red;display: none;" >
+                              Không để trống 
+                            </div>
+                          </div>
+                         
+                        </div>
+                        <div class="col-lg-12">
+                          <div class="form-group">
+                            <label for="xfileDescription" class="col-form-label">Mô tả:</label>
+                            <input type="text" class="form-control" id="xfileDescription">
+                            <div id='nameError' style="color: red;display: none;" >
+                              Không để trống 
+                            </div>
+                          </div>
+                         
+                        </div>
+          
+          
+                      </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+        <!-- Hướng - Nhóm - Địa bàn -->
+            <div class="row">
+              <div class="col-lg-12" id="divTargetTypes">
+                <div class="card card-warning">
+                  <div class="card-header">
+                      <h3 class="card-title">Hướng - Nhóm - Địa bàn</h3>
+                      <div class="card-tools">
+                          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                              <i class="fas fa-minus"></i>
+                          </button>
+                      </div>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <div class="col-lg-12">
+                      <!-- Btn thêm mới Hướng - Nhóm - Địa bàn -->
+                      <btn type="button" class="btn btn-success float-right" style="margin-bottom: 5px;" data-toggle="modal" data-target="#modalAddTargetType"> <i class="fas fa-plus"></i></btn>
+  
+                      <div class="form-group" >
+                        <label>Hướng</label>
+                        <div class="select2-green" >
+                          <select class="select2 select2-hidden-accessible" multiple="" data-placeholder="Chọn Hướng..." data-dropdown-css-class="select2-green" style="width: 100%;" data-select2-id="targetDir" tabindex="-1" aria-hidden="true" id="select-targettype-1">
+              
+      
+                          </select>
+      
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-12">
+                      <div class="form-group" >
+                        <label>Nhóm mục tiêu</label>
+                        <div class="select2-yellow" >
+                          <select class="select2 select2-hidden-accessible" multiple="" data-placeholder="Chọn nhóm mục tiêu" data-dropdown-css-class="select2-yellow" style="width: 100%;" data-select2-id="targetGr" tabindex="-1" aria-hidden="true" id="select-targettype-2">
+                       
+      
+                          </select>
+      
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-12">
+                      <div class="form-group" >
+                        <label>Địa bàn</label>
+                        <div class="select2-purple" >
+                          <select class="select2 select2-hidden-accessible" multiple="" data-placeholder="Chọn địa bàn" data-dropdown-css-class="select2-purple" style="width: 100%;" data-select2-id="targetArea" tabindex="-1" aria-hidden="true" id="select-targettype-3">
+                          </select>
+      
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /.card-body -->
+              </div>
+              </div>
+              {% if xfileId %}
+              <div class="col-lg-6">
+                <div class="card card-info">
+                  <div class="card-header">
+                      <h3 class="card-title">CHI TIẾT</h3>
+  
+                      <div class="card-tools">
+                          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                              <i class="fas fa-minus"></i>
+                          </button>
+                      </div>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                      <div class="row">
+                        <div class="col-lg-12">
+                          <div class="form-group">
+                            <label for="user_creator" class="col-form-label">Người lập</label>
+                            <input type="text" class="form-control" id="user_creator" disabled>
+                          </div>
+                         
+                        </div>
+                          <div class="col-lg-12">
+                            <div class="form-group">
+                              <label for="date_created" class="col-form-label">Thời gian lập</label>
+                              <input type="text" class="form-control" id="date_created" disabled>
+                            </div>
+                           
+                          </div>
+                          <div class="col-lg-12">
+                            <div class="form-group">
+                              <label for="edit_note" class="col-form-label">Cập nhật</label>
+                              <input type="text" class="form-control" id="edit_note">
+                            </div>
+                           
+                          </div>
+            
+                        </div>
+                  </div>
+                  <!-- /.card-body -->
+              </div>
+              </div>
+              {% endif %}
+
+            </div>
+
+            <div class="card-footer">
+              {% if xfileId %}
+              <a  class="btn btn-secondary" href="/hsmt/edit-detail?id={{xfileId}}">Quay lại</a>    
+              <button type="submit" class="btn btn-success float-right" id="btnCreateEdit">Lưu</button>
+              {% else %}
+              <a  class="btn btn-secondary" href="/hsmt/list">Danh sách HSMT</a>    
+              <button type="submit" class="btn btn-success float-right" id="btnCreateEdit">Lưu</button>
+              {% endif %}
+
+            </div>
+            <!-- /.card -->
+        
+            <!-- /.card -->
+        </div><!-- /.container-fluid -->
+    </section>
+    <div class="modal fade" id="modalAddTargetType" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Thêm mới</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+              <div class="col-lg-12">
+                <div class="form-group">
+                    <label>Loại mục tiêu</label>
+                    <select class="custom-select" id="targetType">
+                      <option value="0"selected>Chọn...</option>
+                      <option value="1" >Hướng</option>
+                      <option value="2" >Nhóm mục tiêu</option>
+                      <option value="3" >Địa bàn</option>
+                    </select>
+                    <div id='optTargetTypeFeedback' style="color: red;display: none;" >
+                      Sửa lỗi đê
+                    </div>
+                  </div>
+              </div>
+              <div class="col-lg-12">
+                <div class="form-group">
+                    <label for="targetTypeName" class="col-form-label">Tên:</label>
+                    <input class="form-control" id="targetTypeId" value="" hidden>
+                    <input class="form-control" id="targetTypeName">
+
+                  </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <label for="targetTypeDesc" class="col-form-label">Mô tả:</label>
+                    <textarea class="form-control" id="targetTypeDesc"></textarea>
+                  </div>
+            </div>
+       
+        
+           
+          </div>
+       
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-success" id="btnSaveNewTargetType">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <input hidden type="text" id="xfileId" value="{{xfileId}}">
+  <input hidden type="text" id="originalXfileId" value="">
+
+    {% endblock %}
+
+    {% block script %}
+    <script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+    <script>
+        $(function () {
+            $('.select2').select2();
+        });
+    </script>
+    <script src="{% static 'js/hsmt-create.js' %}"></script>
+   
+
+    {% endblock %}
+
