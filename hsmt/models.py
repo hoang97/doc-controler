@@ -27,9 +27,9 @@ class TARGET_TYPES(models.IntegerChoices):
     '''
     Những loại của Target
     '''
-    DIRECTION = 0, _('hướng'),
-    GROUP = 1, _('nhóm'),
-    AREA = 2, _('địa bàn'),
+    DIRECTION = 1, _('hướng'),
+    GROUP = 2, _('nhóm'),
+    AREA = 3, _('địa bàn'),
 
 # Models here.
 class XFileType(models.Model):

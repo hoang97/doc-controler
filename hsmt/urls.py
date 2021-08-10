@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import (
     XFileListView,
     XFileCreateView,
@@ -25,7 +26,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     # xfile views
-    path('',XFileListView.as_view(), name='hsmt-list'),
+    # path('',XFileListView.as_view(), name='hsmt-list'),
     path('create/',XFileCreateView.as_view(), name='hsmt-create'),
     path('xfile/<int:pk>/',XFileDetailView.as_view(), name='hsmt-detail'),
     path('xfile/<int:pk>/delete/',XFileDeleteView.as_view(), name='hsmt-delete'),
@@ -44,6 +45,30 @@ urlpatterns = [
     path('type/',XFileTypeListView.as_view(), name='hsmt-type-list'),
     path('type/create/',XFileTypeCreateView.as_view(), name='hsmt-type-create'),
     path('type/<int:pk>/',XFileTypeDetailView.as_view(), name='hsmt-type-detail'),
+
+
+
+    #target-type-views
+    # path('target-type/list', views.target_type_list, name='list_target'),
+    path('', views.target_type_list, name='list_target'),
+
+    path('add-edit-target-type', views.add_edit_target_type, name='add-target-type'),
+    path('get-all-target-types', views.get_all_target_types, name='get-all-target-types'),
+    path('get-target-type-by-type', views.get_target_type_by_type, name='get-all-target-types'),
+    path('get-target-type-by-id', views.get_target_type_by_id, name='get-target-type-by-id'),
+    path('delete-target-type', views.delete_target_type, name='delete-target-type'),
+
+
+    #user list 
+
+
+
+
+
+
+    path('test', views.test, name='test'),
+    
+
 ]
 
 if settings.DEBUG :

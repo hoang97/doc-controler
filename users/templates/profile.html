@@ -1,0 +1,195 @@
+
+{% extends "layout.html" %}
+{% load static %}
+
+
+{% block header %}{{ h1header }}{% endblock %}
+{% block breadcrumb-text %}{{ breadcrumb }}{% endblock %}
+
+{% block body %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+
+          <!-- Profile Image -->
+          <div class="card card-primary card-outline">
+            <div class="card-body box-profile">
+              <div class="text-center">
+                <img class="profile-user-img img-fluid img-circle" src="{% static 'img/avatar5.png' %}" alt="User profile picture">
+              </div>
+
+              <h3 class="profile-username text-center">{{user.first_name}}</h3>
+
+              <p class="text-muted text-center">({{user.username}})</p>
+
+              <ul class="list-group list-group-unbordered mb-3">
+                <li class="list-group-item">
+                    <b>Chức vụ</b> <a class="float-right">{{user.group_name}}</a>
+                </li>
+                <li class="list-group-item">
+                  <b>HSMT</b> <a class="float-right">{{user.totalXfile}}</a>
+                </li>
+                
+
+              </ul>
+              {% if user.is_active == 1 %}
+              <btn type="button" class="btn btn-success btn-block"><b>Kích hoạt</b></btn>
+
+              {% else %}
+              <btn type="button" class="btn btn-danger btn-block"><b>Chưa kích hoạt</b></btn>
+
+              {% endif %}
+
+
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+
+
+        </div>
+        <!-- /.col -->
+        <div class="col-md-9">
+          <div class="card">
+            <div class="card-header p-2">
+              <ul class="nav nav-pills">
+                <li class="nav-item"><a class="nav-link active" href="#user-info" data-toggle="tab">Thông tin cá nhân</a></li>
+                {% if selfProfile %}
+                <li class="nav-item"><a class="nav-link" href="#profile-notification" data-toggle="tab" id="profile-notification-tab">Thông báo của tôi</a></li>
+                <li class="nav-item"><a class="nav-link" href="#information" data-toggle="tab">Cập nhật thông tin</a></li>
+                <li class="nav-item"><a class="nav-link" href="#setting" data-toggle="tab">Mật khẩu</a></li>
+                {% endif %}
+
+              </ul>
+            </div><!-- /.card-header -->
+            <div class="card-body">
+              <div class="tab-content">
+                <div class="tab-pane active" id="user-info">
+                          <!-- About Me Box -->
+                    <strong><i class="far fa-file-alt mr-1"></i> Tự giới thiệU</strong>
+
+                    {% if userInfo.self_introdution == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %}<p class="text-primary">  {{userInfo.self_introdution}} {% endif %}</p> 
+
+                    <hr>
+
+                    <strong><i class="fas fa-map-marker-alt mr-1"></i> Địa chỉ</strong>
+
+                        {% if userInfo.address == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %} <p class="text-primary"> {{userInfo.address}} {% endif %}</p> 
+
+                    <hr>
+
+                    <strong><i class="fas fa-pencil-alt mr-1"></i> Kĩ năng</strong>
+
+                    
+                        {% if userInfo.skill == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %}<p class="text-primary"> {{userInfo.skill}} {% endif %}</p> 
+                    
+
+                    <hr>
+
+                    <strong><i class="fas fa-phone-square-alt mr-1"></i> Số điên thại</strong>
+
+                    {% if userInfo.phone_number == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %} <p class="text-primary"> {{userInfo.phone_number}} {% endif %}</p> 
+          <!-- /.card -->
+                </div>
+                <!-- /.tab-pane -->
+                {% if selfProfile %}
+                <div class="tab-pane" id="profile-notification">
+
+                </div>
+                <div class="tab-pane" id="information">
+                    <form class="form-horizontal" action="/edit-user-info" method="post">{% csrf_token %}    
+ 
+                    <div class="form-group row">
+                      <label for="first_name" class="col-sm-2 col-form-label">Họ tên</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" name="first_name" placeholder="Name" value="{{user.first_name}}">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="phoneNumber" class="col-sm-2 col-form-label">Số điện thoại</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" name="phone_number" placeholder="..." value="{{userInfo.phone_number}}">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="address" class="col-sm-2 col-form-label">Địa chỉ</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" name="address" placeholder="Địa chỉ" value="{{userInfo.address}}">
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="selfIntro" class="col-sm-2 col-form-label">Tự giới thiệu</label>
+                      <div class="col-sm-10">
+                        <textarea class="form-control" name="self_introdution" placeholder="Về bản thân.." value="{{userInfo.self_introdution}}"></textarea>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="inputSkills" class="col-sm-2 col-form-label">Skills</label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" name="skill" placeholder="Kĩ năng" value="{{userInfo.skill}}">
+                      </div>
+                    </div>
+
+                    <div class="form-group row">
+                      <div class="offset-sm-2 col-sm-10">
+                        <button type="submit" class="btn btn-success" id="btnSaveUserInfo">Lưu</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="tab-pane" id="setting">
+                    <form class="form-horizontal">
+                      <div class="form-group row">
+                        <label for="oldPassword" class="col-sm-2 col-form-label">Mật khẩu cũ</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="oldPassword" placeholder="Mật khẩu cũ của bạn">
+                        </div>
+                      </div>
+                    <div class="form-group row">
+                        <label for="newPassword" class="col-sm-2 col-form-label">Mật khẩu mới</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="newPassword" placeholder="Mật khẩu mới">
+                        </div>
+                      </div>
+                    <div class="form-group row">
+                      <label for="reNewPassowrd" class="col-sm-2 col-form-label">Nhập lại Mật khẩu mới</label>
+                      <div class="col-sm-10">
+                        <input type="password" class="form-control" id="reNewPassowrd" placeholder="Nhập lại Mật khẩu mới">
+                      </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                      <div class="offset-sm-2 col-sm-10">
+                        <button type="button" class="btn btn-danger" id="btnChangePassword">Đổi mật khẩu</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                {% endif %}
+
+                <!-- /.tab-pane -->
+              </div>
+              <!-- /.tab-content -->
+            </div><!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <!-- /.col -->
+      </div>
+    <!-- /.row -->
+  </div><!-- /.container-fluid -->
+</section>
+{% endblock %}
+
+{% block script %}
+<script >
+ $('#btnSaveUserInfo').on('click',function(){
+    showNotification('Gửi yêu cầu thành công');
+ });
+
+</script>
+<script src="{% static 'js/profile.js' %}"></script>
+
+{% endblock %}

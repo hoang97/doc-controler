@@ -1,0 +1,277 @@
+<div class="card card-default">
+    <div class="card-header" data-card-widget="collapse" >
+        <h3 class="card-title">THÔNG TIN LÝ LỊCH</h3>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" >
+                <i class="fas fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label>1. Tên gọi và các tên gọi khác</label>
+                    <textarea type="text" class="form-control" id="hoVaTen"></textarea>
+                    <div class="feedback" style="color: red;" id="hoVaTen-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            
+        </div>
+        <div class="row">
+            <label>2. Thời gian thành lập</label>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>2a. Thời gian tổ chức thành lập</label>
+                    <div class="input-group date" id="dtp2" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#dtp2" id="thoiGianThanhLap">
+                        <div class="input-group-append" data-target="#dtp2" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>2b. Thời gian xuất hiện trên KGM</label>
+                    <div class="input-group date" id="dtp3" data-target-input="nearest">
+                        <textarea type="text" class="form-control datetimepicker-input" data-target="#dtp3" id="thoiGianXuatHien"></textarea>
+                        <div class="input-group-append" data-target="#dtp3" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>3. Địa chỉ và số điện thoại</label>
+                    <textarea type="text" class="form-control" id="diaChivaSDT"></textarea>
+                    <div class="feedback" style="color: red;" id="diaChivaSDT-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <!-- /.col -->
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label>4. Mục tiêu trên mạng</label>
+                    <textarea type="text" class="form-control" id="mucTieuTrenMang"></textarea>
+                    <div class="feedback" style="color: red;" id="mucTieuTrenMang-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <label>5. Tổ chức</label>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>5a. Cơ cấu tổ chức, các bộ phận, chi nhánh</label>
+                    <textarea type="text" class="form-control" id="coCauToChuc"></textarea>
+                    <div class="feedback" style="color: red;" id="coCauToChuc-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>5b. Lãnh đạo/quản trị, thành viên chủ chốt</label>
+                    <textarea type="text" class="form-control" id="lanhDaoQuanTri"></textarea>
+                    <div class="feedback" style="color: red;" id="lanhDaoQuanTri-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>5c. Số lượng thành viên</label>
+                    <textarea type="text" class="form-control" id="soLuongThanhVien"></textarea>
+                    <div class="feedback" style="color: red;" id="soLuongThanhVien-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>5d. Cách thức, quy trình, quy định tuyển chọn thành viên</label>
+                    <textarea type="text" class="form-control" id="quyTrinhTuyenChon"></textarea>
+                    <div class="feedback" style="color: red;" id="quyTrinhTuyenChon-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>5e. Địa bàn hoạt động</label>
+                    <textarea type="text" class="form-control" id="diaBanHoatDong"></textarea>
+                    <div class="feedback" style="color: red;" id="diaBanHoatDong-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label>6. Tôn chỉ, mục đích</label>
+                    <textarea type="text" class="form-control" id="tonChiMucDich"></textarea>
+                    <div class="feedback" style="color: red;" id="tonChiMucDich-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <label>7. Quá trình hoạt động</label>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>7a. Đặc điểm, quy luật, nội dung, thủ đoạn, các hoạt động chống phá</label>
+                    <textarea type="text" class="form-control" id="quaTrinhHinhThanh"></textarea>
+                    <div class="feedback" style="color: red;" id="quaTrinhHinhThanh-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>7b. Tần suất, lưu lượng đăng tải, mức độ quan tâm</label>
+                    <textarea type="text" class="form-control" id="tanSuatHoatDong"></textarea>
+                    <div class="feedback" style="color: red;" id="tanSuatHoatDong-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>7c. Tổ chức/cá nhân chỉ đạo, tài trợ</label>
+                    <textarea type="text" class="form-control" id="toChucTaiTro"></textarea>
+                    <div class="feedback" style="color: red;" id="toChucTaiTro-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>7d. Các tổ chức, mục tiêu có liên quan</label>
+                    <textarea type="text" class="form-control" id="toChucLienQuan"></textarea>
+                    <div class="feedback" style="color: red;" id="toChucLienQuan-feedback"></div>
+                </div>
+                <!-- /.form-group -->
+            </div>
+        </div>
+        <!-- /.row -->
+        
+    </div>
+    <!-- /.card-body -->
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card card-success">
+            <div class="card-header">
+                <h3 class="card-title">THÔNG TIN KỸ THUẬT</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>1. Địa chỉ máy chủ, nhà cung cấp dịch vụ</label>
+                            <textarea type="text" class="form-control" id="diaChiMayChu"></textarea>
+                            <div class="feedback" style="color: red;" id="diaChiMayChu-feedback"></div>
+                        </div>
+                        <!-- /.form-group -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>2. Quản trị: tổ chức/cá nhân đăng ký, quản trị, thuê</label>
+                            <textarea type="text" class="form-control" id="quanTri"></textarea>
+
+                            <div class="feedback" style="color: red;" id="quanTri-feedback"></div>
+                        </div>
+                        <!-- /.form-group -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>3. Đặc điểm sử dụng phần mềm, kỹ thuật thể hiện</label>
+                            <textarea type="text" class="form-control" id="dacDiemSuDung"></textarea>
+                            <div class="feedback" style="color: red;" id="dacDiemSuDung-feedback"></div>
+                        </div>
+                        <!-- /.form-group -->
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+        </div>
+        <!-- /.card -->
+    </div>
+<div class="col-lg-6">
+    <div class="card card-info">
+        <div class="card-header">
+            <h3 class="card-title">ĐÁNH GIÁ</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Về giá trị TB, tin tức</label>
+                        <textarea type="text" class="form-control" id="giaTriTB"></textarea>
+                        <div class="feedback" style="color: red;" id="giaTriTB-feedback"></div>
+                    </div>
+                    <!-- /.form-group -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Khả năng tiếp cận bằng kỹ thuật</label>
+                        <textarea type="text" class="form-control" id="khaNangTiepCanKT"></textarea>
+                        <div class="feedback" style="color: red;" id="khaNangTiepCanKT-feedback"></div>
+                    </div>
+                    <!-- /.form-group -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Khả năng tiếp cận bằng ĐB</label>
+                        <textarea type="text" class="form-control" id="khaNangTiepCanDB"></textarea>
+                        <div class="feedback" style="color: red;" id="khaNangTiepCanDB-feedback"></div>
+                    </div>
+                    <!-- /.form-group -->
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+      
+    </div>
+    <!-- /.card -->
+    </div>
+</div>
