@@ -7,7 +7,7 @@ $(document).ready(function () {
 function getUsers(initial=true){
     $.ajax({
         type: 'GET',
-        url: '/get-users',
+        url: '/get-users/',
         // headers: {'X-CSRFToken': getCookie('csrftoken')},
     })
         .done((resp) => {
