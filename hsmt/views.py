@@ -22,7 +22,7 @@ from .models import (
 )
 # Create your views here.
 class XFileCreateView(CreateView):
-    template_name = 'hsmt/create.html'
+    template_name = 'hsmt/old/create.html'
     model = XFile
     fields = ['code', 'description','type', 'targets', 'editors', 'checkers', 'approvers']
     success_url = reverse_lazy('hsmt-list')
@@ -36,7 +36,7 @@ class XFileCreateView(CreateView):
         return httpresponse
 
 class XFileListView(ListView):
-    template_name = 'hsmt/list.html'
+    template_name = 'hsmt/old/list.html'
     model = XFile
     context_object_name = 'xfile_list'
     ordering = ['-date_created']
@@ -47,7 +47,7 @@ class XFileListView(ListView):
         return context
 
 class XFileDetailView(DetailView):
-    template_name = 'hsmt/detail.html'
+    template_name = 'hsmt/old/detail.html'
     model = XFile
     context_object_name = 'xfile'
     
@@ -57,12 +57,12 @@ class XFileDetailView(DetailView):
         return context
 
 class XFileDeleteView(DeleteView):
-    template_name = 'hsmt/base.html'
+    template_name = 'hsmt/old/base.html'
     model = XFile
     success_url = reverse_lazy('hsmt-list')
 
 class XFileChangeDetailView(DetailView):
-    template_name = 'hsmt/change_detail.html'
+    template_name = 'hsmt/old/change_detail.html'
     model = XFileChange
     context_object_name = 'change'
 
@@ -72,7 +72,7 @@ class XFileChangeDetailView(DetailView):
         return context
 
 class XFileTypeListView(ListView):
-    template_name = 'hsmt/type_list.html'
+    template_name = 'hsmt/old/type_list.html'
     model = XFileType
     context_object_name = 'xfiletype_list'
     ordering = ['name']
@@ -83,7 +83,7 @@ class XFileTypeListView(ListView):
         return context
 
 class XFileTypeCreateView(CreateView):
-    template_name = 'hsmt/type_create.html'
+    template_name = 'hsmt/old/type_create.html'
     model = XFileType
     fields = ['name','example_content']
     success_url = reverse_lazy('hsmt-type-list')
@@ -94,7 +94,7 @@ class XFileTypeCreateView(CreateView):
         return context
 
 class XFileTypeDetailView(DetailView):
-    template_name = 'hsmt/type_detail.html'
+    template_name = 'hsmt/old/type_detail.html'
     model = XFileType
     context_object_name = 'xfiletype'
 
