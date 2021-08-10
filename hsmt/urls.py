@@ -59,7 +59,13 @@ urlpatterns = [
     path('delete-target-type', views.delete_target_type, name='delete-target-type'),
 
 
-    
+    #user list 
+
+
+
+
+
+
     path('test', views.test, name='test'),
     
 

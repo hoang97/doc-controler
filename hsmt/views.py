@@ -23,9 +23,9 @@ from .models import (
     STATUS,
 )
 LIST_GROUPS=(
-    "trợ lí",
-    "trưởng phòng",
-    "giám đốc"
+    "Trợ lí",
+    "Trưởng phòng",
+    "Giám đốc"
 )
 LIST_XFILE_TYPES =(
     "Trang mạng",
@@ -262,33 +262,6 @@ def get_target_type_by_type(request):
                 data=list(db.Target.objects.filter(type=TARGET_TYPE).values())
                 break
     return JsonResponseSuccess(data)
-
-@login_required
-def add_edit_target_type(request):
-    """
-    Thêm - Sửa target_type
-    """
-    try:
-        targetId=request.POST['target-id']
-        targetName=request.POST['target-name']
-        targetType=request.POST['target-type']
-        targetDesc=request.POST['target-desc']
-
-    except:
-        return JsonResponseError("Thiếu dữ liệu")
-    if targetId:
-        # Có ID = UPDATE
-        target= db.Target.objects.get(id=targetId)
-        target.name=targetName
-        target.description=targetDesc
-        target.save()
-    else:
-        # Không ID = CREATE NEW
-        newObj= db.Target.objects.create(name=targetName,description=targetDesc,type=targetType)
-        newObj.save()
-        return JsonResponseSuccess(model_to_dict(newObj))
-    msg ='Done'
-    return JsonResponseSuccess(msg)    
 
 #trả về danh sách hướng, nhóm, địa bàn theo id
 @login_required

@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from .views import (
     UserLoginView, 
     UserLogoutView, 
@@ -25,6 +26,17 @@ urlpatterns = [
     path('success/',success_view, name='user-success'),
     path('user/<int:pk>/profile/',UserProfileView.as_view(), name='user-profile'),
     path('user/<int:pk>/update/',UserProfileUpdate.as_view(), name='user-update'),
+
+
+
+    # ====== User functions =====
+    path('get-users', views.get_users, name='get-users'),
+    path('activate-user', views.activate_user, name='activate-user'),
+    path('delete-user', views.delete_user, name='delete-user'),
+    path('edit-user-info', views.edit_user_info, name='edit-user-info'),
+    path('change-password', views.change_password, name='change-password'),
+    path('profile', views.profile, name='profile'),
+
 ]
 
 if settings.DEBUG :
