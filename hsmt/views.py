@@ -242,7 +242,7 @@ def target_type_list(request):
     'breadcrumb':title,
     'h1header':title
     }
-    # context['user_role']=get_user_role(request.user)
+    context['user_role']=str(request.user.info.position.id)
     context['user_layout']=request.user
     return render(request, 'hsmt/target-type-list.html',context)
 

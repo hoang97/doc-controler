@@ -26,7 +26,7 @@ $('#btnChangePassword').on('click',function(){
     }
     $.ajax({
         type: 'POST',
-        url: '/change-password',
+        url: '/change-password/',
         headers: {'X-CSRFToken': getCookie('csrftoken')},
         data: data,
     })

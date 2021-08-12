@@ -114,7 +114,7 @@ $('#btnSaveNewUser').on('click',function(){
     };
     $.ajax({
         type: 'POST',
-        url: '/register-api',
+        url: '/register-api/',
         headers: {'X-CSRFToken': getCookie('csrftoken')},
         data: data,
     })
@@ -136,7 +136,7 @@ $('#btnSaveNewUser').on('click',function(){
 function ActivateUser(userId){
     $.ajax({
         type: 'POST',
-        url: '/activate-user',
+        url: '/activate-user/',
         headers: {'X-CSRFToken': getCookie('csrftoken')},
         data: {'userId':userId},
     })
@@ -158,7 +158,7 @@ function ActivateUser(userId){
 function DeleteUser(userId){
     $.ajax({
         type: 'POST',
-        url: '/delete-user',
+        url: '/delete-user/',
         headers: {'X-CSRFToken': getCookie('csrftoken')},
         data: {'userId':userId},
     })

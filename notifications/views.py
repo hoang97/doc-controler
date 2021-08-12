@@ -13,14 +13,14 @@ def get_notifications(request):
     data = {}
     notification_objs = request.user.notification_set.select_related('log')
     data['num'] = notification_objs.filter(seen=False).count()
-    notifications = {}
-    for notification in notification_objs.order_by('-log__timestamp')[:3:-1]:
-        notifications[str(notification.id)] = {
+    notifications = []
+    for notification in notification_objs.order_by('-log__timestamp')[:3]:
+        notifications.append({
             'seen': notification.seen,
             'message': str(notification.log),
             'timestamp': datetime.strftime(notification.log.timestamp, '%b %d, %Y, %I:%M %p'),
             'target_url': notification.log.get_target_url(),
             'notification_id': notification.id
-        }
+        })
     data['notifications'] = notifications
     return JsonResponse(data)

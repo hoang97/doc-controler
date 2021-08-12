@@ -25,16 +25,16 @@
 
               <ul class="list-group list-group-unbordered mb-3">
                 <li class="list-group-item">
-                    <b>Chức vụ</b> <a class="float-right">{{user.group_name}}</a>
+                    <b>Chức vụ</b> <span class="float-right">{{user.group_name}}</span>
                 </li>
                 <li class="list-group-item">
-                  <b>HSMT</b> <a class="float-right">{{user.totalXfile}}</a>
+                  <b>HSMT</b> <span class="float-right">{{user.totalXfile}}</span>
                 </li>
                 
 
               </ul>
               {% if user.is_active == 1 %}
-              <btn type="button" class="btn btn-success btn-block"><b>Kích hoạt</b></btn>
+              <btn type="button" class="btn btn-success btn-block"><b>Đã kích hoạt</b></btn>
 
               {% else %}
               <btn type="button" class="btn btn-danger btn-block"><b>Chưa kích hoạt</b></btn>
@@ -69,27 +69,27 @@
                           <!-- About Me Box -->
                     <strong><i class="far fa-file-alt mr-1"></i> Tự giới thiệu</strong>
 
-                    {% if userInfo.self_introduction == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %}<p class="text-primary">  {{userInfo.self_introdution}} {% endif %}</p> 
+                    {% if userInfo.self_introduction == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %}<p class="text-muted">  {{userInfo.self_introduction}} {% endif %}</p> 
 
                     <hr>
 
                     <strong><i class="fas fa-map-marker-alt mr-1"></i> Địa chỉ</strong>
 
-                        {% if userInfo.address == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %} <p class="text-primary"> {{userInfo.address}} {% endif %}</p> 
+                        {% if userInfo.address == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %} <p class="text-muted"> {{userInfo.address}} {% endif %}</p> 
 
                     <hr>
 
                     <strong><i class="fas fa-pencil-alt mr-1"></i> Kĩ năng</strong>
 
                     
-                        {% if userInfo.skill == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %}<p class="text-primary"> {{userInfo.skill}} {% endif %}</p> 
+                        {% if userInfo.skill == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %}<p class="text-muted"> {{userInfo.skill}} {% endif %}</p> 
                     
 
                     <hr>
 
                     <strong><i class="fas fa-phone-square-alt mr-1"></i> Số điên thại</strong>
 
-                    {% if userInfo.phone_number == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %} <p class="text-primary"> {{userInfo.phone_number}} {% endif %}</p> 
+                    {% if userInfo.phone_number == "" %} <p class="text-muted">Không có dữ liệu</p> {% else %} <p class="text-muted"> {{userInfo.phone_number}} {% endif %}</p> 
           <!-- /.card -->
                 </div>
                 <!-- /.tab-pane -->
@@ -98,12 +98,12 @@
 
                 </div>
                 <div class="tab-pane" id="information">
-                    <form class="form-horizontal" action="/edit-user-info" method="post">{% csrf_token %}    
+                    <form class="form-horizontal" action="{% url 'edit-user-info' %}" method="post">{% csrf_token %}    
  
                     <div class="form-group row">
                       <label for="first_name" class="col-sm-2 col-form-label">Họ tên</label>
                       <div class="col-sm-10">
-                        <input type="text" class="form-control" name="first_name" placeholder="Name" value="{{user.first_name}}">
+                        <input type="text" class="form-control" name="first_name" placeholder="Họ tên" value="{{user.first_name}}">
                       </div>
                     </div>
                     <div class="form-group row">
@@ -121,7 +121,7 @@
                     <div class="form-group row">
                       <label for="selfIntro" class="col-sm-2 col-form-label">Tự giới thiệu</label>
                       <div class="col-sm-10">
-                        <textarea class="form-control" name="self_introdution" placeholder="Về bản thân.." value="{{userInfo.self_introdution}}"></textarea>
+                        <textarea class="form-control" name="self_introduction" placeholder="Về bản thân.." >{{userInfo.self_introduction}}</textarea>
                       </div>
                     </div>
                     <div class="form-group row">

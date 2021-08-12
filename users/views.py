@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.hashers import check_password
 
 # LIST_GROUPS=[
 #     "Trợ Lý",
@@ -57,7 +58,7 @@ def get_user_role(user):
     2 - trưởng phòng, alias=tp
     3 - giám đốc, alias=gd
     '''
-    return user.info.position.id
+    return str(user.info.position.id)
 
 @login_required
 def get_users(request):
@@ -85,6 +86,86 @@ def get_users(request):
         })
 
     return JsonResponseSuccess(data)
+
+@login_required
+def activate_user(request):
+    if request.method == "POST":
+        # Chỉ trưởng phòng mới được kích hoạt tài khoản
+        if request.user.info.position.alias != 'tp':
+            return JsonResponseError('Không đủ thẩm quyền')
+        
+        userId=request.POST.get('userId','')
+        if not userId:
+            return JsonResponseError('Không đủ dữ liệu')
+        userForChanged=User.objects.get(id=userId)
+        if (userForChanged==request.user):
+            return JsonResponseError('Không thể huỷ kích hoạt chính mình')
+        if (userForChanged.info.department!=request.user.info.department):
+            return JsonResponseError('Không thuộc phòng của bạn')
+        userForChanged.is_active=not userForChanged.is_active
+        userForChanged.save()
+        return JsonResponseSuccess('Thành công')
+    
+    return JsonResponseError('')
+    
+@login_required 
+def delete_user(request):
+    if request.method == "POST":
+        # Chỉ trưởng phòng mới được xóa tài khoản
+        if request.user.info.position.alias != 'tp':
+            return JsonResponseError('Không đủ thẩm quyền')
+        
+        userId=request.POST.get('userId','')
+        if not userId:
+            return JsonResponseError('Không đủ dữ liệu')
+        userForDelete=User.objects.get(id=userId)
+        if (userForDelete==request.user):
+            return JsonResponseError('Không thể xóa chính mình')
+        if (userForDelete.info.department!=request.user.info.department):
+            return JsonResponseError('Không thuộc phòng của bạn')
+        
+        userForDelete.delete()
+        return JsonResponseSuccess('Thành công')
+    
+    return JsonResponseError('')
+
+@login_required
+def edit_user_info(request):
+    if request.method == "POST":
+        first_name=request.POST.get('first_name','')
+        phone_number=request.POST.get('phone_number','')
+        address=request.POST.get('address','')
+        self_introduction=request.POST.get('self_introduction','')
+        skill=request.POST.get('skill','')
+
+        user = request.user
+        userInfo = user.info
+        if first_name:
+            user.first_name = first_name
+        userInfo.phone_number = phone_number
+        userInfo.address = address
+        userInfo.self_introduction = self_introduction
+        userInfo.skill = skill
+        user.save()
+
+    return redirect('/profile?u='+request.user.username)
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        oldPassword=request.POST.get('oldPwd','')
+        newPassword=request.POST.get('newPwd','')
+        if not (newPassword and oldPassword):
+            return JsonResponseError('Thiếu dữ liệu')
+        if not check_password(oldPassword,request.user.password):  
+            return JsonResponseError('Mật khẩu cũ không chính xác')
+        if len(newPassword) <8:
+            return JsonResponseError('Mật khẩu mới phải lớn hơn 8 ký tự')
+        request.user.set_password(newPassword)
+        request.user.save()
+        return JsonResponseSuccess('Đổi mật khẩu thành công')
+
+    return JsonResponseError('')
 
 # Create your views here.
 def login_view(request):
@@ -163,6 +244,16 @@ def register_view(request):
     return render(request, 'users/register.html', context)
 
 @login_required
+def user_list_view(request):
+    title='Danh sách người dùng'
+    userGroup=[request.user.info.department]
+    context={'breadcrumb':title,'h1header':title,'userGroup':userGroup}
+    # Quản lý Quyền
+    context['user_role']=str(request.user.info.position.id)
+    context['user_layout']=request.user
+    return render(request, 'users/user-list.html',context)
+
+@login_required
 def profile_view(request):
     userName=request.GET.get('u','')
     selfProfile=False
@@ -190,7 +281,6 @@ def profile_view(request):
             'phone_number':userInfo.phone_number,
             'self_introduction':userInfo.self_introduction
         },
-        'user_layout':request.user,
         'breadcrumb':title,
         'h1header':title,
     }
@@ -201,7 +291,17 @@ def profile_view(request):
     # print(context)
     return render(request, 'users/profile.html',context)
 
+@login_required
+def group_list_view(request):
+    title='Nhóm người dùng'
+    context={
+    'breadcrumb':title,
+    'h1header':title
+    }
+    context['user_role']=str(request.user.info.position.id)
+    context['user_layout']=request.user
 
+    return render(request, 'users/group-list.html',context)
 
 # Old views here
 def display_form_error(request, errors):

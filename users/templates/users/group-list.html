@@ -1,0 +1,106 @@
+
+{% extends "layout.html" %}
+{% load static %}
+
+
+{% block header %}{{ h1header }}{% endblock %}
+{% block breadcrumb-text %}{{ breadcrumb }}{% endblock %}
+
+{% block body %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row py-2 px-2">
+      <!-- <btn class="btn btn-success"  onclick="Edit();">Thêm bản ghi</btn> -->
+      </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Danh sách Nhóm người dùng</h3>
+            <div class="card-tools">
+              <div class="input-group input-group-sm" style="width: 150px;">
+                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-default">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body table-responsive p-0" style="height: 100%;">
+            <table class="table table-head-fixed text-nowrap table-striped">
+              <thead>
+                <tr>
+                  <th style="width: 10%;">Số thứ tự</th>
+                  <th>Nhóm ngườI dùng</th>
+                  <th style="width: 10%;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>01</td>
+                  <td><a href="#">Admin</a></td>
+                  <td>
+                    
+                    
+              </td>
+                </tr>
+                <tr>
+                  <td>02</td>
+                  <td><a href="#">Giám đốc</a></td>
+                  <td>
+                    
+                    
+              </td>
+                </tr>
+                <tr>
+                  <td>03</td>
+                  <td><a href="#">Trưởng Phòng</a></td>
+                  <td>
+                    
+                    
+              </td>
+                </tr>
+                <tr>
+                    <td>04</td>
+                    <td><a href="#">Người kiểm định</a></td>
+                    <td>
+                      
+                      
+                </td>
+                  </tr>
+                  <tr>
+                    <td>05</td>
+                    <td><a href="#">Trợ lý</a></td>
+                    <td>
+                      
+                      
+                 </td>
+                  </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+      </div>
+    </div>
+    <!-- /.row -->
+
+    <!-- /.row -->
+  </div><!-- /.container-fluid -->
+</section>
+<!-- Modal -->
+
+{% endblock %}
+
+{% block script %}
+<!-- <script src="{% static 'js/custom.js' %}"></script> -->
+<!-- <script>
+  function Edit(){
+    location.href = "#";
+  };
+</script> -->
+{% endblock %}

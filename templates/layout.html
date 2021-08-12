@@ -106,7 +106,7 @@
         <li class="nav-item dropdown">
           <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
             <i class="far fa-bell"></i>
-            <span class="badge badge-danger navbar-badge" id='notificationBoxBadge' >0</span>
+            <span class="badge badge-danger navbar-badge" id='notificationBoxBadge' hidden>0</span>
           </a>
           <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="left: inherit; right: 0px;max-height: 385px;overflow-y: scroll" id="notificationBox">
     
@@ -227,8 +227,8 @@
               
               </ul>
             </li>
-            <!-- người dùng là trợ lý  -->
-            {% if user_role == '1' %}
+            <!-- người dùng là trưởng phòng  -->
+            {% if user_role == '2' %}
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>
@@ -345,6 +345,18 @@
   <script
     src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 
+  <!-- Notification -->
+  <script src="{% static 'plugins/reconnecting-websocket/reconnecting-websocket.min.js' %}" ></script>
+  <script>
+    const notificationSocket = new ReconnectingWebSocket(
+      'ws://'
+      + window.location.host
+      + '/ws/notifications/'
+      + {{request.user.id}}
+      + '/'
+    );
+    notification_url = "{% url 'get-notifications' %}"
+  </script>
   <!-- overlayScrollbars -->
   <script
     src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>

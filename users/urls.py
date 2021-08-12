@@ -14,20 +14,15 @@ urlpatterns = [
     path('success/',views.success_view, name='user-success'),
     path('user/list/',views.user_list_view, name='user-list'),
     path('profile/', views.profile_view, name='user-profile'),
-    # path('user/<int:pk>/profile/',views.UserProfileView.as_view(), name='user-profile'),
-    # path('user/<int:pk>/update/',views.UserProfileUpdate.as_view(), name='user-update'),
-    
-
-    # ====== User functions =====
-    # path('get-users/', views.get_users, name='get-users'),
-    # path('activate-user/', views.activate_user, name='activate-user'),
-    # path('delete-user/', views.delete_user, name='delete-user'),
-    # path('edit-user-info/', views.edit_user_info, name='edit-user-info'),
-    # path('change-password/', views.change_password, name='change-password'),
+    path('group/list', views.group_list_view, name='group-list'),
     
     # APIs
     path('register-api/', views.register_api, name='user-register-api'),
     path('get-users/', views.get_users, name='get-users'),
+    path('activate-user/', views.activate_user, name='activate-user'),
+    path('delete-user/', views.delete_user, name='delete-user'),
+    path('edit-user-info/', views.edit_user_info, name='edit-user-info'),
+    path('change-password/', views.change_password, name='change-password'),
     
 
 ]
