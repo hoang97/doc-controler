@@ -5,7 +5,8 @@ const XFILE_TYPE=[
     [3,'Person']
 ];
 const XFILE_STATUS=[
-    [1,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
+    [0,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
+    [1,'Chỉnh sửa','secondary','Hồ sơ đang được chỉnh sửa bởi Trợ lý'],
     [2,'Đang kiểm định','info','Hồ sơ đang trong quá trình kiểm định'],
     [3,'Đang duyệt','warning','Hồ sơ đang chờ duyệt bởi Trưởng phòng'],
     [4,'Hoàn tất','success','Hồ sơ đã được duyệt'],
@@ -63,9 +64,9 @@ function initXfileTable(dataSet,initial=false){
                 data: dataSet[i],
                 columns: [
                     { title: "#","width": "5%" },
-                    { title: "Tên Hồ sơ","width": "20%" },
+                    { title: "Mã số","width": "20%" },
                     { title: "Ngày tạo" },
-                    { title: "Ngày sửa" },
+                    // { title: "Ngày sửa" },
                     // { title: "Người tạo",'overflow': 'hidden','text-overflow': 'ellipsis' },
                     { title: "Người chỉnh sửa","width": "15%" },
                     { title: "Người kiểm định","width": "15%" },
@@ -100,12 +101,12 @@ function dictXfileToList(dict,count){
     } else {
         hrefXfile= '/hsmt/edit-detail'+"?id="+dict['id'];
     }
-    let nameATag='<a href="'+hrefXfile+'">'+dict['name']+' </a>'
+    let nameATag='<a href="'+hrefXfile+'">'+dict['code']+' </a>'
 
     //Push to Datatables
     arr.push( [ nameATag] );
     arr.push( [displayDatetime(dict['date_created']) ] );
-    arr.push( [displayDatetime(dict['date_modified']) ] );
+    // arr.push( [displayDatetime(dict['date_modified']) ] );
     let txtEditors='';
     let txtCheckers='';
     let requestUser=$('#request-username').val();
@@ -128,7 +129,6 @@ function dictXfileToList(dict,count){
         }
     }
     arr.push( [txtEditors] );
-
     arr.push( [txtCheckers] );
 
     arr.push( [dict['department']] );
@@ -147,11 +147,7 @@ function dictXfileToList(dict,count){
         // <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalDelete" data-id="1" data-type="target-direction">Xoá</button>
     
     let btnDetail='<a  class="btn btn-warning float-right" href="'+hrefXfile+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa nội dung HSMT"><i class="fas fa-edit"></i></span></a>'
-    let btnDuplicate='';
     let btnXoa = '';
-    if (dict['duplicate']){
-        btnDuplicate='<a  class="btn bg-purple float-right" href="/hsmt/edit-detail?id='+dict['duplicate']+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xem bản sao của HSMT"><i class="far fa-copy"></i></span></a>'
-    }
     if (requestUser==true){
         btnDetail='<a  class="btn btn-info float-right" href="'+hrefXfile+'"> <span data-toggle="tooltip" data-placement="bottom" title="Kiểm định HSMT"><i class="fas fa-search"></i></span></a>'
     }
@@ -160,7 +156,7 @@ function dictXfileToList(dict,count){
     }
     // let btnXoa='<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalDelete" id="rowDelete-'+dict['id']+'" data-id="'+dict['id']+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
     // arr.push(btnSua+btnXoa);
-    arr.push(btnXoa+btnDetail+btnDuplicate);
+    arr.push(btnXoa+btnDetail);
     return arr;
 }
 $('#modalDelete').on('show.bs.modal', function (event) {

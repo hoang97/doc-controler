@@ -39,6 +39,11 @@ urlpatterns = [
     path('xfile/<int:pk>/reject-check/',reject_check_xfile, name='hsmt-reject-check'),
     path('xfile/<int:pk>/approve/',approve_change_xfile, name='hsmt-approve'),
     path('xfile/<int:pk>/reject-approve/',reject_approve_xfile, name='hsmt-reject-approve'),
+   
+    path('hsmt/list/', views.hsmt_list, name='hsmt-list'),
+    path('get-xfiles', views.get_xfiles, name='get-xfiles'),
+   
+   
     # change views
     path('change/<int:pk>/',XFileChangeDetailView.as_view(), name='hsmt-change-detail'),
     # type views
