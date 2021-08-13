@@ -51,7 +51,8 @@ urlpatterns = [
     #target-type-views
     # path('target-type/list', views.target_type_list, name='list_target'),
     path('', views.target_type_list, name='list_target'),
-
+    
+    path('target-type/list', views.target_type_list, name='list_target'),
     path('add-edit-target-type', views.add_edit_target_type, name='add-target-type'),
     path('get-all-target-types', views.get_all_target_types, name='get-all-target-types'),
     path('get-target-type-by-type', views.get_target_type_by_type, name='get-all-target-types'),
