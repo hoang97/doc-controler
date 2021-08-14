@@ -232,7 +232,63 @@ def reject_approve_xfile(request, pk):
     else:
         return JsonResponse({'msg': 'permission denie'})
 
+#======================XFILEs VIEWS========================    
 
+@login_required
+def hsmt_list(request):
+    title='Danh sách HSMT'
+    context={
+    'breadcrumb':title,
+    'h1header':title,
+    }
+    context['user_role']=str(request.user.info.position.id)
+    context['user_layout']=request.user
+    return render(request, 'hsmt/hsmt-list.html',context)
+
+@login_required
+def get_xfiles(request):
+    isGiamdoc=False
+    if request.user.info.position.id == 1:
+        ''' Nếu là trợ lý thì có quyền xem hsmt mình có quyền chỉnh sửa hoặc kiểm tra'''
+        xfileuseredit = request.user.xfiles_can_edit.all()
+        xfileusercheck  = request.user.xfiles_can_check.all()
+        xfiles = xfileuseredit.union(xfileusercheck)
+    elif request.user.info.position.id == 2:
+        '''Nếu là trưởng phòng có quyền xem tất cả hsmt của phòng mình'''
+        xfiles=db.XFile.objects.filter(department=request.user.info.department)
+    elif request.user.info.position.id == 3:
+        '''giám đốc có quyền xem tất cả hsmt'''
+        xfiles=db.XFile.objects.filter()
+        isGiamdoc=True
+    else:
+        return JsonResponseError("Không đủ thẩm quyền")
+    data=[]
+    for xfile in xfiles:
+        if xfile is None:
+            continue
+        tmp={
+            # 'xfile':model_to_dict(xfile),
+            'id':xfile.id,
+            'code':xfile.code,
+            'date_created':xfile.date_created,
+            # 'date_modified':xfile.date_modified,
+            # 'edit_note':xfile.edit_note,
+            "status":xfile.status,
+            "xfile_type":xfile.type.id,
+            "department":xfile.department.name,
+            'editors':[],
+            'checkers':[],
+            'ct':isGiamdoc,
+        }    
+        checkers = xfile.checkers.all()
+        editors = xfile.editors.all()
+        for checker in checkers:
+            tmp['checkers'].append({"id":checker.id,"first_name":checker.first_name,"username":checker.username,"is_active":checker.is_active}) 
+        for editor in editors:
+            tmp['editors'].append({"id":editor.id,"first_name":editor.first_name,"username":editor.username,"is_active":editor.is_active}) 
+        data.append(tmp)
+
+    return JsonResponseSuccess(data)
 
 #======================TARGET_TYPES VIEWS========================    
 @login_required
