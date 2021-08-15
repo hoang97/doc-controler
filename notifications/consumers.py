@@ -23,23 +23,40 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
-    def mark_notification_seen(self, notification_id):
+    def seen_notification(self, notification_id):
         Notification.objects.filter(id = notification_id).update(seen=True)
 
-    # User have seen a notification
+    @database_sync_to_async
+    def delete_notification(self, notification_id):
+        Notification.objects.get(id = notification_id).delete()
+
+    # User have seen or deleted a notification
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        action_type = text_data_json['action_type']
         notification_id = text_data_json['notification_id']
-        print('User seen notification ', notification_id)
-        await self.channel_layer.group_send(
-            self.user_group,
-            {
-                'type': 'notify.user',
-                'message_type': 'seen',
-                'notification_id': notification_id,
-            }
-        )
-        await self.mark_notification_seen(notification_id)
+        if action_type == 'seen.notification':
+            print('User seen notification ', notification_id)
+            await self.channel_layer.group_send(
+                self.user_group,
+                {
+                    'type': 'notify.user',
+                    'message_type': 'seen',
+                    'notification_id': notification_id,
+                }
+            )
+            await self.seen_notification(notification_id)
+        elif action_type == 'delete.notification':
+            print('User deleted notification ', notification_id)
+            await self.channel_layer.group_send(
+                self.user_group,
+                {
+                    'type': 'notify.user',
+                    'message_type': 'delete',
+                    'notification_id': notification_id,
+                }
+            )
+            await self.delete_notification(notification_id)
 
     # Send notification via Websocket
     async def notify_user(self, event):

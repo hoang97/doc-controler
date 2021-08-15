@@ -255,11 +255,11 @@ def user_list_view(request):
 
 @login_required
 def profile_view(request):
-    userName=request.GET.get('u','')
+    username = request.GET.get('u', '')
     selfProfile=False
-    if (request.user.username==userName):
+    if (request.user.username==username):
         selfProfile=True
-    user = get_object_or_404(User.objects.all().select_related('info').prefetch_related('xfiles_can_edit'), username=userName)
+    user = get_object_or_404(User.objects.all().select_related('info').prefetch_related('xfiles_can_edit'), username=username)
     userInfo = user.info
 
     totalXfile = user.xfiles_can_edit.count()

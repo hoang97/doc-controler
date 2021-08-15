@@ -1,7 +1,26 @@
 
 $(document).ready(function () {
-    getNotifications();
+    getNotifications()
+        .then(data => {
+            reloadNotification(data);
+        });
 });
+
+function seenNotification(notification_id) {
+    // send 'seen' signal to websocket
+    notificationSocket.send(JSON.stringify({
+        action_type: 'seen.notification',
+        notification_id: notification_id
+    }));
+}
+
+function deleteNotification(notification_id) {
+    // send 'delete' signal to websocket
+    notificationSocket.send(JSON.stringify({
+        action_type: 'delete.notification',
+        notification_id: notification_id
+    }));
+}
 
 const update_num_notification = (x) =>{
     let numNotifications = document.querySelector('#notificationBoxBadge');
@@ -30,8 +49,8 @@ function createOneNotification(data) {
 
     newRow[0].onclick = (e) => {
         // redirect to target_url when click
+        seenNotification();
         window.location.href=data['target_url'];
-        notificationSocket.send(JSON.stringify({'notification_id': data['notification_id']}));
     };
     notifyBox.append(newRow)
     update_num_notification(seen);
@@ -71,25 +90,21 @@ async function getData(url) {
 };
 
 function getNotifications() {
-    // get and reload the last 3 notifications of current user
-    getData(notification_url)
-        .then(data => {
-            reloadNotification(data);
-        });
+    // get the last 3 notifications of current user
+    return getData(notification_url)
 };
+
+function getAllNotifications() {
+    // get all notifications of current user
+    return getData(notification_url+'?all=true')
+}
 
 notificationSocket.onmessage = (e) => {
     let data = JSON.parse(e.data);
-    if (data['message_type'] === 'new') {
-        console.log('Receive a notification');
-        createOneNotification(data);
-    };
-    if (data['message_type'] === 'seen') {
-        console.log('User have seen a notification');
-        let notification = document.getElementById(data['notification_id']);
-        let x = +notification.classList.contains('text-bold');
-        notification.classList.remove('text-bold');
-        update_num_notification(-x);
-    };
+    console.log(data['message_type']+ ' notification');
     
+    getNotifications()
+        .then(data => {
+            reloadNotification(data);
+        })
 };

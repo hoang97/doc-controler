@@ -5,8 +5,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.forms.models import model_to_dict
-from hsmt.utils import notify, VERB
-import hsmt.models as db
+from notifications.utils import notify, VERB
 from django.views.generic import (
     ListView,
     DetailView,
@@ -21,6 +20,8 @@ from .models import (
     Comment,
     XFileType,
     STATUS,
+    Target,
+    TARGET_TYPES
 )
 LIST_GROUPS=(
     "Trợ lí",
@@ -255,10 +256,10 @@ def get_xfiles(request):
         xfiles = xfileuseredit.union(xfileusercheck)
     elif request.user.info.position.id == 2:
         '''Nếu là trưởng phòng có quyền xem tất cả hsmt của phòng mình'''
-        xfiles=db.XFile.objects.filter(department=request.user.info.department)
+        xfiles=XFile.objects.filter(department=request.user.info.department)
     elif request.user.info.position.id == 3:
         '''giám đốc có quyền xem tất cả hsmt'''
-        xfiles=db.XFile.objects.filter()
+        xfiles=XFile.objects.filter()
         isGiamdoc=True
     else:
         return JsonResponseError("Không đủ thẩm quyền")
@@ -304,7 +305,7 @@ def target_type_list(request):
 
 @login_required
 def get_all_target_types(request):
-    data = list(db.Target.objects.all().values())
+    data = list(Target.objects.all().values())
     return JsonResponseSuccess(data)
 
 #trả về danh sách theo hướng, nhóm địa bàn    
@@ -313,9 +314,9 @@ def get_target_type_by_type(request):
     targetType=request.GET.get('targetType','')
     data=[]
     if targetType:
-        for TARGET_TYPE in db.TARGET_TYPES:
+        for TARGET_TYPE in TARGET_TYPES:
             if str(TARGET_TYPE) ==targetType:
-                data=list(db.Target.objects.filter(type=TARGET_TYPE).values())
+                data=list(Target.objects.filter(type=TARGET_TYPE).values())
                 break
     return JsonResponseSuccess(data)
 
@@ -327,7 +328,7 @@ def get_target_type_by_id(request):
         msg ="Failed"
         return  JsonResponseError(msg) 
     data={}
-    data=db.Target.objects.filter(id=target_type_id).values()[0]
+    data=Target.objects.filter(id=target_type_id).values()[0]
 
     return JsonResponseSuccess(data)
 
@@ -346,14 +347,14 @@ def add_edit_target_type(request):
         return JsonResponseError("Thiếu dữ liệu")
     if targetId:
         # Có ID = UPDATE
-        target= db.Target.objects.get(id=targetId)
+        target= Target.objects.get(id=targetId)
         target.name=targetName
         target.description=targetDesc
         # target.target_type=
         target.save()
     else:
         # Không ID = CREATE NEW
-        newObj= db.Target.objects.create(name=targetName,description=targetDesc,type=targetType)
+        newObj= Target.objects.create(name=targetName,description=targetDesc,type=targetType)
         newObj.save()
         return JsonResponseSuccess(model_to_dict(newObj))
     msg ='Done'
@@ -369,18 +370,11 @@ def delete_target_type(request):
         return JsonResponseError("Thiếu dữ liệu")
     msg=''
     if targetId:
-        oldObj= db.Target.objects.get(id=targetId)
+        oldObj= Target.objects.get(id=targetId)
         # ktra xem da duoc su dung boi Xfile nao chua
         # https://djangotricks.blogspot.com/2018/05/queryset-filters-on-many-to-many-relations.html
-        if  db. XFile.objects.filter(targets__type=targetId).count() > 0:
+        if  XFile.objects.filter(targets__type=targetId).count() > 0:
             return JsonResponseError("Không thể xoá do đang sử dụng bởi HSMT")
         oldObj.delete()
         msg='Xoá thành công'
     return JsonResponseSuccess(msg)
-
-
-
-def test(request):
-    pwd=hash_password('2')
-    print(pwd)
-    return JsonResponseError('')    
