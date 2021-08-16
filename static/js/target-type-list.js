@@ -206,3 +206,10 @@ function dictTargetTypeToList(dict,targetType,count){
     return arr;
 }
 
+$('#modalAddTargetType').on('hidden.bs.modal', function () {
+    clear();
+})
+function clear() {
+    $("#targetTypeName").val("");
+    $("#targetTypeDesc").val("");
+}
