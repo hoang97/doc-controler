@@ -1,0 +1,140 @@
+
+
+
+  <div class="modal fade" id="modalAddEditXfileTracking" tabindex="-1" role="dialog" aria-labelledby="modalAddEditXfileTrackingTitle"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddEditXfileTrackingTitle"> Thêm mới quá trình theo dõi</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-sm-12">
+            <!-- text input -->
+            <div class="form-group">
+              <label>Thời gian tiến hành:</label>
+                <div class="input-group date" id="trackingDT" data-target-input="nearest">
+                    <input type="text" class="form-control datetimepicker-input" data-target="#trackingDT" id="trackingDatetime">
+                    <div class="input-group-append" data-target="#trackingDT" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>
+                </div>
+            </div>
+  
+        </div>
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group">
+                  <laberl for="trackingContent"> Nội dung</label>
+                    <textarea type="text" class="form-control" id="trackingContent"></textarea>
+                    <input type="text" id="trackingId" value="" hidden>
+     
+                </div>
+  
+            </div>
+            <div class="col-sm-12">
+              <!-- text input -->
+              <div class="form-group">
+                <laberl for="trackingResult"> Kết quả/Đánh giá</label>
+                  <textarea type="text" class="form-control" id="trackingResult"></textarea>
+     
+              </div>
+  
+          </div>
+          <div class="col-sm-12">
+            <!-- text input -->
+            <div class="form-group">
+              <laberl for="trackingActor"> Người thực hiện</label>
+                <input type="text" class="form-control" id="trackingActor">
+                
+            </div>
+  
+        </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success" id="btnAddEditXTracking">Lưu</button>
+      </div>
+    </div>
+  </div>
+  </div>
+  
+  <div class="modal fade" data-backdrop="static" id="modalDeleteXTracking" tabindex="-1" aria-labelledby="deleteModalLabel11" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel11">Xác nhận xoá?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Chắc chắn xoá bản theo dõi này?
+          <input type="text"  id="deleteTrackingId" value="" hidden>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnDeleteXTracking" >Xoá</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="modalAddEditXfileUpdate" tabindex="-1" role="dialog" aria-labelledby="modalAddEditXfileUpdateTitle"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddEditXfileUpdateTitle"> Thêm mới bảng cập nhật</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+
+            <div class="col-sm-12">
+                <!-- text input -->
+                <div class="form-group">
+                  <laberl for="updateContent"> Nội dung</label>
+                    <textarea type="text" class="form-control" id="updateContent"></textarea>
+                    <input type="text" id="updateId" value="" hidden>
+     
+                </div>
+  
+            </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success" id="btnAddEditXUpdate">Lưu</button>
+      </div>
+    </div>
+  </div>
+  </div>
+  
+  <div class="modal fade" data-backdrop="static" id="modalDeleteXUpdate" tabindex="-1" aria-labelledby="deleteModalLabel112" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel112">Xác nhận xoá?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+           Chắc chắn xoá bản cập nhật này?
+          <input type="text"  id="deleteUpdateId" value="" hidden>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnDeleteXUpdate" >Xoá</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>

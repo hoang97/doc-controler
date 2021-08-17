@@ -1,0 +1,381 @@
+
+{% extends "layout.html" %}
+{% load static %}
+
+{% block header %}{{ h1header }}{% endblock %}
+{% block breadcrumb-text %}{{ breadcrumb }}{% endblock %}
+{% block customcss %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/select2/css/select2.min.css' %}">
+{% endblock %}
+{% block body %}
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Card-Tab Cover -->
+                <div class="col-lg-12" >
+                    <div class="card card-info card-tabs">
+                      <div class="card-header p-0 pt-1">
+                        <ul class="nav nav-tabs" id="custom-tabs-two-tab" role="tablist">
+                          <li class="pt-2 px-3" ><a href="#" data-card-widget="collapse"><h3 class="card-title"><i class="fas fa-chevron-circle-up"></i></h3></a> </li>
+                          <li class="nav-item">
+                            <a class="nav-link active" id="xfile-cover-tab" data-toggle="pill" href="#xfile-cover" role="tab" aria-controls="xfile-cover" aria-selected="true">Thông tin chung</a>
+                          </li>
+
+                          <li class="nav-item">
+                            <a class="nav-link" id="xfile-note-tab" data-toggle="pill" href="#xfile-note" role="tab" aria-controls="xfile-note" aria-selected="false">Nhận xét</a>
+                          </li>
+                          <li class="nav-item">
+                            <a class="nav-link" id="xfile-role-tab" data-toggle="pill" href="#xfile-role" role="tab" aria-controls="xfile-role" aria-selected="false">Quyền</a>
+                          </li>
+                        </ul>
+ 
+                      </div>
+                      <div class="card-body">
+                        <div class="overlay" id="cardBodyXfileCoverLoading"><i class="fas fa-2x fa-sync-alt fa-spin"></i></div>
+                        <div class="tab-content" id="cardBodyXfileCover" style="display: none;">
+                          <div class="tab-pane fade show active" id="xfile-cover" role="tabpanel" aria-labelledby="xfile-cover-tab">
+
+                            <div class="row">
+                                <div class="col-lg-8 ">
+                                  <div class="row">
+                                    <div class="col-12 col-sm-4">
+                                      <div class="info-box bg-white">
+                                        <div class="info-box-content">
+                                          <span class="info-box-text text-center text-muted">Mã số</span>
+                                          <span class="info-box-number text-center text-muted mb-0" id="maSo">None</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <!-- End div col-12 col-sm-4 -->
+                                    <div class="col-12 col-sm-4">
+                                      <div class="info-box bg-white">
+                                        <div class="info-box-content">
+                                          <span class="info-box-text text-center text-muted">Người lập</span>
+                                          <span class="info-box-number text-center text-info mb-0" id="nguoiLap">None</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <!-- End div col-12 col-sm-4 -->
+                                    <div class="col-12 col-sm-4">
+                                      <div class="info-box bg-white">
+                                        <div class="info-box-content">
+                                          <span class="info-box-text text-center text-muted">Trạng thái</span>
+                                          <p id="xfileStatus" class="text-center mb-0">None</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <!-- End div col-12 col-sm-4 -->
+
+
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-12">
+
+                                      
+                                        <div class="callout callout-info">
+                                            <p><i class="fas fa-compass"></i> Hướng:</p>
+                                            <h5 id="txtTargetDirection" class="text-info">None</h5>
+                                        </div>
+                                        <div class="callout callout-info">
+                                            <p><i class="fas fa-layer-group"></i> Nhóm mục tiêu:</p>
+                                            <h5 id="txtTargetGroup" class="text-info">None</h5>
+                                        </div>
+                                        <div class="callout callout-info">
+                                            <p><i class="fas fa-inbox"></i> Địa bàn:</p>
+                                            <h5 id="txtTargetArea" class="text-info">None</h5>
+                                        </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-lg-4 ">
+                                  <h3 class="text-info">
+                                    <i class="fas fa-file-alt mr-2"></i><span id="tenDoiTuong"> </span>
+
+                                    
+                                  </h3>
+                                  <p class="text-muted" id="xfileDescription">None.</p>
+                                  <br>
+                                  <div class="text-muted">
+
+                                    <p class="text-md">Ngày tạo:
+                                        <b class="d-block" id="date_created">None</b>
+                                      </p>
+                                    <p class="text-md">Chỉnh sửa lần cuối:
+                                      <b class="d-block" id="date_modified">None</b>
+                                    </p>
+                                    <p class="text-md">Phòng:
+                                      <b class="d-block" id="department">None</b>
+                                    </p>
+                                  </div>
+                                  {% if historyId %}
+                                  <div class="text-center mb-2">
+                                    <a href="/hsmt/edit-detail?id={{ historyId }}" class="text-info float-right"><i class="fas fa-history"></i></a>
+                                  </div>
+                                  {% endif %}
+                                  <div class="text-center mb-2" >
+                                    <a  class="btn btn-outline-info btn-sm"  href="/hsmt/create-edit?id=" id='btnEditXfile'><i class="fas fa-edit"> Sửa HSMT</i></a>
+                                    <span id="divRightSideXfileCover">
+
+                                    </span>
+                                  </div>
+
+                                 
+                                </div>
+                              </div>
+
+
+
+                            <div class="card-footer" id="footerXfileCover">
+                              <btn  class="btn btn-danger " data-toggle="modal" data-target="#modalSendBackXfile" id="btnYeuCauSuaLai"><i class="fas fa-exclamation-circle" ></i> Yêu cầu sửa lại</btn>
+
+                                <btn  class="btn btn-success float-right" data-toggle="modal" data-target="#modalSendXfile" id="btnGuiHSMT"><i class="fas fa-paper-plane"></i> Gửi HSMT</btn>
+
+                                <btn class="btn btn-warning float-right text-bold btn-sm"  id="btnDuplicate" style="display: none;"></btn>
+                               
+            
+                            </div>
+                            <!-- /.card-footer -->
+
+                          </div>
+
+                          <div class="tab-pane fade" id="xfile-note" role="tabpanel" aria-labelledby="xfile-note-tab">
+                            <div class="row" >
+                                <div class="col-lg-12">
+                                    <button type="button" class="btn btn-outline-success float-right" data-toggle="modal" data-target="#modalAddEditNote" id="btnAddNote" data-id=""><i class="fas fa-plus"></i> Thêm nhận xét</button>
+                                </div>
+                                <div class="col-lg-12" id="divNhanXet">
+         
+        
+                                </div>
+                                <div class="col-lg-12" id="divNhanXetFooter">
+                                    <!-- Phân trang - HiểN thị dữ liệu Nhận xét -->
+                                    <hr>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Số lượng nhận xét
+                                        </button>
+                                        <div class="dropdown-menu" style="">
+                                            <a class="dropdown-item" href="#cardNhanXet" onclick="NotesPerPages(5);">5</a>
+                                            <a class="dropdown-item" href="#cardNhanXet" onclick="NotesPerPages(10);">10</a>
+                                            <a class="dropdown-item" href="#cardNhanXet" onclick="NotesPerPages(20);">20</a>
+                                        </div>
+                                        </div>
+                                        <div class="btn-group  btn-group-sm float-right" role="group" aria-label="Basic example">
+                                        <button type="button" class="btn btn-outline-primary" id="btnPreviousNotePage" onclick="ChangeNotePage(1);">Trang trước</button>
+                                        <button type="button" class="btn btn-outline-primary" id="btnNextNotePage" onclick="ChangeNotePage();">Trang sau</button>
+                                        </div>
+                                        <p class="float-right mr-2" id="pageNumberDisplay"></p>
+        
+                                </div>
+                              </div>
+
+                            <!-- /.card-footer -->
+
+                          </div>
+                          <div class="tab-pane fade" id="xfile-role" role="tabpanel" aria-labelledby="xfile-role-tab">
+                                <div class="row"> 
+                                    <div class="col-lg-6">
+                                      <div class="info-box">
+                                        <span class="info-box-icon bg-warning"><i class="fas fa-user-edit"></i></span>
+                          
+                                        <div class="info-box-content">
+                                          <span class="info-box-text">Người chỉnh sửa:</span>
+                                          <span class="info-box-number" id="txtEditors">0</span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                      </div>
+                                        <!-- text input -->
+            
+                                    </div>
+                                    <div class="col-lg-6">
+                                      <div class="info-box">
+                                        <span class="info-box-icon bg-success"><i class="fas fa-user-check"></i></span>
+                          
+                                        <div class="info-box-content">
+                                          <span class="info-box-text">Người kiểm định</span>
+                                          <span class="info-box-number" id="txtCheckers">0</span>
+                                        </div>
+                                        <!-- /.info-box-content -->
+                                      </div>
+                                        <!-- text input -->
+            
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                      <!-- /.card -->
+                    </div>
+                </div>
+                <!-- End div Card-tab Cover -->
+                <hr>
+                <!-- Card-Tab Chi tiết -->
+                <div class="col-lg-12" id="cardDetailDecrypted" style="display: none;">
+                    <div class="card card-info card-tabs">
+                      <div class="card-header p-0 pt-1">
+                        <ul class="nav nav-tabs" id="custom-tabs-two-tab" role="tablist">
+                          <li class="pt-2 px-3" ><a href="#" data-card-widget="collapse"><h3 class="card-title"><i class="fas fa-chevron-circle-up"></i></h3></a> </li>
+                          <li class="nav-item">
+                            <a class="nav-link active" id="xfile-detail-tab" data-toggle="pill" href="#xfile-detail" role="tab" aria-controls="xfile-detail" aria-selected="true">Chi tiết</a>
+                          </li>
+
+                          <li class="nav-item">
+                            <a class="nav-link" id="xfile-tracking-tab" data-toggle="pill" href="#xfile-tracking" role="tab" aria-controls="xfile-tracking" aria-selected="false">Bảng theo dõi</a>
+                          </li>
+                          <li class="nav-item">
+                            <a class="nav-link" id="xfile-update-tab" data-toggle="pill" href="#xfile-update" role="tab" aria-controls="xfile-update" aria-selected="false">Bảng cập nhật</a>
+                          </li>
+
+                        </ul>
+ 
+                      </div>
+                      <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-two-tabContent">
+                          <div class="tab-pane fade show active" id="xfile-detail" role="tabpanel" aria-labelledby="xfile-detail-tab">
+
+                      
+                            <div >
+                              {% if xfile_type == '1' %}
+                                {% include "hsmt/XFILE-WEBPAGE.html" %}
+                              {% elif xfile_type == '2' %}
+                                  {% include "hsmt/XFILE-ORG.html" %}
+                              {% elif xfile_type == '3' %}
+                                  {% include "hsmt/XFILE-PERSON.html" %}
+                              {% endif %}
+                              <div class="col-md-12 mb-3" id="divReConfirmXfilePwd" style="display: none;">
+                               
+                                
+                                <!-- /.form-group -->
+                             </div>
+                              <div class="card-footer">
+                                <button  class="btn btn-primary float-right" type="button" onclick="SaveXfile({{xfileId}});" id="btnLuuChiTiet">Lưu chi tiết</button>
+                                <a href="/hsmt/list" class="btn btn-secondary">Quay lại</a>
+                            </div>
+                            </div>
+                           
+
+                          </div>
+
+                          <div class="tab-pane fade" id="xfile-tracking" role="tabpanel" aria-labelledby="xfile-tracking-tab">
+                            <div class=row>
+
+                              <div class="col-lg-12">
+                                  <table class="table table-head-fixed table-hover" width="100%" id="tblXfileTracking">
+                                    
+                                  </table>
+                              </div>
+                            </div>
+                            <div class="card-footer">
+                              <button type="button" class="btn btn-success float-right mb-2" data-toggle="modal" data-target="#modalAddEditXfileTracking"
+                                data-id="" id="btnThemMoiTracking" style="display: none;">Thêm mới</button>
+                          </div>
+                          </div>
+                          <div class="tab-pane fade" id="xfile-update" role="tabpanel" aria-labelledby="xfile-update-tab">
+                            <div class=row>
+
+                              <div class="col-lg-12">
+                                  <table class="table table-head-fixed table-hover" width="100%" id="tblXfileUpdate">
+                                    
+                                  </table>
+                              </div>
+                            </div>
+                            <div class="card-footer">
+                              <button type="button" class="btn btn-success float-right mb-2" data-toggle="modal" data-target="#modalAddEditXfileUpdate"
+                                data-id="" id="btnThemMoiUpdate" style="display: none;">Thêm mới</button>
+                          </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- /.card -->
+                    </div>
+                </div>
+                <div class="col-lg-12 mb-3" id="cardNotDetailDecrypted" style="display: none;">
+                    <div class="card card-outline card-danger">
+                      <div class="card-header" data-card-widget="collapse">
+                        <h3 class="card-title">Thiết lập mật khẩu HSMT</h3>
+                        <div class="card-tools">
+                          <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                          </button>
+                        </div>
+                        <!-- /.card-tools -->
+                      </div>
+                      <!-- /.card-header -->
+                      <div class="card-body">
+                        
+                        <div class="input-group flex-nowrap">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text" id="addon-wrapping">Mật khẩu hồ sơ</span>
+                          </div>
+                          <input type="password" class="form-control"  id="xfilePassword" >
+                          <div class="input-group-append">
+                            <button  class="btn btn-outline-success" type="button"  id="setXfilePassword">Thiết lập mật khẩu</button>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- /.card-body -->
+                    </div>
+                 
+                    
+                    <!-- /.form-group -->
+
+                </div>
+               
+               </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+        
+
+    </section>
+  {% if user_role != '0'  %}
+      {% include "hsmt/modals/modal-add-edit-note.html" %}
+  {% endif %}
+  {% if user_role == '0' and xfile_status == 4 %}
+    {% include "hsmt/modals/modal-create-duplicate.html" %}
+  {% endif %}
+  <!-- End of Modal for Quickly Add-Edit Note -->
+  {% include "hsmt/modals/modal-send-xfile.html" %}
+  {% include "hsmt/modals/modal-xfile-tracking-update.html" %}
+<input hidden id="template_user_group" value="{{ user_role }}">
+<input hidden id="template_xfile_status" value="{{ xfile_status }}">
+<input hidden id="xfileType" value="{{ xfile_type }}">
+<input hidden id="originalXfileId" value="{{ originalXfileId }}">
+<input hidden id="xfileId" value="{{ xfileId }}">
+{% endblock %}
+
+
+{% block datatablejs %}
+<!-- DataTables  & Plugins -->
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+<script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+
+{% endblock %}
+{% block script %}
+<script>
+$(function () {
+    $('.select2').select2();
+});
+</script>
+<script src="{% static 'js/hsmt-edit.js' %}"></script>
+<script src="{% static 'js/hsmt-edit/note.js' %}"></script>
+<script src="{% static 'js/hsmt-edit/xfile-tracking.js' %}"></script>
+<script src="{% static 'js/hsmt-edit/xfile-update.js' %}"></script>
+
+{% endblock %}
+

@@ -16,8 +16,10 @@ def get_notifications(request):
     notification_objs = request.user.notification_set.select_related('log')
     data['num'] = notification_objs.filter(seen=False).count()
     if all:
+        # Get all notifications for notificationTab
         query = notification_objs.order_by('-log__timestamp')
     else:
+        # Get lastest 3 notifications for notificationBox
         query = notification_objs.order_by('-log__timestamp')[:3]
     notifications = []
     for notification in query:

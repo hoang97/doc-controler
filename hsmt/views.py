@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http.response import JsonResponse
+from django.http import HttpResponseForbidden
+from django.http.response import Http404, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -247,19 +248,169 @@ def hsmt_list(request):
     return render(request, 'hsmt/hsmt-list.html',context)
 
 @login_required
+def hsmt_edit_detail(request):
+    xfileId = request.GET.get('id',-1)
+    title='Chỉnh sửa HSMT'
+    context={ }
+    # xfile_type='1'
+    originalXfileId=xfileId
+    xfile = get_object_or_404(XFile, id=xfileId)
+    if not xfile.can_view(request.user):
+        return HttpResponseForbidden()
+
+    title += ' - '+ xfile.type.name
+    isChecker=xfile.can_check(request.user)
+    # if db.Xfile.objects.filter(id=xfileId).count() >0:
+    #     xfile=db.Xfile.objects.get(id=xfileId)
+    #     if not xfile.original:
+    #         if xfile.duplicate:
+    #             originalXfileId=xfile.duplicate
+    #         elif xfile.history:
+    #             originalXfileId=xfile.history
+    #     # List[Tuple[int, str]]
+    #     for XFILE_TYPE in db.XFILE_TYPES:
+    #         if xfile.xfile_type==XFILE_TYPE:
+    #             title=title+' - '+XFILE_TYPE.label
+    #             xfile_type=str(XFILE_TYPE)
+    #             break
+    #     #Quản lý quyền 
+    #     if db.Xfile_role.objects.filter(role=db.XFILE_ROLES.CHECKER, xfile=xfile,user=request.user).count()  >0:
+    #         isChecker=True
+    #     if xfile.history:
+    #         context['historyId']=xfile.history
+        
+    context['xfile_type'] = str(xfile.type.id)
+    context['xfileId']=xfileId
+    context['xfile_status']=xfile.get_status_display()
+    context['originalXfileId']=originalXfileId
+    context['breadcrumb']=title
+    context['h1header']=title
+
+    #Quản lý quyền 
+    if isChecker == True:
+        context['user_role']='05'
+    else:
+        context['user_role'] = str(request.user.info.position.id)
+    context['user_layout']=request.user
+    return render(request, 'hsmt/hsmt-detail.html',context)
+
+@login_required
+def get_xfile_by_id(request):
+    # API dùng để lấy thông tin xfile
+    xfileId = request.GET.get('id', -1)
+    onlyXfileCover=request.GET.get('onlyXfileCover','')
+    #Getiing Xfile
+    try:
+        xfile = XFile.objects.get(id=xfileId)
+    except:
+        return JsonResponseError('HSMT không tồn tại hoặc đã bị xoá')
+
+    # originalXfileId=xfile.id
+    # if not xfile.original:
+    #     if xfile.duplicate:
+    #         originalXfileId=xfile.duplicate
+    #     elif xfile.history:
+    #         originalXfileId=xfile.history
+    #Check Authorized
+    isGiamdoc=False
+    if not xfile.can_view(request.user):
+        return JsonResponseError("Không đủ thẩm quyền")
+
+    values=[]
+    isDecrypted=False
+    msg='Lấy dữ liệu chi tiết HSMT thành công'
+    # pwd=''
+    # if isGiamdoc:
+    #     pwd=request.session.get(xfile.department.alias,'')
+    # else:
+    #     pwd=request.session.get('dp','')
+    # if not compare_passwords(pwd,xfile.department.password):
+    #     msg='Mật khẩu '+xfile.department.name+' đã thay đổi hoặc chưa thiết lập mật khẩu'
+    #     pwd=False
+    # else:
+    #     isDecrypted=True
+    #     if not onlyXfileCover:
+    #         if xfile.value:
+    #             old_value_decrypted={}
+    #             if xfile.history:
+    #                 historyXfile=db.Xfile.objects.filter(id=xfile.history).values('value').first()
+    #                 if historyXfile:
+    #                     old_value_decrypted=historyXfile['value']
+    #             elif xfile.duplicate:
+    #                 dupXfile=db.Xfile.objects.filter(id=xfile.duplicate).values('value').first()
+    #                 if dupXfile:
+    #                     old_value_decrypted=dupXfile['value']
+    #             value_decrypted=''
+    #             try:
+    #                 raw_value=AESdecrypt(xfile.value,pwd)
+    #                 value_decrypted=json.loads(raw_value)
+    #                 if old_value_decrypted:
+    #                     try:
+    #                         old_value_decrypted=json.loads(AESdecrypt(old_value_decrypted,pwd))
+    #                     except:
+    #                         print("Khoong giai  mã được old_value_decrypted")
+    #             except:
+    #                 msg="Không thể giải mã HSMT"
+    #             if not (type(value_decrypted) is dict):
+    #                 #Nếu có giá trị --> không decrypt ra Dictionary --> mậT khẩu sai
+    #                 isDecrypted=False
+    #             if not (type(old_value_decrypted) is dict):
+    #                 old_value_decrypted={}
+
+    #             if isDecrypted and len(value_decrypted) >0:
+    #                 for key in value_decrypted.keys(): 
+    #                         # [alias, val]
+    #                         tmp=[key,value_decrypted[key],False]
+
+    #                         if key in old_value_decrypted:
+    #                             print('ori='+ value_decrypted[key])
+    #                             print('dup='+ old_value_decrypted[key])
+    #                             if value_decrypted[key] != old_value_decrypted[key]:
+    #                                 tmp[2]=True
+    #                         values.append(tmp)
+    targets = xfile.targets.all()
+    data={
+        # 'xfile':model_to_dict(xfile),
+        'id':xfile.id,
+        'name': 'need fix', # xfile.name,
+        'code':xfile.code,
+        'description':xfile.description,
+        'duplicate': 'need fix', # xfile.duplicate,
+        'original': 'need fix', # xfile.original,
+        'history': 'need fix', # xfile.history,
+        'date_created':xfile.date_created,
+        'date_modified': 'need fix', # xfile.date_modified,
+        'edit_note': 'need fix', # xfile.edit_note,
+        "status":xfile.status,
+        'values': 'need fix', # values,
+        'isDecrypted': isDecrypted,
+        "xfile_type": xfile.type.name,
+        'department':xfile.department.name,
+        'targetTypes':{
+            'target-direction': list(targets.filter(type=TARGET_TYPES.DIRECTION).values()),
+            'target-group': list(targets.filter(type=TARGET_TYPES.GROUP).values()),
+            'target-area': list(targets.filter(type=TARGET_TYPES.AREA).values())
+        }, 
+        'user': 'Chả hiểu là cái j', # User.objects.filter(username=db.Xfile_role.objects.get(xfile=xfile,role=db.XFILE_ROLES.CREATOR).user).values("username","first_name")[0],
+        'msg':msg
+    }    
+    return JsonResponseSuccess(data)
+
+
+@login_required
 def get_xfiles(request):
     isGiamdoc=False
     if request.user.info.position.id == 1:
         ''' Nếu là trợ lý thì có quyền xem hsmt mình có quyền chỉnh sửa hoặc kiểm tra'''
-        xfileuseredit = request.user.xfiles_can_edit.all()
-        xfileusercheck  = request.user.xfiles_can_check.all()
+        xfileuseredit = request.user.xfiles_can_edit.all().prefetch_related('editors').prefetch_related('checkers')
+        xfileusercheck  = request.user.xfiles_can_check.all().prefetch_related('editors').prefetch_related('checkers')
         xfiles = xfileuseredit.union(xfileusercheck)
     elif request.user.info.position.id == 2:
         '''Nếu là trưởng phòng có quyền xem tất cả hsmt của phòng mình'''
-        xfiles=XFile.objects.filter(department=request.user.info.department)
+        xfiles=XFile.objects.filter(department=request.user.info.department).prefetch_related('editors').prefetch_related('checkers')
     elif request.user.info.position.id == 3:
         '''giám đốc có quyền xem tất cả hsmt'''
-        xfiles=XFile.objects.filter()
+        xfiles=XFile.objects.filter().prefetch_related('editors').prefetch_related('checkers')
         isGiamdoc=True
     else:
         return JsonResponseError("Không đủ thẩm quyền")
@@ -290,6 +441,22 @@ def get_xfiles(request):
         data.append(tmp)
 
     return JsonResponseSuccess(data)
+
+@login_required
+def hsmt_filter(request):
+    title='Danh sách HSMT'
+    context={
+    'breadcrumb':title,
+    'h1header':title,
+    }
+    context['user_role']=str(request.user.info.position.id)
+    context['user_layout']=request.user
+    xfileStatusId = request.GET.get('status','')
+    if not xfileStatusId:
+        msg="khong co du lieu"
+        return JsonResponseError(msg)
+    context['xfileStatusId']=xfileStatusId
+    return render(request, 'hsmt/hsmt-filter.html',context)
 
 #======================TARGET_TYPES VIEWS========================    
 @login_required
@@ -342,9 +509,9 @@ def add_edit_target_type(request):
         targetName=request.POST['target-name']
         targetType=request.POST['target-type']
         targetDesc=request.POST['target-desc']
-
     except:
         return JsonResponseError("Thiếu dữ liệu")
+
     if targetId:
         # Có ID = UPDATE
         target= Target.objects.get(id=targetId)
@@ -359,8 +526,6 @@ def add_edit_target_type(request):
         return JsonResponseSuccess(model_to_dict(newObj))
     msg ='Done'
     return JsonResponseSuccess(msg)
-
-
 
 @login_required
 def delete_target_type(request):

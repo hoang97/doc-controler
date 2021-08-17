@@ -1,0 +1,76 @@
+<div class="modal fade" id="modalAddEditNote" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel11"
+aria-hidden="true">
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title" id="exampleModalLabel11">Thêm mới Nhận xét</h5>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-sm-12">
+              <!-- text input -->
+              <div class="form-group">
+                  <laberl for="noteTitle"> Tiêu đề</label>
+                    <input type="text" hidden id="noteId" value="">
+
+                  <input type="text" class="form-control" id="noteTitle">
+                  <div class="feedback" style="color: red;" id="noteTitle-feedback">
+                  </div>
+              </div>
+
+          </div>
+              <div class="col-sm-12">
+                  <!-- text input -->
+                  <div class="form-group">
+                    <laberl for="noteContent"> Nội dung</label>
+                      <textarea type="text" class="form-control" id="noteContent"></textarea>
+                      <div class="feedback" style="color: red;" id="noteContent-feedback">
+                      </div>
+                  </div>
+
+              </div>
+              <div class="col-lg-12">
+                  <!-- checkbox -->
+                  <div class="form-group clearfix">
+                    <div class="icheck-success d-inline">
+                      <input type="checkbox" id="chkBoxNoteStatus" >
+                      <label for="chkBoxNoteStatus"> Đã hoàn thành
+                      </label>
+                    </div>
+
+                  </div>
+                </div>
+          </div>
+   
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+      <button type="button" class="btn btn-success" data-dismiss="modal" id="btnSaveNote">Lưu</button>
+    </div>
+  </div>
+</div>
+</div>
+<div class="modal fade" data-backdrop="static" id="modalDeleteNote" tabindex="-1" aria-labelledby="modalDeleteNote123" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalDeleteNote123">Xác nhận xoá?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Chắc chắn xoá nhận xét này?
+        <input type="text"  id="deleteNoteId" value="" hidden>
+      </div>
+      <div class="modal-footer">
+       
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnDeleteNote" >Xoá</button>
+      </div>
+    </div>
+  </div>
+</div>

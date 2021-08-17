@@ -79,6 +79,7 @@ class XFile(models.Model):
     version = models.PositiveIntegerField(default=0)
     
     # Phân quyền
+    creator = models.ForeignKey(User, related_name='xfiles_created', on_delete=models.PROTECT)
     editors = models.ManyToManyField(User, related_name='xfiles_can_edit')
     checkers = models.ManyToManyField(User, related_name='xfiles_can_check')
     approvers = models.ManyToManyField(User, related_name='xfiles_can_approve')
@@ -175,11 +176,11 @@ class XFile(models.Model):
             return False
         if user in list(self.editors.all()):
             return True
-        if user in list(self.checkers.all()) and self.status != STATUS.INIT:
+        if user in list(self.checkers.all()): # and self.status not in [STATUS.INIT, STATUS.EDITING]:
             return True
-        if user in list(self.approvers.all()) and self.status not in [STATUS.INIT, STATUS.CHECKING]:
+        if user in list(self.approvers.all()):
             return True
-        if user in list(User.objects.filter(info__department__alias='giamdoc')) and self.status == STATUS.DONE:
+        if user.info.department.alias == 'giamdoc':
             return True
         return False
 
