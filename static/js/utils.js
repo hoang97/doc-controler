@@ -26,7 +26,7 @@ const NOTIFICATION_SUCCESS=2;
 const NOTIFICATION_ERROR=3;
 function displayDatetime(s,type='short'){
     if (s=='' || s==null){
-        return '';
+        return 'Không có';
     }
     let dtObj= new Date(s);
     if (type=='long'){

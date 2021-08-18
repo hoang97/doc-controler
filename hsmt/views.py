@@ -41,7 +41,30 @@ def JsonResponseSuccess(data):
     ''' Trả về ({"status":0,"data":data}) '''
     return JsonResponse({"status":0,"data":data})
 
+def _get_queryset(klass):
+    """
+    This is copy of _get_queryset in django.shortcuts
+    """
+    # If it is a model class or anything else with ._default_manager
+    if hasattr(klass, '_default_manager'):
+        return klass._default_manager.all()
+    return klass
 
+def get_object_or_none(klass, *args, **kwargs):
+    """
+    This is copy of django.shortcuts.get_object_or_404
+    """
+    queryset = _get_queryset(klass)
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_object_or_none() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return None
 
 # Create your views here.
 class XFileCreateView(CreateView):
@@ -372,26 +395,26 @@ def get_xfile_by_id(request):
     data={
         # 'xfile':model_to_dict(xfile),
         'id':xfile.id,
-        'name': 'need fix', # xfile.name,
+        'name': 'Miêu tả về hồ sơ', # xfile.name,
         'code':xfile.code,
         'description':xfile.description,
         'duplicate': 'need fix', # xfile.duplicate,
         'original': 'need fix', # xfile.original,
         'history': 'need fix', # xfile.history,
         'date_created':xfile.date_created,
-        'date_modified': 'need fix', # xfile.date_modified,
+        'date_modified': get_object_or_none(xfile.changes.filter(version=xfile.version)).date_edited, # xfile.date_modified,
         'edit_note': 'need fix', # xfile.edit_note,
         "status":xfile.status,
         'values': 'need fix', # values,
         'isDecrypted': isDecrypted,
-        "xfile_type": xfile.type.name,
+        "xfile_type": xfile.type.id,
         'department':xfile.department.name,
         'targetTypes':{
             'target-direction': list(targets.filter(type=TARGET_TYPES.DIRECTION).values()),
             'target-group': list(targets.filter(type=TARGET_TYPES.GROUP).values()),
             'target-area': list(targets.filter(type=TARGET_TYPES.AREA).values())
         }, 
-        'user': 'Chả hiểu là cái j', # User.objects.filter(username=db.Xfile_role.objects.get(xfile=xfile,role=db.XFILE_ROLES.CREATOR).user).values("username","first_name")[0],
+        'user': model_to_dict(xfile.creator), # User.objects.filter(username=db.Xfile_role.objects.get(xfile=xfile,role=db.XFILE_ROLES.CREATOR).user).values("username","first_name")[0],
         'msg':msg
     }    
     return JsonResponseSuccess(data)

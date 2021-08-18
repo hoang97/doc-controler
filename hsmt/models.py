@@ -215,11 +215,11 @@ class XFile(models.Model):
     def submit_change(self, by=None):
         '''
         - Change status to CHECKING
-        - Save XFileChange.editor, XFileChange.date_edited
+        - Save XFileChange.editor, XFileChange.date_submited
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.editor = by
-        xfilechange.date_edited = timezone.now()
+        xfilechange.date_submited = timezone.now()
         xfilechange.save()
 
     @transition(
@@ -322,6 +322,7 @@ class XFileChange(models.Model):
     version = models.PositiveIntegerField(default=None, null=True, blank=True)
     date_created = models.DateField(default=timezone.now)
     date_edited = models.DateField(blank=True, null=True)
+    date_submited = models.DateField(blank=True, null=True)
     date_checked = models.DateField(blank=True, null=True)
     date_approved = models.DateField(blank=True, null=True)
     editor = models.ForeignKey(User, on_delete=models.PROTECT, related_name='changes_edited', null=True)
@@ -341,6 +342,7 @@ class XFileChange(models.Model):
     def save(self, *args, **kwargs):
         if self.version is None:
             self.version = self.file.version + 1
+        self.date_edited = timezone.now()
         super().save(*args, **kwargs)
 
     # Chức năng riêng

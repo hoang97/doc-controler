@@ -1,5 +1,6 @@
 const XFILE_STATUS=[
-    [1,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
+    [0,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
+    [1,'Sửa đổi','info','Hồ sơ đang quá trình sửa đổi'],
     [2,'Đang kiểm định','info','Hồ sơ đang trong quá trình kiểm định'],
     [3,'Đang duyệt','warning','Hồ sơ đang chờ duyệt bởi Trưởng phòng'],
     [4,'Hoàn tất','success','Hồ sơ đã được duyệt'],
