@@ -21,7 +21,7 @@ $(document).ready(function () {
 function getXfiles(initial=false){
     $.ajax({
         type: 'GET',
-        url: '/get-xfiles',
+        url: '/get-xfiles/',
         // headers: {'X-CSRFToken': getCookie('csrftoken')},
     })
         .done((resp) => {

@@ -1,7 +1,7 @@
 const XFILE_STATUS=[
     [0,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
-    [1,'Sửa đổi','info','Hồ sơ đang quá trình sửa đổi'],
-    [2,'Đang kiểm định','info','Hồ sơ đang trong quá trình kiểm định'],
+    [1,'Đang sửa đổi','info','Hồ sơ đang quá trình sửa đổi'],
+    [2,'Đang kiểm định','primary','Hồ sơ đang trong quá trình kiểm định'],
     [3,'Đang duyệt','warning','Hồ sơ đang chờ duyệt bởi Trưởng phòng'],
     [4,'Hoàn tất','success','Hồ sơ đã được duyệt'],
 ];
@@ -195,7 +195,7 @@ function InitXfileData(xfileId,onlyXfileCover=false){
     }
     $.ajax({
         type: 'GET',
-        url: '/get-xfile-by-id',
+        url: '/get-xfile-by-id/',
         data: data,
     })
         .done((resp) => {
@@ -233,8 +233,6 @@ function InitXfileData(xfileId,onlyXfileCover=false){
                     else{
                         btnDuplicate.attr({'data-toggle':"modal", 'data-target':"#modalCreateDuplicate"});
                         btnDuplicate.append($('<i>',{class:"far fa-copy"})).append(" Tạo bản nháp");
-
-                       
                     }
                 }
                 else{
@@ -252,7 +250,7 @@ function InitXfileData(xfileId,onlyXfileCover=false){
 
                 $('#tenDoiTuong').text(tenDoiTuong);
                 $('#date_created').text(displayDatetime(data['date_created']));
-                $('#date_modified').text(displayDatetime(data['date_modified']));
+                $('#version').text(data['version']);
                 $('#department').text(data['department']);
                 let maSo= '123-56/QD';
                 if (data['code'] ){
@@ -317,8 +315,6 @@ function InitXfileData(xfileId,onlyXfileCover=false){
                                     tag.parent().find('label').append(newTag);
                                 }
                             }
-
-                            
                         }
                     }
                     else{
@@ -328,13 +324,10 @@ function InitXfileData(xfileId,onlyXfileCover=false){
                         showNotification(data['msg']);
                     }   
                 }
-                
             }
             else{
                 showNotification(resp['msg'],NOTIFICATION_ERROR);
             }
-            
-            
         })
         .fail(() => {
             showNotification("Server không phản hồi",NOTIFICATION_ERROR);
@@ -385,7 +378,7 @@ $('#modalSendXfile').on('show.bs.modal', function (event) {
                         let flag=false;
                         for (let j=0;j<data['editors'].length;j++){
                             if (allUsers[i]['id']==data['editors'][j]['id']){
-                                // Loại bỏ các usẻ  CREATOR và EDITOR
+                                // Loại bỏ các user  CREATOR và EDITOR
                                 flag=true;
                                 data['editors'].splice(j, 1); 
                                 break;
@@ -501,28 +494,35 @@ function SendXfile(type='forward'){
 function InitXfileRole(xfileId){
     $.ajax({
         type: 'POST',
-        url: '/get-xfile-user-role',
+        url: '/get-xfile-user-role/',
         headers: {'X-CSRFToken': getCookie('csrftoken')},
         data: {
             'xfileId':xfileId,
         }
     })
         .done((resp) => {
+
             if(resp['status']===0){
                 let data=resp['data'];
                 // dataEditors.push({'id':data['creator']['id'],'text':data['creator']['first_name']})
                 $('#txtEditors').html('');
                 for (let i in data['editors']){
-                    if (i!=0)   {$('#txtEditors').append(',');}
+                    if (i!=0)   {$('#txtEditors').append(', ');}
                     $('#txtEditors').append($('<a>',{href:"/profile?u="+data['editors'][i]['username']}).text(data['editors'][i]['first_name']))
                 }
+                
                 $('#txtCheckers').html('');
-
                 for (let i in data['checkers']){
-                    if (i!=0)   {$('#txtCheckers').append(',');}
+                    if (i!=0)   {$('#txtCheckers').append(', ');}
                     $('#txtCheckers').append($('<a>',{href:"/profile?u="+data['checkers'][i]['username']}).text(data['checkers'][i]['first_name']))
                 }
-            
+
+                $('#txtApprovers').html('');
+                for (let i in data['approvers']){
+                    if (i!=0)   {$('#txtApprovers').append(', ');}
+                    $('#txtApprovers').append($('<a>',{href:"/profile?u="+data['approvers'][i]['username']}).text(data['approvers'][i]['first_name']))
+                }
+  
             }
             else{
                 showNotification(resp['msg'],NOTIFICATION_ERROR);

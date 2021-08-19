@@ -50,10 +50,14 @@ urlpatterns = [
 
     # new xfile views
     path('hsmt/list/', views.hsmt_list, name='hsmt-list'),
-    path('get-xfiles', views.get_xfiles, name='get-xfiles'),
+    path('get-xfiles/', views.get_xfiles, name='get-xfiles'),
     # path('hsmt/filter/', views.hsmt_filter,name='hsmt-filter'),
     path('hsmt/edit-detail/', views.hsmt_edit_detail, name='edit-detail'),
-    path('get-xfile-by-id', views.get_xfile_by_id, name='get-xfile-by-id'),
+    path('get-xfile-by-id/', views.get_xfile_by_id, name='get-xfile-by-id'),
+    path('get-xfile-user-role/', views.get_xfile_user_role, name='get-xfile-user-role'),
+
+    #XFileChange API
+    path('get-xfile-update/', views.get_xfile_update, name='get_xfile_update'),
 
     #target-type-views
     path('', views.target_type_list, name='list_target'),

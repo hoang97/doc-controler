@@ -324,7 +324,11 @@ def get_xfile_by_id(request):
     onlyXfileCover=request.GET.get('onlyXfileCover','')
     #Getiing Xfile
     try:
-        xfile = XFile.objects.get(id=xfileId)
+        xfile = XFile.objects\
+            .select_related('creator')\
+            .select_related('type')\
+            .prefetch_related('targets')\
+            .get(id=xfileId)
     except:
         return JsonResponseError('HSMT không tồn tại hoặc đã bị xoá')
 
@@ -340,7 +344,7 @@ def get_xfile_by_id(request):
         return JsonResponseError("Không đủ thẩm quyền")
 
     values=[]
-    isDecrypted=False
+    isDecrypted=True
     msg='Lấy dữ liệu chi tiết HSMT thành công'
     # pwd=''
     # if isGiamdoc:
@@ -402,7 +406,7 @@ def get_xfile_by_id(request):
         'original': 'need fix', # xfile.original,
         'history': 'need fix', # xfile.history,
         'date_created':xfile.date_created,
-        'date_modified': get_object_or_none(xfile.changes.filter(version=xfile.version)).date_edited, # xfile.date_modified,
+        'version': xfile.version,
         'edit_note': 'need fix', # xfile.edit_note,
         "status":xfile.status,
         'values': 'need fix', # values,
@@ -414,11 +418,43 @@ def get_xfile_by_id(request):
             'target-group': list(targets.filter(type=TARGET_TYPES.GROUP).values()),
             'target-area': list(targets.filter(type=TARGET_TYPES.AREA).values())
         }, 
-        'user': model_to_dict(xfile.creator), # User.objects.filter(username=db.Xfile_role.objects.get(xfile=xfile,role=db.XFILE_ROLES.CREATOR).user).values("username","first_name")[0],
+        'user': model_to_dict(xfile.creator),
         'msg':msg
     }    
     return JsonResponseSuccess(data)
 
+@login_required
+def get_xfile_update(request):
+    '''Lấy ra danh sách XFileChange của XFile'''
+    xfileId=request.GET.get('xfileId', -1)
+    xfile= get_object_or_none(XFile, id=xfileId)
+    if not xfile:
+        return JsonResponseError('HSMT không tồn tại!')
+    data= list(xfile.changes.values())
+    return JsonResponseSuccess(data)
+
+@login_required
+def get_xfile_user_role(request):
+    ''' filter= None=ALL, 1: Creator, filter=2: edtior, filter=3, checkers, '''
+    xfileId=request.POST.get('xfileId', -1)
+    # fetchAllUsers=request.POST.get('fetchAllUsers','')
+    try:
+        xfile = XFile.objects\
+            .select_related('creator')\
+            .prefetch_related('editors')\
+            .prefetch_related('checkers')\
+            .prefetch_related('approvers')\
+            .get(id=xfileId)
+    except:
+        return JsonResponseError('HSMT không tồn tại - Không tìm được Quyền')
+    data={
+        'creator': model_to_dict(xfile.creator, fields=['username', 'first_name']),
+        'editors': list(xfile.editors.values('username', 'first_name')),
+        'checkers': list(xfile.checkers.values('username', 'first_name')),
+        'approvers': list(xfile.approvers.values('username', 'first_name')),
+    }
+
+    return JsonResponseSuccess(data)
 
 @login_required
 def get_xfiles(request):
