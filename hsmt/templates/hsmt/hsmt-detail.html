@@ -129,12 +129,18 @@
 
 
 
-                            <div class="card-footer" id="footerXfileCover">
-                              <btn  class="btn btn-danger " data-toggle="modal" data-target="#modalSendBackXfile" id="btnYeuCauSuaLai"><i class="fas fa-exclamation-circle" ></i> Yêu cầu sửa lại</btn>
+                            <div class="p-0" id="footerXfileCover">
+                              <a  class="btn btn-danger ml-2" hidden href="{% url 'hsmt-cancel-change' xfileId %}" id="cancelBtn"><i class="fas fa-exclamation-circle" ></i> Hủy bỏ bản cập nhật</a>
+                              <a  class="btn btn-danger ml-2" hidden href="{% url 'hsmt-reject-check' xfileId %}" id="rejectCheckBtn"><i class="fas fa-exclamation-circle" ></i> Yêu cầu sửa lại</a>
+                              <a  class="btn btn-danger ml-2" hidden href="{% url 'hsmt-reject-approve' xfileId %}" id="rejectApproveBtn"><i class="fas fa-exclamation-circle" ></i> Yêu cầu kiểm định lại</a>
 
-                                <btn  class="btn btn-success float-right" data-toggle="modal" data-target="#modalSendXfile" id="btnGuiHSMT"><i class="fas fa-paper-plane"></i> Gửi HSMT</btn>
+                              <a  class="btn btn-success float-right mr-2" hidden href="#" id="createChangeBtn" data-toggle="modal" data-target="#createChangeModal"><i class="far fa-plus-square"></i> Tạo bản cập nhật mới</a>
+                              <a  class="btn btn-success float-right mr-2" hidden href="#" id="editBtn"><i class="fas fa-pencil-alt"></i> Sửa HSMT</a>
+                              <a  class="btn btn-success float-right mr-2" hidden href="{% url 'hsmt-submit' xfileId %}" id="submitBtn"><i class="fas fa-paper-plane"></i> Gửi kiểm định</a>
+                              <a  class="btn btn-success float-right mr-2" hidden href="{% url 'hsmt-check' xfileId %}" id="checkBtn"><i class="fas fa-paper-plane"></i> Gửi phê duyệt</a>
+                              <a  class="btn btn-success float-right mr-2" hidden href="{% url 'hsmt-approve' xfileId %}" id="approveBtn"><i class="fas fa-check"></i> Phê duyệt HSMT</a>
 
-                                <btn class="btn btn-warning float-right text-bold btn-sm"  id="btnDuplicate" style="display: none;"></btn>
+                              <a class="btn btn-warning float-right text-bold btn-sm"  id="btnDuplicate" style="display: none;"></a>
                                
             
                             </div>
@@ -266,7 +272,7 @@
                              </div>
                               <div class="card-footer">
                                 <button  class="btn btn-primary float-right" type="button" onclick="SaveXfile({{xfileId}});" id="btnLuuChiTiet">Lưu chi tiết</button>
-                                <a href="/hsmt/list" class="btn btn-secondary">Quay lại</a>
+                                <a href="/hsmt/list/" class="btn btn-secondary">Quay lại</a>
                             </div>
                             </div>
                            

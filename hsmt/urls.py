@@ -53,6 +53,7 @@ urlpatterns = [
     path('get-xfiles/', views.get_xfiles, name='get-xfiles'),
     # path('hsmt/filter/', views.hsmt_filter,name='hsmt-filter'),
     path('hsmt/edit-detail/', views.hsmt_edit_detail, name='edit-detail'),
+    path('hsmt/perm/', views.get_perm_user_xfile, name='get-xfile-perm'),
     path('get-xfile-by-id/', views.get_xfile_by_id, name='get-xfile-by-id'),
     path('get-xfile-user-role/', views.get_xfile_user_role, name='get-xfile-user-role'),
 

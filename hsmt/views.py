@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden
 from django.http.response import Http404, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
+from django.urls.base import reverse
 from django.utils import timezone
 from django.forms.models import model_to_dict
 from notifications.utils import notify, VERB
@@ -178,7 +179,7 @@ def create_change_xfile(request, pk):
             xfile.create_change(change_name, by=user)
             xfile.save()
             notify(actor=user, target=xfile, verb=VERB.CHANGE.label, notify_to=list(xfile.editors.all()))
-            return redirect('hsmt-detail', pk=pk)
+            return redirect(reverse('edit-detail')+f'?id={pk}')
         else:
             return JsonResponse({'msg': 'permission denie'})
 
@@ -190,7 +191,7 @@ def cancel_change_xfile(request, pk):
         xfile.cancel_change(by=user)
         xfile.save()
         notify(actor=user, target=xfile, verb=VERB.CANCLE_CHANGE.label, notify_to=list(xfile.editors.all()))
-        return redirect('hsmt-detail', pk=pk)
+        return redirect(reverse('edit-detail')+f'?id={pk}')
     else:
         return JsonResponse({'msg': 'permission denie'})
 
@@ -202,7 +203,7 @@ def submit_change_xfile(request, pk):
         xfile.submit_change(by=user)
         xfile.save()
         notify(actor=user, target=xfile, verb=VERB.SEND.label, notify_to=list(xfile.checkers.all()))
-        return redirect('hsmt-detail', pk=pk)
+        return redirect(reverse('edit-detail')+f'?id={pk}')
     else:
         return JsonResponse({'msg': 'permission denie'})
 
@@ -214,7 +215,7 @@ def check_change_xfile(request, pk):
         xfile.check_change(by=user)
         xfile.save()
         notify(actor=user, target=xfile, verb=VERB.CHECK.label, notify_to=list(xfile.approvers.all()))
-        return redirect('hsmt-detail', pk=pk)
+        return redirect(reverse('edit-detail')+f'?id={pk}')
     else:
         return JsonResponse({'msg': 'permission denie'})
 
@@ -226,7 +227,7 @@ def reject_check_xfile(request, pk):
         xfile.reject_check(by=user)
         xfile.save()
         notify(actor=user, target=xfile, verb=VERB.REJECT_CHECK.label, notify_to=list(xfile.editors.all()))
-        return redirect('hsmt-detail', pk=pk)
+        return redirect(reverse('edit-detail')+f'?id={pk}')
     else:
         return JsonResponse({'msg': 'permission denie'})
 
@@ -241,7 +242,7 @@ def approve_change_xfile(request, pk):
             actor=user, target=xfile, verb=VERB.APPROVE.label, 
             notify_to=list(User.objects.filter(info__department__alias='giamdoc'))
         )
-        return redirect('hsmt-detail', pk=pk)
+        return redirect(reverse('edit-detail')+f'?id={pk}')
     else:
         return JsonResponse({'msg': 'permission denie'})
 
@@ -253,7 +254,7 @@ def reject_approve_xfile(request, pk):
         xfile.reject_approve(by=user)
         xfile.save()
         notify(actor=user, target=xfile, verb=VERB.REJECT_APPROVE.label, notify_to=list(xfile.checkers.all()))
-        return redirect('hsmt-detail', pk=pk)
+        return redirect(reverse('edit-detail')+f'?id={pk}')
     else:
         return JsonResponse({'msg': 'permission denie'})
 
@@ -454,6 +455,27 @@ def get_xfile_user_role(request):
         'approvers': list(xfile.approvers.values('username', 'first_name')),
     }
 
+    return JsonResponseSuccess(data)
+
+@login_required
+def get_perm_user_xfile(request):
+    xfileId = request.POST.get('xfileId', -1)
+    try:
+        xfile = XFile.objects.get(id=xfileId)
+    except:
+        return JsonResponseError('HSMT không tồn tại hoặc đã bị xóa')
+    user = request.user
+    data = {
+        'view': xfile.can_view(user),
+        'createChange': has_transition_perm(xfile.create_change, user),
+        'edit': has_transition_perm(xfile.cancel_change, user),
+        'cancel': has_transition_perm(xfile.cancel_change, user),
+        'submit': has_transition_perm(xfile.submit_change, user),
+        'check': has_transition_perm(xfile.check_change, user),
+        'rejectCheck': has_transition_perm(xfile.reject_check, user),
+        'approve': has_transition_perm(xfile.approve_change, user),
+        'rejectApprove': has_transition_perm(xfile.reject_approve, user),
+    }
     return JsonResponseSuccess(data)
 
 @login_required

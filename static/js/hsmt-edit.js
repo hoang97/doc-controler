@@ -12,99 +12,39 @@ $(document).ready(function () {
     InitFrontEndForUserGroup();
  });
 
-function InitFrontEndForUserGroup(){
-    let group=$('#template_user_group').val();
-    //0:troly,05:checker,1:truongphong
-    let xfile_status=$('#template_xfile_status').val();
-    //0:closed, 1:init, 2:checking, 3 approving, 4: DONE
-    //Button Sửa HSMT
-    if (group=='0' && xfile_status=='1' ){
-        //Chỉ TroLy mớI đưỢc thực hiện
-        $('#btnEditXfile').attr('class','btn btn-outline-info btn-sm');
-        $('#btnLuuChiTiet').prop('disabled', false);
-        $('#btnThemMoiTracking').show();
-        $('#btnThemMoiUpdate').show();
-    }
-    else {
-        $('#btnEditXfile').attr('class','btn btn-outline-info btn-sm disabled');
-        $('#btnLuuChiTiet').prop('disabled', true);
-
-    }
-    //Button Thêm nhận xét
-    if ((group=='1' && xfile_status=='3') ||(group=='05' && xfile_status=='2')) {
-        $('#btnAddNote').prop('disabled', false);
-    }
-    else{
-        $('#btnAddNote').prop('disabled', true);
-    }
-    //Modal Gửi HSMT
-    let sendXfileStatus= $('#sendXfileStatus');
-    let sendBackXfileStatus=$("#sendBackXfileStatus");
-    let bodyPtag=  $('#modalSendXfileErrorPtag');
-    let bodyBackPtag=$('#modalSendBackXfileErrorPtag');
-    let btnSend=$('#btnSendXfileModal');
-    let btnSendBack=$('#btnSendBackXfileModal');
-    if (group=='0'){
-        $('#btnYeuCauSuaLai').hide();
-        $('#btnAddNote').hide();
-        if  (xfile_status=='1'){
-            $('#divSelectCheckerInModal').show();
-            sendXfileStatus.val('11');
+function InitFrontEndForUserGroup() {
+    // Khởi tạo các button send, sendback, edit, ... xfile
+    xfileId = $('#xfileId').val()
+    $.ajax({
+        type: 'POST',
+        url: '/hsmt/perm/',
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
+        data: {
+            xfileId: xfileId
+        },
+    })
+    .done((resp) => {
+        if (resp['status'] === 0) {
+            // thành công
+            let data = resp['data'];
+            // với mỗi quyền thì hiện nút tương ứng
+            for (perm in data)
+                if (data[perm]) {
+                    let btn = $('#'+perm+'Btn');
+                    if (btn[0]) {
+                        btn[0].hidden = false;
+                    }
+                }
         }
-        else{
-            if (xfile_status== '4'){
-                // #HSMT hoan tất 
-                $('#btnGuiHSMT').hide();
-                $('#btnDuplicate').show();
-            }
-            bodyPtag.text('Hồ sơ không trong trạng thái cho phép chỉnh sửa');
-            btnSend.hide();
+        else {
+            // lỗi bên server
+            showNotification(resp['msg'], NOTIFICATION_ERROR);
         }
-    }
-    else if(group=='05'){
-        btnSend.text('Gửi phê duyệt');
-        if ( xfile_status=='2'){
-            bodyPtag.text('Xác nhận gửi HSMT cho trưởng phòng  duyệt?');
-            bodyBackPtag.text("Yêu cầu chỉnh sửa lại?")
-
-            sendXfileStatus.val('21');
-            sendBackXfileStatus.val("20");
-        }
-        else{
-            let tmp='Hồ sơ không trong trạng thái kiểm định!';
-            bodyPtag.text(tmp);
-            bodyBackPtag.text(tmp);
-            btnSend.hide();
-            btnSendBack.hide() ;
-        }
-        
-    }
-    else if(group=='1'){
-        // /Trưởng phòng
-        btnSend.text('Duyệt');
-        btnSendBack.text('Yêu cầu kiểm định lại');
-        if ( xfile_status=='3'){
-            bodyPtag.text('Xác nhận duyệt HSMT?');
-            bodyBackPtag.text("Yêu cầu kiểm định lại?")
-            sendXfileStatus.val('31');
-            sendBackXfileStatus.val("30");
-        }
-        else if ( xfile_status=='4'){
-            bodyPtag.text('Hồ sơ không trong trạng thái chờ duyệt!');
-            bodyBackPtag.text("Yêu cầu kiểm định lại?")
-            sendBackXfileStatus.val("30");
-            btnSend.hide();       
-
-        }
-        else{
-            let tmp='Hồ sơ không trong trạng thái chờ duyệt!';
-            bodyPtag.text(tmp);
-            bodyBackPtag.text(tmp);    
-            btnSend.hide();       
-            btnSendBack.hide() ;
-        }
-        
-    }
+    })
+    .fail(() => {
+        // lỗi bên client
+        showNotification(msg="Lỗi truy cập /hsmt/perm/", NOTIFICATION_ERROR);
+    })
 }
 
 // For init DatetimePicker Input

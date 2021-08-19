@@ -6,12 +6,11 @@ const XFILE_TYPE=[
 ];
 const XFILE_STATUS=[
     [0,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
-    [1,'Chỉnh sửa','secondary','Hồ sơ đang được chỉnh sửa bởi Trợ lý'],
-    [2,'Đang kiểm định','info','Hồ sơ đang trong quá trình kiểm định'],
+    [1,'Đang sửa đổi','info','Hồ sơ đang quá trình sửa đổi'],
+    [2,'Đang kiểm định','primary','Hồ sơ đang trong quá trình kiểm định'],
     [3,'Đang duyệt','warning','Hồ sơ đang chờ duyệt bởi Trưởng phòng'],
     [4,'Hoàn tất','success','Hồ sơ đã được duyệt'],
 ];
-
 $(document).ready(function () {
    getXfiles(initial=true);
 
@@ -96,11 +95,12 @@ function dictXfileToList(dict,count){
     let arr=[];
     arr.push( [ count] );
     let hrefXfile='';
-    if(dict['ct']){
-        hrefXfile= '/hsmt/detail'+"?id="+dict['id'];
-    } else {
-        hrefXfile= '/hsmt/edit-detail'+"?id="+dict['id'];
-    }
+    // if(dict['ct']){
+    //     hrefXfile= '/hsmt/detail'+"?id="+dict['id'];
+    // } else {
+    //     hrefXfile= '/hsmt/edit-detail'+"?id="+dict['id'];
+    // }
+    hrefXfile= '/hsmt/edit-detail'+"?id="+dict['id'];
     let nameATag='<a href="'+hrefXfile+'">'+dict['code']+' </a>'
 
     //Push to Datatables
