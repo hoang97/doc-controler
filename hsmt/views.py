@@ -431,7 +431,19 @@ def get_xfile_update(request):
     xfile= get_object_or_none(XFile, id=xfileId)
     if not xfile:
         return JsonResponseError('HSMT không tồn tại!')
-    data= list(xfile.changes.values())
+    data = []
+    changes = xfile.changes.all()\
+                .select_related('editor')\
+                .select_related('checker')\
+                .select_related('approver')
+    for change in changes:
+        data.append({
+            'date_created': change.date_created,
+            'name': change.name,
+            'editor': None if not change.editor else change.editor.first_name,
+            'checker': None if not change.checker else change.checker.first_name,
+            'approver': None if not change.approver else change.approver.first_name,
+        })
     return JsonResponseSuccess(data)
 
 @login_required

@@ -1,7 +1,7 @@
 function ReloadXfileUpdates(xfileId){
     $.ajax({
         type: 'GET',
-        url: '/get-xfile-update',
+        url: '/get-xfile-update/',
         data: {
             'xfileId':xfileId,
         }
@@ -25,26 +25,25 @@ function ReloadXfileUpdates(xfileId){
         });
 }
 function dictUpdateToList(dict){
-
     let arr=[];
-    arr.push( [displayDatetime(dict['date_created']) ] );
-    arr.push( ([dict['content'] ]) );
-    arr.push( ([dict['editor'] ]) );
-    arr.push( ([dict['checker'] ]) );
-    arr.push( ([dict['approver'] ]) );
-    let btnSua='';
-    let btnXoa='';
-    if (dict['verified']){
+    
+    arr.push( [`<span class="text-dark">${displayDatetime(dict['date_created'])}</span>`] );
+    arr.push( [`<span class="text-dark">${dict['name']}</span>`] );
+    arr.push( [dict['editor'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict['editor']}</span>`] );
+    arr.push( [dict['checker'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict['checker']}</span>`] );
+    arr.push( [dict['approver'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict['approver']}</span>`] );
+    // let btnSua='';
+    // let btnXoa='';
+    if (dict['approver']){
         arr.push( ([ '<span class="text-lg text-success" data-toggle="tooltip" data-placement="bottom" title="Bản cập nhật đã xác minh"><i class="fas fa-check-circle"></i></span>' ]) );
-
     }
     else{
         arr.push( ([ '<span class="text-lg text-danger" data-toggle="tooltip" data-placement="bottom" title="Bản cập nhật chưa xác minh"><i class="fas fa-exclamation-circle"></i></span>' ]) );
-        btnSua='<button type="button" class="btn btn-warning float-right" data-toggle="modal" data-target="#modalAddEditXfileUpdate" data-id="'+dict['id']+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
-        btnXoa='<button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#modalDeleteXUpdate" data-id="'+dict['id']+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
+        // btnSua='<button type="button" class="btn btn-warning float-right" data-toggle="modal" data-target="#modalAddEditXfileUpdate" data-id="'+dict['id']+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
+        // btnXoa='<button type="button" class="btn btn-danger float-right" data-toggle="modal" data-target="#modalDeleteXUpdate" data-id="'+dict['id']+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
     }
 
-    arr.push(btnXoa+btnSua);
+    // arr.push(btnXoa+btnSua);
 return arr;
 }
 initTableXfileUpdate([],true);
@@ -62,7 +61,6 @@ function initTableXfileUpdate(dataSet,initial=false){
                 { title: "Người thẩm định"},
                 { title: "Người duyệt"},
                 { title: "Xác minh"},
-                { title: "","width": "10%" }
             ],    
             "language": DATATABLE_LANGUAGE
         } );
