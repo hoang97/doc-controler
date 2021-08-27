@@ -17,13 +17,10 @@ def JsonResponseSuccess(data):
     return JsonResponse({"status": 0, "data": data})
 
 
+# Thêm nhiệm vụ - bất kỳ ai cũng đc thêm
 @login_required
 def add_task(request):
     msg = ''
-    if request.user.info.position.id == 0:
-        msg = "Không đủ quyền tạo công việc"
-        return JsonResponseError(msg)
-
     if request.method == 'POST':
         title = request.POST.get('title', '')
         content = request.POST.get('content', '')
@@ -57,7 +54,7 @@ def add_task(request):
 
     return JsonResponseError(msg)
 
-
+# Thêm mini task - chỉ có người quản lý của task
 @login_required
 def add_mini_task(request, task_id):
     msg = ''
@@ -89,7 +86,7 @@ def add_mini_task(request, task_id):
             elif task.users.filter(username=username).exists():
                 users.append(task.users.get(username=username))
             else:
-                msg = "Người dùng được thêm không có trong danh sách người thực hiện"
+                msg = "Người dùng được thêm không có trong danh sách người thực hiện hoặc không tồn tại"
                 return JsonResponseError(msg)
 
         if not (title and content and start_at and deadline):
@@ -105,6 +102,7 @@ def add_mini_task(request, task_id):
     return JsonResponseError(msg)
 
 
+#Xóa task - chỉ có người quản lý của task
 @login_required
 def delete_task(request):
     msg = ''
@@ -128,6 +126,7 @@ def delete_task(request):
     return JsonResponseError(msg)
 
 
+#Xóa minitask - chỉ có người quản lý của task
 @login_required
 def delete_mini_task(request):
     msg = ''
@@ -155,6 +154,7 @@ def delete_mini_task(request):
     return JsonResponseError(msg)
 
 
+#Xem task - mọi người
 @login_required
 def get_tasks(request):
     data = {
@@ -176,6 +176,7 @@ def get_tasks(request):
     return JsonResponseSuccess(data)
 
 
+#Xem minitask - chỉ có người thực hiện và quản lý task
 @login_required
 def get_mini_tasks(request, task_id):
     data = {
@@ -200,6 +201,7 @@ def get_mini_tasks(request, task_id):
     return JsonResponseSuccess(data)
 
 
+#thay đổi trạng thái task - người quản lý task
 @login_required
 def switch_status(request):
     if request.method == "POST":
@@ -211,7 +213,6 @@ def switch_status(request):
 
         if not MiniTask.objects.filter(id=task_id).exists():
             return JsonResponseError('Công việc không tồn tại')
-        task_for_change = Task.objects.get(id=task_id)
 
         task_for_change = Task.objects.get(id=task_id)
         if task_for_change.manager.username != request.user.username:
@@ -225,6 +226,7 @@ def switch_status(request):
     return JsonResponseError('')
 
 
+#thay đổi trạng thái minitask - người quản lý và người thực hiện minitask (Trạng thái Đã hoàn thiện thì chỉ có người quản lý)
 @login_required
 def switch_status_mini_task(request):
     if request.method == "POST":
@@ -237,14 +239,14 @@ def switch_status_mini_task(request):
             return JsonResponseError('Nhiệm vụ không tồn tại')
         mini_task_for_change = MiniTask.objects.get(id=mini_task_id)
 
-        if mini_task_for_change.task.manager.username != request.user.username or \
-                any([user.username == request.user.username for user in mini_task_for_change.users.all()]):
+        if mini_task_for_change.task.manager.username != request.user.username and \
+                all([user.username != request.user.username for user in mini_task_for_change.users.all()]):
             return JsonResponseError('Không thể đổi trạng thái nhiệm vụ không phải của mình')
 
-        if mini_task_for_change.task.manager.username != request.user.username and status == 3:
+        if mini_task_for_change.task.manager.username != request.user.username and status == '3':
             return JsonResponseError('Chỉ có người quản lý mới được đổi trạng thái Đã hoàn thiện')
 
-        mini_task_for_change.status = request.POST.get('status', status)
+        mini_task_for_change.status = status
         mini_task_for_change.save()
 
         return JsonResponseSuccess('Đổi trạng thái thành công')
@@ -252,6 +254,7 @@ def switch_status_mini_task(request):
     return JsonResponseError('')
 
 
+# View task
 def task_list_view(request):
     title = 'Danh sách công việc'
     context = {
@@ -262,6 +265,7 @@ def task_list_view(request):
     return render(request, 'todolist/task_list.html', context)
 
 
+# View mini task
 def task_view(request, task_id):
     context = {
         'breadcrumb_sub': Task.objects.get(id=task_id).title,

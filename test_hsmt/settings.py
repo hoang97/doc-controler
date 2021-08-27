@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     # 3rd party apps
     'channels',
     'django_fsm',
-    'crispy_forms',
     # my own apps
     'users',
     'hsmt',

@@ -9,7 +9,7 @@ class TaskStatus(models.IntegerChoices):
     Những trạng thái của Task
     """
     INIT = 0, _('khởi tạo')
-    EDITING = 1, _('đang sửa đổi')
+    EDITING = 1, _('đang thực hiện')
     CHECKING = 2, _('đang kiểm định')
     DONE = 3, _('đã hoàn thiện')
 
