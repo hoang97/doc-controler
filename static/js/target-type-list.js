@@ -104,10 +104,10 @@ function initTable(dataSet,targetType,initial=false){
         tbl.DataTable( {
             data: dataSet,
             columns: [
-                { title: "#","width": "5%" },
-                { title: "Tên" },
-                { title: "Mô tả" },
-                { title: "","width": "15%" },
+                { title: "#", "width": "5%" },
+                { title: "Tên", "width": "20%"  },
+                { title: "Mô tả", "width": "60%"  },
+                { title: "" },
                 // { title: "Start date" },
                 // { title: "Salary" }
             ],

@@ -38,12 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 3rd party apps
-    'django_fsm',
     'channels',
+    'django_fsm',
+    'crispy_forms',
     # my own apps
     'users',
     'hsmt',
     'notifications',
+    'todolist'
 ]
 
 MIDDLEWARE = [
