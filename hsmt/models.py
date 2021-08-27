@@ -2,6 +2,7 @@ from copy import deepcopy
 import json
 import logging
 from datetime import datetime, date
+from django.contrib.contenttypes import fields
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
@@ -43,8 +44,8 @@ class XFileType(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.name = self.username.lower()
-        return super(User, self).save(*args, **kwargs)
+        self.name = self.name.lower()
+        return super().save(*args, **kwargs)
 
 class Target(models.Model):
     '''
@@ -93,7 +94,7 @@ class XFile(models.Model):
         Trả lại JSON dict thể hiện tất cả nội dung của XFile theo cấu trúc
         '''
         content = {}
-        general_content = ['code', 'description', 'targets', 'department']
+        general_content = ['code', 'description', 'targets', 'department', 'editors', 'checkers', 'approvers']
         for field in general_content:
             record = {}
             value = getattr(self, field)
@@ -104,6 +105,9 @@ class XFile(models.Model):
                 value = list(value.all())
             elif field == 'department':
                 record['type'] = 'department'
+            elif field in ['editors', 'checkers', 'approvers']:
+                record['type'] = 'user'
+                value = list(value.all())
             record['value'] = value
             content[field] = record
         
@@ -144,31 +148,6 @@ class XFile(models.Model):
                 # Nếu không tồn tại phiên bản tương ứng -> None
                 return None
         return xfile
-
-    def get_change_content(self, new_content):
-        '''
-        - So sánh với JSON dict, trả lại JSON dict thể hiện thay đổi theo cấu trúc
-        - Nội dung của 2 file phải cùng dạng
-        '''
-        old_content = self.get_xfile_content()
-
-        change = {}
-        
-        key1 = set(old_content.keys())
-        key2 = set(new_content.keys())
-
-        # Với mỗi trường trong tổng hợp nội dung cả 2 file, kiểm tra sự khác nhau
-        for field in key1 | key2 :
-            old_record = old_content.get(field)
-            new_record = new_content.get(field)
-            if old_record != new_record:
-                change[field] = {
-                    'type': new_record.get('type'),
-                    'old' : old_record.get('value'),
-                    'new' : new_record.get('value')
-                }
-        
-        return change
 
     # Permisions control
     def can_view(self, user=None):
@@ -268,6 +247,7 @@ class XFile(models.Model):
         '''
         new_change = self.changes.create(name = change_name)
         new_change.date_created = timezone.now()
+        new_change.editor = by
         new_change.apply_to_xfile()
         new_change.save()
 
@@ -351,7 +331,7 @@ class XFileChange(models.Model):
         Áp dụng thay đổi vào XFile
         '''
         xfile = self.file
-        general_content = ['code', 'description', 'targets', 'department']
+        general_content = ['code', 'description', 'targets', 'department', 'editors', 'checkers', 'approvers']
         secret_content = json.loads(xfile.content)
         xfile.version = self.version - backward
         try:
@@ -373,13 +353,17 @@ class XFileChange(models.Model):
                 if type == 'string':
                     setattr(xfile, field, value)
                 if type == 'target':
-                    targets = getattr(xfile, field)
-                    targets.set(Target.objects.filter(id__in = value))
+                    attr = getattr(xfile, field)
+                    attr.set(Target.objects.filter(id__in = value))
                 if type == 'department':
                     setattr(xfile, field, Department.objects.get(id = value))
+                if type == 'user':
+                    attr = getattr(xfile, field)
+                    attr.set(User.objects.filter(id__in = value))
             # Nếu thay đổi trong secret_content -> lưu vào secret_content
             if field in secret_content.keys():
-                secret_content[field] = record
+                secret_content[field]['type'] = type
+                secret_content[field]['value'] = value
 
         xfile.content = json.dumps(secret_content)
 
@@ -395,9 +379,9 @@ class XFileChange(models.Model):
             old_value = record['old']
             new_value = record['new']
             # Nếu dữ liệu thuộc class đặc biệt -> thay đổi để serialize ra JSON string
-            if type == 'target':
-                record['old'] = [target.id for target in old_value]
-                record['new'] = [target.id for target in new_value]
+            if type in ['target', 'user']:
+                record['old'] = [object.id for object in old_value]
+                record['new'] = [object.id for object in new_value]
             if type == 'department':
                 record['old'] = old_value.id
                 record['new'] = new_value.id

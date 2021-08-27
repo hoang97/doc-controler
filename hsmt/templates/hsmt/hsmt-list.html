@@ -16,7 +16,8 @@
 <section class="content ">
   <div class="container-fluid">
     <div class="row">
-      {% if user_role == '0' %}
+      <!--Chỉ trợ lí có thể thêm mới HSMT-->
+      {% if request.user.info.position.alias == 'tl' %}
       <div class="col-lg-12">
         <a  class="btn btn-success mb-2"  href="/hsmt/create-edit">Thêm mới HSMT</a>
       </div>

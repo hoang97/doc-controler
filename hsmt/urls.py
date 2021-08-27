@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_test
 from .views import (
     XFileListView,
     XFileCreateView,
@@ -57,6 +58,19 @@ urlpatterns = [
     path('get-xfile-by-id/', views.get_xfile_by_id, name='get-xfile-by-id'),
     path('get-xfile-user-role/', views.get_xfile_user_role, name='get-xfile-user-role'),
 
+
+    path('api/hsmt/', views_test.XFileListView.as_view()),
+    path('api/hsmt/create/', views_test.XFileCreateView.as_view()),
+    path('api/hsmt/<int:pk>/perm/', views_test.XFilePermView.as_view()),
+    path('api/hsmt/<int:pk>/general/', views_test.XFileRetrieveDestroyView.as_view()),
+    path('api/hsmt/<int:pk>/content/', views_test.XFileContentRetrieveUpdateView.as_view()),
+    path('api/hsmt/<int:pk>/general-update/', views_test.XFileGeneralUpdateView.as_view()),
+    path('api/hsmt-type/', views_test.XFileTypeListCreateView.as_view()),
+    path('api/hsmt-type/<int:pk>/', views_test.XFileTypeRetrieveUpdateDestroyView.as_view()),
+
+    path('test/hsmt/', views_test.hsmt_list_view, name='get-xfile-user-role'),
+
+
     #XFileChange API
     path('get-xfile-update/', views.get_xfile_update, name='get_xfile_update'),
 
@@ -70,6 +84,7 @@ urlpatterns = [
     path('get-target-type-by-id', views.get_target_type_by_id, name='get-target-type-by-id'),
     path('delete-target-type', views.delete_target_type, name='delete-target-type'),
 
+    # ------------------------------------------------------------------------------#
 ]
 
 if settings.DEBUG :

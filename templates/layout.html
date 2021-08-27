@@ -150,8 +150,8 @@
           <img src="{% static 'img/avatar5.png' %}" class="img-circle elevation-2" alt="User Image">
           </div>
           <div class="info">
-            <a href="/profile?u={{user_layout.username}}" class="d-block"  >{{user_layout.first_name|default:"Tài khoản"}}</a>
-            <input hidden id="request-username" value="{{user_layout.username}}">
+            <a href="/profile?u={{request.user.username}}" class="d-block"  >{{request.user.first_name|default:"Tài khoản"}}</a>
+            <input hidden id="request-username" value="{{request.user.username}}">
           </div>
         </div>
 
@@ -223,12 +223,10 @@
                   </a>
                 </li>
               
-               
-              
               </ul>
             </li>
             <!-- người dùng là trưởng phòng  -->
-            {% if user_role == '2' %}
+            {% if request.user.info.position.alias == 'tp' %}
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-th"></i>

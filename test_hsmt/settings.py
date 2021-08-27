@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # 3rd party apps
     'django_fsm',
     'channels',
+    'rest_framework',
     # my own apps
     'users',
     'hsmt',
@@ -114,6 +115,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
