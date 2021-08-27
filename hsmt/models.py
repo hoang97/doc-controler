@@ -1,8 +1,6 @@
 from copy import deepcopy
 import json
-import logging
 from datetime import datetime, date
-from django.contrib.contenttypes import fields
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey

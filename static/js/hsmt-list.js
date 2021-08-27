@@ -12,8 +12,8 @@ const XFILE_STATUS=[
     [4,'Hoàn tất','success','Hồ sơ đã được duyệt'],
 ];
 $(document).ready(function () {
-   getXfiles(initial=true);
-
+//    getXfiles(initial=true);
+    initWebPage();
 });
 
 
@@ -194,4 +194,17 @@ function DeleteXfile(XfileId){
         .fail(() => {
             showNotification("Failed");
         });
+}
+
+function initWebPage() {
+    $.ajax({
+        type: 'POST',
+        url: '/api/hsmt-type/',
+        success: (data) => {
+            console.log(data)
+        },
+        error: (xhr, status, error) => {
+            showNotification(status + ': ' + error)
+        }
+    })
 }

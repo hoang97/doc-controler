@@ -98,11 +98,13 @@ class XFileContentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
         return get_xfiles_can_view(self.request.user)
 
 class XFileTypeListCreateView(generics.ListCreateAPIView):
+    '''fields = ('id', 'name', 'example_content')'''
     queryset = XFileType.objects.all()
     serializer_class = XFileTypeSerializer
     permission_classes = [IsAuthenticated, IsGiamdoc]
 
 class XFileTypeRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    '''fields = ('id', 'name', 'example_content')'''
     queryset = XFileType.objects.all()
     serializer_class = XFileTypeSerializer
     permission_classes = [IsAuthenticated, IsGiamdoc]
