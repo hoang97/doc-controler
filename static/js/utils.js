@@ -24,6 +24,9 @@ const LOG_CONTENT_TYPE=[
 const NOTIFICATION_INFO=1;
 const NOTIFICATION_SUCCESS=2;
 const NOTIFICATION_ERROR=3;
+
+
+
 function displayDatetime(s,type='short'){
     if (s=='' || s==null){
         return 'Không có';
@@ -65,6 +68,27 @@ function getCookie(name)
     }
     return cookieValue;
 }
+const XFILE_STATUS=[
+    [0,'Khởi tạo','secondary','Hồ sơ đang được khởi tạo bởi Trợ lý'],
+    [1,'Đang sửa đổi','info','Hồ sơ đang quá trình sửa đổi'],
+    [2,'Đang kiểm định','primary','Hồ sơ đang trong quá trình kiểm định'],
+    [3,'Đang duyệt','warning','Hồ sơ đang chờ duyệt bởi Trưởng phòng'],
+    [4,'Hoàn tất','success','Hồ sơ đã được duyệt'],
+];
+const HTML_CODE_MESSAGE={
+    200: 'Lấy dữ liệu thành công',
+    201: 'Khởi tạo thành công',
+    204: 'Không có dữ liệu',
+    400: 'Yêu cầu không hợp lệ',
+    401: 'Yêu cầu chưa được xác thực',
+    403: 'Không đủ quyền truy cập',
+    404: 'Không tìm thấy dữ liệu',
+    405: 'Không đủ quyển truy cập',
+    406: 'Yêu cầu không hợp lệ',
+    409: 'Dữ liệu đã bị thay đổi',
+    415: 'Yêu cầu không hợp lệ',
+    500: 'Lỗi máy chủ'
+};
 const DATATABLE_LANGUAGE={
     "lengthMenu": "Hiển thị _MENU_ bản ghi mỗi trang",
     "zeroRecords": "Không tìm thấy kết quả",

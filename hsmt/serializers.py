@@ -3,6 +3,8 @@ from hsmt.models import XFile, XFileType, XFileChange, Target
 from users.models import Department
 from django.contrib.auth.models import User
 
+# Support functions
+
 def get_change_content(old_content, new_content):
     '''
     - Nhận vào JSON_dict của XFile cũ và mới
@@ -26,6 +28,21 @@ def get_change_content(old_content, new_content):
             }
     
     return change
+
+def get_old_xfile_content(xfile):
+    if xfile.version == 0:
+        # Nếu XFile đang trong trạng thái khởi tạo thì ko thể update
+        raise ValueError("Can't update XFile in INIT status")
+    old_xfile = xfile.get_xfile_by_version(xfile.version-1)
+    old_content = old_xfile.get_xfile_content()
+    return old_content
+
+def save_to_xfile_change(xfile, old_content, new_content):
+    change_content = get_change_content(old_content, new_content)
+    change = xfile.changes.get(version=xfile.version)
+    change.update(change_content)
+
+# Serializers
 
 class XFileTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,8 +99,8 @@ class XFileGeneralSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = XFile
-        fields = ('id', 'code', 'status', 'version', 'description', 'date_created', 'type', 'targets', 'department', 'creator', 'editors', 'checkers', 'approvers', 'changes')
-        read_only_fields = ('id', 'status', 'version', 'date_created', 'department', 'creator', 'changes')
+        fields = ('id', 'code', 'status', 'get_status_display', 'version', 'description', 'date_created', 'type', 'targets', 'department', 'creator', 'editors', 'checkers', 'approvers', 'changes')
+        read_only_fields = ('id', 'status', 'get_status_display', 'version', 'date_created', 'department', 'creator', 'changes')
     
 
 class XFileGeneralUpdateSerializer(serializers.ModelSerializer):
@@ -93,17 +110,12 @@ class XFileGeneralUpdateSerializer(serializers.ModelSerializer):
 
     # Ghi đè function update để cập nhật XFileChange
     def update(self, instance, validated_data):
-        if instance.version == 0:
-            # Nếu XFile đang trong trạng thái khởi tạo thì ko thể update
-            raise ValueError("Can't update XFile in INIT status")
-        old_instance = instance.get_xfile_by_version(instance.version-1)
-        old_content = old_instance.get_xfile_content()
         new_instance = super().update(instance, validated_data)
+        
+        old_content = get_old_xfile_content(instance)
         new_content = new_instance.get_xfile_content()
+        save_to_xfile_change(instance, old_content, new_content)
 
-        change_content = get_change_content(old_content, new_content)
-        change = instance.changes.get(version=instance.version)
-        change.update(change_content)
         return new_instance
 
 class XFileContentSerializer(serializers.ModelSerializer):
@@ -112,17 +124,10 @@ class XFileContentSerializer(serializers.ModelSerializer):
         fields = ('id', 'content')
 
     def update(self, instance, validated_data):
-        if instance.version == 0:
-            # Nếu XFile đang trong trạng thái khởi tạo thì ko thể update
-            raise ValueError("Can't update XFile in INIT status")
-        old_instance = instance.get_xfile_by_version(instance.version-1)
-        old_content = old_instance.get_xfile_content()
-
         new_instance = super().update(instance, validated_data)
-        new_content = new_instance.get_xfile_content()
 
-        change_content = get_change_content(old_content, new_content)
-        change = instance.changes.get(version=instance.version)
-        change.update(change_content)
+        old_content = get_old_xfile_content(instance)
+        new_content = new_instance.get_xfile_content()
+        save_to_xfile_change(instance, old_content, new_content)
 
         return new_instance
