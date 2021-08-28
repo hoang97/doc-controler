@@ -35,6 +35,9 @@
 
   <!-- Daterange picker -->
   <link rel="stylesheet" type="text/css" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+
+  <!-- Bootstrap multiselect -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-multiselect/css/bootstrap-multiselect.min.css' %}" type="text/css"/>
   <style>
     /*
  *  STYLE 7
@@ -72,6 +75,14 @@
                         color-stop(0.44, rgb(122,153,217)),
                       color-stop(0.72, rgb(73,125,189)),
                       color-stop(0.86, rgb(28,58,148)));
+    }
+
+    .multiselect-container {
+        width: 100% !important;
+    }
+
+    .multiselect.dropdown-toggle {
+        text-align: left !important;
     }
   </style>
     {% block customcss %}
@@ -275,12 +286,12 @@
       <div class="content-header">
         <div class="container-fluid">
           <div class="row mb-2">
-            <div class="col-sm-6">
+            <div class="col-xs-12 col-md-6">
               <h1 class="m-0">{% block header %}
                 {% endblock %}
               </h1>
             </div><!-- /.col -->
-            <div class="col-sm-6">
+            <div class="col-xs-12 col-md-6">
               <ol class="breadcrumb float-sm-right">
                 <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                 <li class="breadcrumb-item">{% block breadcrumb-text %}{% endblock %}</li>
@@ -379,7 +390,11 @@
   <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
   <script src="{% static 'js/dashboard.js' %}"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-    <script src="{% static 'js/utils.js' %}"></script>
+  <script src="{% static 'js/utils.js' %}"></script>
+
+  <!-- Bootstrap multiselect -->
+  <script type="text/javascript" src="{% static 'plugins/bootstrap-multiselect/js/bootstrap-multiselect.min.js' %}"></script>
+
   {% block script %}
 
   {% endblock %}

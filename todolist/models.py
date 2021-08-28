@@ -2,7 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMIntegerField
-
+from django import forms
+from datetime import date
 
 class TaskStatus(models.IntegerChoices):
     """
@@ -21,8 +22,8 @@ class CommonTask(models.Model):
         choices=TaskStatus.choices,
         default=TaskStatus.INIT,
     )
-    deadline = models.DateTimeField()
-    start_at = models.DateTimeField()
+    deadline = models.DateField(default=date.today)
+    start_at = models.DateField(default=date.today)
 
     # default
     created_at = models.DateTimeField(auto_now_add=True)

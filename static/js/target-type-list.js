@@ -198,13 +198,11 @@ function dictTargetTypeToList(dict,targetType,count){
     arr.push( [count ] );
     arr.push( [dict['name'] ] );
     arr.push( [dict['description'] ] );
-        // <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#modalAddTargetType" data-id="1" data-type="target-direction">Sửa</button>
-        // <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalDelete" data-id="1" data-type="target-direction">Xoá</button>
-    let btnSua='<button type="button" class="btn btn-warning float-right mr-1 d-none d-md-block" data-toggle="modal" data-target="#modalAddTargetType" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
-    let btnXoa='<button type="button" class="btn btn-danger float-right d-none d-md-block" data-toggle="modal" data-target="#modalDelete" id="row-'+targetType+'-' +dict['id']+'" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
-    let btnSuaMini='<button type="button" class="btn btn-warning float-right mr-sm-1 btn-sm d-block d-md-none" data-toggle="modal" data-target="#modalAddTargetType" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
-    let btnXoaMini='<button type="button" class="btn btn-danger float-right  mb-1 mb-sm-0 btn-sm d-block d-md-none" data-toggle="modal" data-target="#modalDelete" id="row-'+targetType+'-' +dict['id']+'" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
-    arr.push(btnXoa+btnSua+btnXoaMini+btnSuaMini);
+    let btnSua = '<button type="button" class="btn btn-warning float-right mr-1 d-none d-md-block" data-toggle="modal" data-target="#modalAddTargetType" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
+    let btnXoa = '<button type="button" class="btn btn-danger float-right d-none d-md-block" data-toggle="modal" data-target="#modalDelete" id="row-'+targetType+'-' +dict['id']+'" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
+    let btnSuaMini = '<button type="button" class="btn btn-warning float-right mr-sm-1 btn-sm d-block d-md-none" data-toggle="modal" data-target="#modalAddTargetType" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
+    let btnXoaMini = '<button type="button" class="btn btn-danger float-right  mb-1 mb-sm-0 btn-sm d-block d-md-none" data-toggle="modal" data-target="#modalDelete" id="row-'+targetType+'-' +dict['id']+'" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
+    arr.push(btnXoa + btnSua + btnXoaMini + btnSuaMini);
     return arr;
 }
 
