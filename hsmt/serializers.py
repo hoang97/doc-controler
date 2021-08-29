@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from hsmt.models import XFile, XFileType, XFileChange, Target
-from users.models import Department
-from django.contrib.auth.models import User
+from users.serializers import DepartmentSerializer, UserGeneralSerializer
 
 # Support functions
 
@@ -52,17 +51,7 @@ class XFileTypeSerializer(serializers.ModelSerializer):
 class TargetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Target
-        fields = ('id', 'name', 'description', 'get_type_display')
-
-class DepartmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Department
-        fields = ('id', 'name', 'alias')
-
-class UserGeneralSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'first_name')
+        fields = ('id', 'name', 'description', 'get_type_display', 'type')
 
 class XFileChangeSerializer(serializers.ModelSerializer):
     editor = UserGeneralSerializer()

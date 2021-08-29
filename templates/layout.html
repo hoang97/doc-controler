@@ -126,7 +126,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="btn btn-danger"  href="/logout" role="button" data-toggle="tooltip" data-placement="bottom" title="Đăng xuất">
+          <a class="btn btn-danger"  href="/logout/" role="button" data-toggle="tooltip" data-placement="bottom" title="Đăng xuất">
             <i class="fas fa-sign-out-alt"></i>
           </a>
         </li>
@@ -175,19 +175,19 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="/hsmt/list" class="nav-link">
+                  <a href="{% url 'hsmt-list' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Danh sách HSMT</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="/target-type/list" class="nav-link">
+                  <a href="{% url 'target-list' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Hướng - Nhóm - ĐB</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="/note/list" class="nav-link">
+                  <a href="/note/list/" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Quản lý Nhận xét</p>
                   </a>
@@ -205,13 +205,13 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="/statistic/log" class="nav-link">
+                  <a href="/statistic/log/" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Nhật ký Hoạt động</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="/group/list" class="nav-link">
+                  <a href="{% url 'group-list' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Nhóm người dùng</p>
                   </a>

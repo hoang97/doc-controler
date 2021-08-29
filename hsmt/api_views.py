@@ -1,15 +1,10 @@
-from django.contrib.auth.decorators import login_required
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
 
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from notifications.utils import notify, VERB
 from .models import *
-from .forms import *
 from .serializers import *
 from .permissions import *
 
@@ -109,13 +104,14 @@ class XFileTypeRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = XFileTypeSerializer
     permission_classes = [IsAuthenticated, IsGiamdoc]
 
-# XFile views
+class TargetListCreateView(generics.ListCreateAPIView):
+    ''''''
+    queryset = Target.objects.all()
+    serializer_class = TargetSerializer
+    permission_classes = [IsAuthenticated]
 
-@login_required
-def hsmt_list_view(request):
-    title='Danh sách HSMT'
-    context={
-        'breadcrumb':title,
-        'h1header':title,
-    }
-    return render(request, 'hsmt/hsmt-list.html',context)
+class TargetRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    ''''''
+    queryset = Target.objects.all()
+    serializer_class = TargetSerializer
+    permission_classes = [IsAuthenticated]

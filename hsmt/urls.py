@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from . import views_test
+from . import api_views, test_views
 from .views import (
     XFileListView,
     XFileCreateView,
@@ -50,7 +50,7 @@ urlpatterns = [
 # ------------------------------------------------------------------------------
 
     # new xfile views
-    path('hsmt/list/', views.hsmt_list, name='hsmt-list'),
+    path('hsmt/list/', test_views.hsmt_list_view, name='hsmt-list'),
     path('get-xfiles/', views.get_xfiles, name='get-xfiles'),
     # path('hsmt/filter/', views.hsmt_filter,name='hsmt-filter'),
     path('hsmt/edit-detail/', views.hsmt_edit_detail, name='edit-detail'),
@@ -59,16 +59,16 @@ urlpatterns = [
     path('get-xfile-user-role/', views.get_xfile_user_role, name='get-xfile-user-role'),
 
 
-    path('api/hsmt/', views_test.XFileListView.as_view()),
-    path('api/hsmt/create/', views_test.XFileCreateView.as_view()),
-    path('api/hsmt/<int:pk>/perm/', views_test.XFilePermView.as_view()),
-    path('api/hsmt/<int:pk>/general/', views_test.XFileRetrieveDestroyView.as_view()),
-    path('api/hsmt/<int:pk>/content/', views_test.XFileContentRetrieveUpdateView.as_view()),
-    path('api/hsmt/<int:pk>/general-update/', views_test.XFileGeneralUpdateView.as_view()),
-    path('api/hsmt-type/', views_test.XFileTypeListCreateView.as_view()),
-    path('api/hsmt-type/<int:pk>/', views_test.XFileTypeRetrieveUpdateDestroyView.as_view()),
-
-    path('test/hsmt/', views_test.hsmt_list_view, name='get-xfile-user-role'),
+    path('api/hsmt/', api_views.XFileListView.as_view()),
+    path('api/hsmt/create/', api_views.XFileCreateView.as_view()),
+    path('api/hsmt/<int:pk>/perm/', api_views.XFilePermView.as_view()),
+    path('api/hsmt/<int:pk>/general/', api_views.XFileRetrieveDestroyView.as_view()),
+    path('api/hsmt/<int:pk>/content/', api_views.XFileContentRetrieveUpdateView.as_view()),
+    path('api/hsmt/<int:pk>/general-update/', api_views.XFileGeneralUpdateView.as_view()),
+    path('api/hsmt-type/', api_views.XFileTypeListCreateView.as_view()),
+    path('api/hsmt-type/<int:pk>/', api_views.XFileTypeRetrieveUpdateDestroyView.as_view()),
+    path('api/target/', api_views.TargetListCreateView.as_view()),
+    path('api/target/<int:pk>/', api_views.TargetRetrieveUpdateDestroy.as_view()),
 
 
     #XFileChange API
@@ -77,7 +77,7 @@ urlpatterns = [
     #target-type-views
     path('', views.target_type_list, name='list_target'),
     
-    path('target-type/list', views.target_type_list, name='list_target'),
+    path('target/list/', test_views.target_list_view, name='target-list'),
     path('add-edit-target-type', views.add_edit_target_type, name='add-target-type'),
     path('get-all-target-types', views.get_all_target_types, name='get-all-target-types'),
     path('get-target-type-by-type', views.get_target_type_by_type, name='get-all-target-types'),

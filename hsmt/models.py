@@ -27,7 +27,7 @@ class TARGET_TYPES(models.IntegerChoices):
     Những loại của Target
     '''
     DIRECTION = 1, _('hướng'),
-    GROUP = 2, _('nhóm'),
+    GROUP = 2, _('nhóm mục tiêu'),
     AREA = 3, _('địa bàn'),
 
 # Models here.
