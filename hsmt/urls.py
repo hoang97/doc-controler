@@ -1,5 +1,4 @@
 from django.urls import path
-from . import views
 from . import api_views, test_views
 
 # just for debug
@@ -11,7 +10,7 @@ urlpatterns = [
     # Views
     path('', test_views.target_list_view, name='index'),
     path('hsmt/list/', test_views.hsmt_list_view, name='hsmt-list'),
-    path('hsmt/edit-detail/', views.hsmt_edit_detail, name='hsmt-detail'),
+    path('hsmt/edit-detail/', test_views.hsmt_edit_detail, name='hsmt-detail'),
     path('target/list/', test_views.target_list_view, name='target-list'),
 
     # XFile API
