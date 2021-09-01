@@ -66,6 +66,7 @@ function getCookie(name)
             }
         }
     }
+    console.log('Cookie: ' + cookieValue);
     return cookieValue;
 }
 const XFILE_STATUS=[

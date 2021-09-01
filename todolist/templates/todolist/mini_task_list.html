@@ -1,0 +1,322 @@
+
+{% extends "layout.html" %}
+{% load static %}
+
+
+{% block header %}{{ h1header }} của {{ breadcrumb_sub }} <br/>
+  (từ {{ task_start_at_formatted }} đến {{ task_deadline_formatted }}) {% endblock %}
+{% block breadcrumb-text %}<a href="/task/list">Danh sách công việc</a>{% endblock %}
+{% block breadcrumb-text-sub %}{{ breadcrumb_sub }}{% endblock %}
+{% block customcss %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css' %}">
+{% endblock %}
+{% block body %}
+<p class="d-none" id="task-id" aria-label="to get current id">{{ task_id }}</p>
+<p class="d-none" id="task-title" aria-label="to get current title">{{ breadcrumb_sub }}</p>
+<p class="d-none" id="task-content" aria-label="to get current content">{{ task_content }}</p>
+<p class="d-none" id="task-start-at" aria-label="to get current start at">{{ task_start_at }}</p>
+<p class="d-none" id="task-deadline" aria-label="to get current deadline">{{ task_deadline }}</p>
+<p class="d-none" id="task-users" aria-label="to get current users">{{ task_users }}</p>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="row py-2 px-2">
+          <h5>{{ task_content }}</h5>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              {% if user_layout.username == task_manager %}
+                <div class="card-header">
+                  <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#modalAddMiniTask">Thêm mới</button>
+                  <button type="button" class="btn btn-info mr-2" data-toggle="modal" data-target="#modalEditTask">Chỉnh sửa</button>
+                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#modalDeleteTask" data-id="{{ task_id }}">Xóa công việc</button>
+                </div>
+              {% endif %}
+              <div class="card-body">
+                <div class=row>
+                  <div class="col-lg-12">
+                    <table class="table table-head-fixed text-nowrap table-hover" width="100%" id="tblTask">
+
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="modalAddMiniTask" tabindex="-1" role="dialog" aria-labelledby="addMiniTaskLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thêm nhiệm vụ</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-title" class="col-form-label">Tên nhiệm vụ:</label>
+              <input class="form-control" id="mini-task-title">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-content" class="col-form-label">Nội dung nhiệm vụ:</label>
+              <textarea class="form-control" id="mini-task-content" type="date"></textarea>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-start-at" class="col-form-label">Ngày bắt đầu:</label>
+              <input class="form-control" id="mini-task-start-at" type="date" value="2021-01-01">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-deadline" class="col-form-label">Hạn thực hiện:</label>
+              <input class="form-control" id="mini-task-deadline" type="date" value="2021-01-01">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <div class="form-group">
+                <label for="mini-task-users">Người thực hiện:</label>
+                <br>
+                <select multiple class="custom-select w-100" id="mini-task-users">
+                  {% for username in task_users %}
+                    <option value="{{ username }}">{{ username }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-save-new-mini-task" data-id="{{ task_id }}">Thêm nhiệm vụ mới</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEditTask" tabindex="-1" role="dialog" aria-labelledby="editTaskLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Chỉnh sửa công việc</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="task-title-edit" class="col-form-label">Tên công việc:</label>
+              <input class="form-control" id="task-title-edit">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="task-content-edit" class="col-form-label">Nội dung công việc:</label>
+              <textarea class="form-control" id="task-content-edit" type="date"></textarea>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="task-start-at-edit" class="col-form-label">Ngày bắt đầu:</label>
+              <input class="form-control" id="task-start-at-edit" type="date" value="2021-01-01">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="task-deadline-edit" class="col-form-label">Hạn thực hiện:</label>
+              <input class="form-control" id="task-deadline-edit" type="date" value="2021-01-01">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <div class="form-group">
+                <label for="task-users-edit">Người thực hiện:</label>
+                <br>
+                <select multiple class="custom-select w-100" id="task-users-edit">
+                  {% for username in user_options %}
+                    {% if username != user_layout.username %}
+                      <option value="{{ username }}">{{ username }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-edit-task">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEditMiniTask" tabindex="-1" role="dialog" aria-labelledby="editMiniTaskLabel" aria-hidden="true">
+  <p class="d-none" id="mini-task-id-edit"></p>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Chỉnh sửa nhiệm vụ</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-title-edit" class="col-form-label">Tên nhiệm vụ:</label>
+              <input class="form-control" id="mini-task-title-edit">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-content-edit" class="col-form-label">Nội dung nhiệm vụ:</label>
+              <textarea class="form-control" id="mini-task-content-edit" type="date"></textarea>
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-start-at-edit" class="col-form-label">Ngày bắt đầu:</label>
+              <input class="form-control" id="mini-task-start-at-edit" type="date" value="2021-01-01">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <label for="mini-task-deadline-edit" class="col-form-label">Hạn thực hiện:</label>
+              <input class="form-control" id="mini-task-deadline-edit" type="date" value="2021-01-01">
+            </div>
+          </div>
+          <div class="col-lg-12">
+            <div class="form-group">
+              <div class="form-group">
+                <label for="mini-task-users-edit">Người thực hiện:</label>
+                <br>
+                <select multiple class="custom-select w-100" id="mini-task-users-edit">
+                  {% for username in task_users %}
+                    <option value="{{ username }}">{{ username }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-edit-mini-task">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalChangeStatus" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Đổi trạng thái</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label for="statusType">Trạng thái mới</label>
+            <select class="custom-select" id="statusType">
+              <option value="0">Khởi tạo</option>
+              <option value="1">Đang thực hiện</option>
+              <option value="2">Đang kiểm định</option>
+              <option value="3">Đã hoàn thiện</option>
+            </select>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-change-status">Đổi trạng thái</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalDeleteMiniTask" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Xác nhận xoá?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Chắc chắn xoá nhiệm vụ này?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-danger"  data-dismiss="modal" id="btn-delete-mini-task">Xoá</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalDeleteTask" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Xác nhận xoá?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Chắc chắn xoá công việc này?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-danger"  data-dismiss="modal" id="btn-delete-task">Xoá</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% comment %} <!-- {% endif %} --> {% endcomment %}
+
+{% endblock %}
+
+{% block datatablejs %}
+<!-- DataTables  & Plugins -->
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+{% endblock %}
+{% block script %}
+<script src="{% static 'js/minitask-list.js' %}"></script>
+{% endblock %}

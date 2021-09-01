@@ -19,6 +19,7 @@ function initTargetList() {
             TARGET_TYPES.forEach((type) => {
                 initTargetTableByType(type, targetData);
             })
+
         },
         error: (xhr, status, error) => {
             showNotification(HTML_CODE_MESSAGE[xhr.status], 3)
