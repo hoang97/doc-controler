@@ -14,7 +14,7 @@ urlpatterns = [
     path('success/',views.success_view, name='user-success'),
     path('user/list/',views.user_list_view, name='user-list'),
     path('profile/', views.profile_view, name='user-profile'),
-    path('group/list', views.group_list_view, name='group-list'),
+    path('group/list/', views.group_list_view, name='group-list'),
     
     # APIs
     path('register-api/', views.register_api, name='user-register-api'),

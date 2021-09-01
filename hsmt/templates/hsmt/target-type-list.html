@@ -17,28 +17,19 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-lg-12">
-        <button type="button" class="btn btn-success mb-2" data-toggle="modal" data-target="#modalAddTargetType"
-        data-id="">Thêm mới</button>
-    
-
-
+        <button type="button" class="btn btn-success mb-2" data-toggle="modal" data-target="#modalCreate"
+        data-url="/api/target/">Thêm mới</button>
       </div>
       <div class="col-lg-12">
         <div class="card card-primary card-outline card-outline-tabs">
           <div class="card-header p-0 border-bottom-0">
             <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" id="custom-tab-target-direction" data-toggle="pill" href="#tab-target-direction" role="tab"
-                  aria-controls="tab-target-direction" aria-selected="true">Hướng</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="custom-tab-target-group" data-toggle="pill" href="#tab-target-group" role="tab" aria-controls="tab-target-group"
-                  aria-selected="false">Nhóm mục tiêu</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="custom-tab-target-area" data-toggle="pill" href="#tab-target-area" role="tab"
-                  aria-controls="tab-target-area" aria-selected="false">Địa bàn</a>
-              </li>
+              {% for id, name in targets %}
+                <li class="nav-item">
+                  <a class="nav-link {% if forloop.first %}active{% endif %}" data-toggle="pill" href="#tblWrapper{{id}}" role="tab"
+                    aria-controls="tab-target-direction" aria-selected="true" id="tab{{id}}">{{name|capfirst}}</a>
+                </li>
+              {% endfor %}
             </ul>
           </div>
           <div class="card-body">
@@ -46,55 +37,13 @@
               
               <div class="col-lg-12">
                 <div class="tab-content" id="custom-tabs-four-tabContent">
-                  <div class="tab-pane fade active show" id="tab-target-direction" role="tabpanel" aria-labelledby="tab-target-direction">
-                    
-                    <table class="table table-head-fixed table-striped" width="100%" id="tbl-target-direction">
-                      <!-- <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Tên</th>
-                          <th style="width: 50%">Mô tả</th>
-                          <th style="width:15%;">Tùy chọn</th>
-                        </tr>
-                      </thead>
-                      <tbody id="tbl-target-direction">
-                       
-                      </tbody> -->
-                    </table>
-                  </div>
-                  <div class="tab-pane fade active" id="tab-target-group" role="tabpanel" aria-labelledby="tab-target-group">
-    
-                    <table class="table table-head-fixed table-striped display"  width="100%" id="tbl-target-group">
-                      <!-- <thead>
-                        <tr>
-                          <th>Thứ tự</th>
-                          <th>Tên</th>
-                          <th style="width: 50%">Mô tả</th>
-                          <th style="width:15%;">Tùy chọn</th>
-                        </tr>
-                      </thead>
-                      <tbody id="tbl-target-group">
-                       
-                      </tbody> -->
-                    </table>
-                  </div>
-                  <div class="tab-pane fade active" id="tab-target-area" role="tabpanel" aria-labelledby="tab-target-area">
-    
-                    <table class="table table-head-fixed table-striped" width="100%" id="tbl-target-area">
-                      <!-- <thead>
-                        <tr>
-                          <th>Thứ tự</th>
-                          <th>Tên</th>
-                          <th style="width: 50%">Mô tả</th>
-                          <th style="width:15%;">Tùy chọn</th>
-                        </tr>
-                      </thead>
-                      <tbody id="tbl-target-area">
-                       
-    
-                      </tbody> -->
-                    </table>
-                  </div>
+                  {% for id, name in targets %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tblWrapper{{id}}" role="tabpanel" aria-labelledby="tbl{{id}}">
+                      <table class="table table-head-fixed table-striped" width="100%" id="tbl{{id}}">
+                      </table>
+                    </div>
+                  {% endfor %}
+
                 </div>
               </div>
             </div>
@@ -108,8 +57,68 @@
     </div>
   </div>
   <!-- /.container-fluid -->
-  <div class="modal fade" id="modalAddTargetType" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
+
+  <!-- modalDelete -->
+  <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Xác nhận xoá</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="modalDeleteForm">
+        <div class="modal-body">
+          Chắc chắn xoá bản HSMT này?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-danger" >Xóa</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- modalEdit -->
+  <div class="modal fade" id="modalEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Sửa mục tiêu</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="modalEditForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="inputTypeEdit">Loại mục tiêu</label>
+            <select class="custom-select" id="inputTypeEdit" name="type">
+              {% for id, name in targets %}
+                <option value="{{id}}">{{name}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inputNameEdit">Tên</label>
+            <input type="text" class="form-control" id="inputNameEdit" placeholder="Tên mục tiêu" name="name">
+          </div>
+          <div class="form-group">
+            <label for="inputDescriptionEdit">Mô tả</label>
+            <textarea class="form-control" name="description" id="inputDescriptionEdit" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-success" >Xác nhận</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- modalCreate -->
+  <div class="modal fade" id="modalCreate" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -118,70 +127,33 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
+        <form id="modalCreateForm">
         <div class="modal-body">
-          <div class="row">
-            <div class="col-lg-12">
-              <div class="form-group">
-                <label>Loại mục tiêu</label>
-                <select class="custom-select" id="targetType">
-                  <option value="0"selected>Chọn...</option>
-                  <option value="1" >Hướng</option>
-                  <option value="2" >Nhóm mục tiêu</option>
-                  <option value="3" >Địa bàn</option>
-                </select>
-                <div id='optTargetTypeFeedback' style="color: red;display: none;" >
-                  Sửa lỗi đê
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-12">
-              <div class="form-group">
-                <label for="targetTypeName" class="col-form-label">Tên:</label>
-                <input class="form-control" id="targetTypeId" value="" hidden>
-                <input class="form-control" id="targetTypeName">
-              </div>
-              <div id='optTargetNameFeedback' style="color: red;display: none;" >
-                Không để trống trường này
-              </div>
-            </div>
-            <div class="col-lg-12">
-              <div class="form-group">
-                <label for="targetTypeDesc" class="col-form-label">Mô tả:</label>
-                <textarea class="form-control" id="targetTypeDesc"></textarea>
-              </div>
-            </div>
-        
-
+          <div class="form-group">
+            <label for="inputTypeCreate">Loại mục tiêu</label>
+            <select class="custom-select" id="inputTypeCreate" name="type">
+              {% for id, name in targets %}
+                <option value="{{id}}">{{name}}</option>
+              {% endfor %}
+            </select>
           </div>
-       
+          <div class="form-group">
+            <label for="inputNameCreate">Tên</label>
+            <input type="text" class="form-control" id="inputNameCreate" placeholder="Tên mục tiêu" name="name">
+          </div>
+          <div class="form-group">
+            <label for="inputDescriptionCreate">Mô tả</label>
+            <textarea class="form-control" name="description" id="inputDescriptionCreate" rows="3"></textarea>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-success" id="btnSave">Lưu</button>
+          <button type="submit" class="btn btn-success" >Xác nhận</button>
         </div>
+        </form>
       </div>
     </div>
   </div>
-  <!-- Modal delete Target Type -->
-  <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Xác nhận xoá</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Chắc chắn xoá bản ghi này?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-danger" data-dismiss="modal" id="btnDelete" >Xoá</button>
-      </div>
-    </div>
-  </div>
-</div>
   <!-- End of Modal delete Target Type -->
 </section>
 

@@ -1,215 +1,72 @@
 const TARGET_TYPES=[
-    ['1','target-direction'],
-    ['2','target-group'],
-    ['3','target-area'],
+    {id: '1', name:'hướng'},
+    {id: '2', name:'nhóm mục tiêu'},
+    {id: '3', name:'địa bàn'},
 ];
+
 $(document).ready(function () {
-    for (let i in TARGET_TYPES){
-        // ['1','target-direction']
-        getTargetTypes(TARGET_TYPES[i][0],true);
-    }
-
-});
-$( "#btnSave" ).on( "click", function() {
-    // Validation
-    if ($('#targetType').val()=='0'){
-        $('#optTargetTypeFeedback').show();
-        return; 
-    }
-    $('#optTargetTypeFeedback').hide();
-    // End Validation
-    if ($('#targetTypeName').val()==''){
-        $('#optTargetNameFeedback').show();
-        return; 
-    }
-    $('#optTargetNameFeedback').hide();
-    let targetType=$('#targetType').val();
-    let data={
-        'target-type':targetType,
-        'target-id':$('#targetTypeId').val(),
-        'target-name':$('#targetTypeName').val(),
-        'target-desc':$('#targetTypeDesc').val()
-    }
-    $.ajax({
-        type: 'POST',
-        url: '/add-edit-target-type',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: data,
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                getTargetTypes(targetType);
-                showNotification('Lưu thành công');
-                
-            }
-            else{
-                showNotification(resp['msg']);
-
-            }
-    
-        })
-        .fail(() => {
-            showNotification("Failed");
-        });
-        $('#modalAddTargetType').modal('hide');
-
+    initTargetList();
+    setCreateModalForm();
+    setDeleteModalForm();
+    setEditModalForm(initEditModalValue);
 });
 
-function resolveTargetTypeToString(targetType){
-    for (let i in TARGET_TYPES){
-        if (targetType==TARGET_TYPES[i][0]){
-            return TARGET_TYPES[i][1];
-        }
-    }   
-}
-$('#modalAddTargetType').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Button that triggered the modal
-    var targetTypeId = button.data('id'); // Extract info from data-* attributes
-    var targetType = button.data('type'); // Extract info from data-* attributes
-    // Đặt option = 0: Chọn... --> Validate yêu cầu người dùng phải chọn Loại mục tiêu
-    $('#targetType').val('0');
-    $('#targetTypeId').val(targetTypeId);
-    
-    if(targetTypeId!=''){
-        // Có dữ liệu --> Get dữ liệu để chỉnh sửa
-        $.ajax({
-            type: 'GET',
-            url: '/get-target-type-by-id',
-            data: {
-                'type':targetType,
-                'id':targetTypeId
-            },
-        })
-            .done((resp) => {
-                if(resp['status']===0){
-                    let data=resp['data'];
-                    // {"id": 1, "name": "dsa", "description": "das"}
-                    $('#targetType').val(targetType);
-                    $('#targetTypeName').val(data['name']);
-                    $('#targetTypeDesc').val(data['description']);
-                }
-                else{
-                    showNotification(resp['msg']);
-                }
-            })
-            .fail(() => {
-                showNotification("Failed");
-            });
-    }
-});
-function initTable(dataSet,targetType,initial=false){
-    let tbl=$('#tbl-'+resolveTargetTypeToString(targetType));
-    if (initial==true){
-        tbl.html('');
-        tbl.DataTable( {
-            data: dataSet,
-            columns: [
-                { title: "#", "width": "5%" },
-                { title: "Tên", "width": "20%"  },
-                { title: "Mô tả", "width": "50%"  },
-                { title: "" },
-                // { title: "Start date" },
-                // { title: "Salary" }
-            ],
-            "language": DATATABLE_LANGUAGE
-           
-            
-        } );
-    }
-    else{
-        tbl.dataTable().fnClearTable();
-        if (dataSet.length>0){
-            tbl.dataTable().fnAddData(dataSet);
-        }
-    }
-
-}
-
-function DeleteTarget(targetType,targetTypeId){
-    let data={
-        'target-id':targetTypeId
-    }
-    $.ajax({
-        type: 'POST',
-        url: '/delete-target-type',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: data,
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                getTargetTypes(targetType);
-                showNotification('Xoá thành công');
-            }
-            else{
-                showNotification(resp['msg']);
-
-            }
-        })
-        .fail(() => {
-            showNotification("Failed");
-        });
-}
-$('#modalDelete').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Button that triggered the modal
-    var targetTypeId = button.data('id'); // Extract info from data-* attributes
-    var targetType = button.data('type'); // Extract info from data-* attributes
-    // Đặt option = 0: Chọn... --> Validate yêu cầu người dùng phải chọn Loại mục tiêu
-    
-    let deleteQuery='DeleteTarget("'+targetType +'","' + targetTypeId+'");';
-    $('#btnDelete').attr('onclick',deleteQuery);
-    
-});
-
-function getTargetTypes(targetType,initial=false){
-    
+function initTargetList() {
     $.ajax({
         type: 'GET',
-        url: '/get-target-type-by-type',
-        data:{'targetType':targetType}
-        // headers: {'X-CSRFToken': getCookie('csrftoken')},
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                let data=resp['data'];
-                    // [
-                    //  {"id": 1, "name": "dsa", "description": "das"}, 
-                    //  {"id": 2, "name": "dsad", "description": "dsa"}
-                    // ]
-                let displayTableList=[];
-                let count=0;
-                for (let i in data){
-                    count+=1;
-                    displayTableList.push(dictTargetTypeToList(data[i],targetType,count));
-                }
-                initTable(displayTableList,targetType,initial);
-            }
-            else{   
-                showNotification(resp['msg']);
-            }
-            
-        })
-        .fail(() => {
-            showNotification("Failed");
-        });
+        url: '/api/target/',
+        success: (targetData) => {
+            TARGET_TYPES.forEach((type) => {
+                initTargetTableByType(type, targetData);
+            })
 
-}   
-function dictTargetTypeToList(dict,targetType,count){
-    let arr=[];
-    arr.push( [count ] );
-    arr.push( [dict['name'] ] );
-    arr.push( [dict['description'] ] );
-    let btnSua = '<button type="button" class="btn btn-warning float-right mr-1 d-none d-md-block" data-toggle="modal" data-target="#modalAddTargetType" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
-    let btnXoa = '<button type="button" class="btn btn-danger float-right d-none d-md-block" data-toggle="modal" data-target="#modalDelete" id="row-'+targetType+'-' +dict['id']+'" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
-    let btnSuaMini = '<button type="button" class="btn btn-warning float-right mr-sm-1 btn-sm d-block d-md-none" data-toggle="modal" data-target="#modalAddTargetType" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Chỉnh sửa bản ghi"><i class="fas fa-edit"></i></span></button>'
-    let btnXoaMini = '<button type="button" class="btn btn-danger float-right  mb-1 mb-sm-0 btn-sm d-block d-md-none" data-toggle="modal" data-target="#modalDelete" id="row-'+targetType+'-' +dict['id']+'" data-id="'+dict['id']+'" data-type="'+targetType+'"> <span data-toggle="tooltip" data-placement="bottom" title="Xoá bản ghi"<i class="fas fa-trash-alt"></i></span></button>'
-    arr.push(btnXoa + btnSua + btnXoaMini + btnSuaMini);
-    return arr;
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3)
+        }
+    });
+};
+
+function filterTargetByType(targets, type_id) {
+    filtered_targets = []
+    targets.forEach(target => {
+        if (target.type == type_id) {
+            filtered_targets.push(target)
+        }
+    })
+    return filtered_targets
 }
 
-$('#modalAddTargetType').on('hidden.bs.modal', function () {
-    clear();
-})
-function clear() {
-    $("#targetTypeName").val("");
-    $("#targetTypeDesc").val("");
+function initTargetTableByType(type, data) {
+    let targetTableElement=$('#tbl'+type.id);
+    let targetTabElement=$('#tab'+type.id);
+    let t = targetTableElement.DataTable({
+        processing : true,
+        data: filterTargetByType(data, type.id),
+        columns: [
+            // Index column
+            { width: "2rem", title: "#", searchable: false, orderable: false,  data: "id" },
+            // Data columns
+            { width: "30%", title: "Tên", data: "name" },
+            { width: "50%", title: "Mô tả", data: "description" },
+            // Button columns
+            { width: "8rem", title: "", searchable: false, orderable: false, render: rendererForButtonColumn('id', '', '/api/target/<>/', '/api/target/<>/', 'tbl'+type.id)},
+        ],
+        language: DATATABLE_LANGUAGE,
+        order: [[ 1, 'asc' ]],
+    });
+    t.on('order.dt search.dt', function () {
+        t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+            cell.innerHTML = i+1;
+        } );
+    } ).draw();
+    targetTabElement.on('shown.bs.tab', function(e){
+        t.columns.adjust();
+    });
+}
+
+function initEditModalValue(data){
+    $('#inputTypeEdit').val(data.type);
+    $('#inputNameEdit').val(data.name);
+    $('#inputDescriptionEdit').val(data.description);
 }

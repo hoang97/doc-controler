@@ -130,17 +130,17 @@
 
 
                             <div class="p-0" id="footerXfileCover">
-                              <a  class="btn btn-danger ml-2" hidden href="{% url 'hsmt-cancel-change' xfileId %}" id="cancelBtn"><i class="fas fa-exclamation-circle" ></i> Hủy bỏ bản cập nhật</a>
-                              <a  class="btn btn-danger ml-2" hidden href="{% url 'hsmt-reject-check' xfileId %}" id="rejectCheckBtn"><i class="fas fa-exclamation-circle" ></i> Yêu cầu sửa lại</a>
-                              <a  class="btn btn-danger ml-2" hidden href="{% url 'hsmt-reject-approve' xfileId %}" id="rejectApproveBtn"><i class="fas fa-exclamation-circle" ></i> Yêu cầu kiểm định lại</a>
+                              <button  class="btn btn-danger ml-2" hidden onclick="cancel_change_xfile({{xfileId}})" id="cancelBtn"><i class="fas fa-exclamation-circle" ></i> Hủy bỏ bản cập nhật</button>
+                              <button  class="btn btn-danger ml-2" hidden onclick="reject_check_xfile({{xfileId}})" id="rejectCheckBtn"><i class="fas fa-exclamation-circle" ></i> Yêu cầu sửa lại</button>
+                              <button  class="btn btn-danger ml-2" hidden onclick="reject_approve_xfile({{xfileId}})" id="rejectApproveBtn"><i class="fas fa-exclamation-circle" ></i> Yêu cầu kiểm định lại</button>
 
-                              <a  class="btn btn-success float-right mr-2" hidden href="#" id="createChangeBtn" data-toggle="modal" data-target="#createChangeModal"><i class="far fa-plus-square"></i> Tạo bản cập nhật mới</a>
-                              <a  class="btn btn-success float-right mr-2" hidden href="#" id="editBtn"><i class="fas fa-pencil-alt"></i> Sửa HSMT</a>
-                              <a  class="btn btn-success float-right mr-2" hidden href="{% url 'hsmt-submit' xfileId %}" id="submitBtn"><i class="fas fa-paper-plane"></i> Gửi kiểm định</a>
-                              <a  class="btn btn-success float-right mr-2" hidden href="{% url 'hsmt-check' xfileId %}" id="checkBtn"><i class="fas fa-paper-plane"></i> Gửi phê duyệt</a>
-                              <a  class="btn btn-success float-right mr-2" hidden href="{% url 'hsmt-approve' xfileId %}" id="approveBtn"><i class="fas fa-check"></i> Phê duyệt HSMT</a>
+                              <button  class="btn btn-success float-right mr-2" hidden href="#" id="createChangeBtn" data-toggle="modal" data-target="#createChangeModal"><i class="far fa-plus-square"></i> Tạo bản cập nhật mới</button>
+                              <button  class="btn btn-success float-right mr-2" hidden href="#" id="editBtn"><i class="fas fa-pencil-alt"></i> Sửa HSMT</button>
+                              <button  class="btn btn-success float-right mr-2" hidden onclick="submit_xfile({{xfileId}})" id="submitBtn"><i class="fas fa-paper-plane"></i> Gửi kiểm định</button>
+                              <button  class="btn btn-success float-right mr-2" hidden onclick="check_xfile({{xfileId}})" id="checkBtn"><i class="fas fa-paper-plane"></i> Gửi phê duyệt</button>
+                              <button  class="btn btn-success float-right mr-2" hidden onclick="approve_xfile({{xfileId}})" id="approveBtn"><i class="fas fa-check"></i> Phê duyệt HSMT</button>
 
-                              <a class="btn btn-warning float-right text-bold btn-sm"  id="btnDuplicate" style="display: none;"></a>
+                              <button class="btn btn-warning float-right text-bold btn-sm"  id="btnDuplicate" style="display: none;"></button>
                                
             
                             </div>
@@ -351,12 +351,7 @@
         
 
     </section>
-  {% if user_role != '0'  %}
-      {% include "hsmt/modals/modal-add-edit-note.html" %}
-  {% endif %}
-  {% if user_role == '0' and xfile_status == 4 %}
-    {% include "hsmt/modals/modal-create-duplicate.html" %}
-  {% endif %}
+
   <!-- End of Modal for Quickly Add-Edit Note -->
   {% include "hsmt/modals/modal-send-xfile.html" %}
   {% include "hsmt/modals/modal-xfile-tracking-update.html" %}
@@ -387,9 +382,9 @@
 {% endblock %}
 {% block script %}
 <script>
-$(function () {
-    $('.select2').select2();
-});
+  $(function () {
+      $('.select2').select2();
+  });
 </script>
 <script src="{% static 'js/hsmt-edit.js' %}"></script>
 <script src="{% static 'js/hsmt-edit/note.js' %}"></script>

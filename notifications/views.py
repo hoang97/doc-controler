@@ -24,7 +24,7 @@ def get_notifications(request):
     notifications = []
     for notification in query:
         actor_url = reverse('user-profile') + f'?u={notification.recipient.username}'
-        target_url = reverse('hsmt-detail', args=[notification.log.target_id])
+        target_url = reverse('hsmt-detail') + f'?id={notification.log.target_id}'
         notifications.append({
             'seen': notification.seen,
             'message': str(notification.log),
