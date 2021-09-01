@@ -63,7 +63,7 @@
   </div>
 </div>
 
-<form action="{% url 'hsmt-create-change' xfileId %}" method="post">
+<form id="formCreateChangeXFile">
   {% csrf_token %}
   <div class="modal fade" id="createChangeModal" tabindex="-1" role="dialog" aria-labelledby="createChangeModalTitle" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -86,8 +86,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-            {% comment %} <button type="button" class="btn btn-success" id="btnSendXfileModal" onclick="SendXfile();"> Gửi kiểm định</button> {% endcomment %}
-            <button type="submit" class="btn btn-success" id="btnSendXfileModal"> Tạo mới</button>
+            <button type="button" class="btn btn-success" onclick="create_change_xfile({{xfileId}})"> Tạo mới</button>
           </div>
         </div>
       </div>

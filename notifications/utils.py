@@ -36,7 +36,7 @@ def notify(actor, target, verb, notify_to):
         user_id = notification.recipient.id
         user_group = f'user_{user_id}'
         actor_url = reverse('user-profile') + f'?u={notification.recipient.username}'
-        target_url = reverse('hsmt-detail', args=[notification.log.target_id])
+        target_url = reverse('hsmt-detail') + f'?id={notification.log.target_id}'
         async_to_sync(channel_layer.group_send)(
             user_group,
             {

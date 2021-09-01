@@ -1,37 +1,52 @@
 function ReloadXfileUpdates(xfileId){
     $.ajax({
         type: 'GET',
-        url: '/get-xfile-update/',
-        data: {
-            'xfileId':xfileId,
+        url: `/api/hsmt/${xfileId}/general/`,
+        success: (data) => {
+            changes = data['changes']
+            let displayTableList=[];
+            changes.forEach((change) => {
+                displayTableList.push(dictUpdateToList(change));
+            })
+            initTableXfileUpdate(displayTableList);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
         }
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                let data=resp['data'];
-                let displayTableList=[];
-                for (let i in data){
-                    displayTableList.push(dictUpdateToList(data[i]));
-                }
-                initTableXfileUpdate(displayTableList);
+    });
+    // $.ajax({
+    //     type: 'GET',
+    //     url: '/get-xfile-update/',
+    //     data: {
+    //         'xfileId':xfileId,
+    //     }
+    // })
+    //     .done((resp) => {
+    //         if(resp['status']===0){
+    //             let data=resp['data'];
+    //             let displayTableList=[];
+    //             for (let i in data){
+    //                 displayTableList.push(dictUpdateToList(data[i]));
+    //             }
+    //             initTableXfileUpdate(displayTableList);
             
-            }
-            else{
-                showNotification(resp['msg']);
-            }
-        })
-        .fail(() => {
-            showNotification("Failed");
-        });
+    //         }
+    //         else{
+    //             showNotification(resp['msg']);
+    //         }
+    //     })
+    //     .fail(() => {
+    //         showNotification("Failed");
+    //     });
 }
 function dictUpdateToList(dict){
     let arr=[];
     
-    arr.push( [`<span class="text-dark">${displayDatetime(dict['date_created'])}</span>`] );
+    arr.push( [`<span class="text-dark">${displayDatetime(dict['date_edited'])}</span>`] );
     arr.push( [`<span class="text-dark">${dict['name']}</span>`] );
-    arr.push( [dict['editor'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict['editor']}</span>`] );
-    arr.push( [dict['checker'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict['checker']}</span>`] );
-    arr.push( [dict['approver'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict['approver']}</span>`] );
+    arr.push( [dict['editor'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict.editor.first_name}</span>`] );
+    arr.push( [dict['checker'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict.checker.first_name}</span>`] );
+    arr.push( [dict['approver'] == null ? '<span class="text-muted">Không có</span>': `<span class="text-dark">${dict.approver.first_name}</span>`] );
     // let btnSua='';
     // let btnXoa='';
     if (dict['approver']){

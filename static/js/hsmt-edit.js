@@ -1,6 +1,7 @@
 $(document).ready(function () {
     // $('#cardNhanXet').CardWidget('collapse');
     InitXfileData($('#xfileId').val());
+    InitXfileContent($('#xfileId').val());
     InitFrontEndForUserGroup();
  });
 
@@ -8,35 +9,20 @@ function InitFrontEndForUserGroup() {
     // Khởi tạo các button send, sendback, edit, ... xfile
     xfileId = $('#xfileId').val()
     $.ajax({
-        type: 'POST',
-        url: '/hsmt/perm/',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: {
-            xfileId: xfileId
-        },
-    })
-    .done((resp) => {
-        if (resp['status'] === 0) {
-            // thành công
-            let data = resp['data'];
-            // với mỗi quyền thì hiện nút tương ứng
-            for (perm in data)
-                if (data[perm]) {
-                    let btn = $('#'+perm+'Btn');
-                    if (btn[0]) {
-                        btn[0].hidden = false;
-                    }
+        type: 'GET',
+        url: `/api/hsmt/${xfileId}/perm/`,
+        success: (resp) => {
+            for (perm in resp) {
+                if (resp[perm]) {
+                    let btn = document.getElementById(`${perm}Btn`);
+                    if (btn) btn.hidden = false;
                 }
+            }
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
         }
-        else {
-            // lỗi bên server
-            showNotification(resp['msg'], NOTIFICATION_ERROR);
-        }
-    })
-    .fail(() => {
-        // lỗi bên client
-        showNotification(msg="Lỗi truy cập /hsmt/perm/", NOTIFICATION_ERROR);
-    })
+    });
 }
 
 // For init DatetimePicker Input
@@ -102,7 +88,7 @@ function SaveXfile(xfileId){
     });
 }
 
-function displayCalloutTargetType(elementId,data){
+function displayCalloutTargetType(elementId, data){
     let txt='';
     if (data.length<=0){
         txt='Không có dữ liệu';
@@ -113,7 +99,6 @@ function displayCalloutTargetType(elementId,data){
                 txt+=',';
             }
             txt+=data[i]['name'];
-    
         }
     }
    
@@ -121,149 +106,96 @@ function displayCalloutTargetType(elementId,data){
     $('#'+elementId).text(txt);
 }
 function InitXfileData(xfileId,onlyXfileCover=false){
-    let data={ 'id':xfileId};
-    if (onlyXfileCover==true){
-        data['onlyXfileCover']=onlyXfileCover
-    }
     $.ajax({
         type: 'GET',
-        url: '/get-xfile-by-id/',
-        data: data,
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                let data=resp['data'];
+        url: `/api/hsmt/${xfileId}/general/`,
+        success: (data) => {
+            $('#cardBodyXfileCoverLoading').hide();
+            $('#cardBodyXfileCover').show();
+            $('#btnEditXfile').attr('href','/hsmt/create-edit?id='+data['id']);
                 
-                $('#cardBodyXfileCoverLoading').hide();
-                $('#cardBodyXfileCover').show();
-                 // {    
-                    // "id":"1"
-                $('#btnEditXfile').attr('href','/hsmt/create-edit?id='+data['id']);
-                //     "name": "das",
-                //      "date_created": "2021-05-10T13:39:12.446Z", 
-                //      "date_modified": null,
-                //       "edit_note": null, 
-                //       "status": 1,
-                    //   "values": [
-                    //       ["hoVaTen", "hehe"],
-                    //     ["queQuan", "hehe"]
-                    //     ]
-                //         "targetTypes": {
-                //             "target-direction": [{"id": 2, "name": "testt", "description": ""}],
-                //             "target-group": [{"id": 2, "name": "das", "description": "das"}], 
-                //             "target-area": [{"id": 1, "name": "test33", "description": ""}]
-                //         }
-                // }            
-                let btnDuplicate=$('#btnDuplicate');
-                btnDuplicate.html('')
-                let tenDoiTuong=data['name'];
-                if (data['original']){
-                      if (data['duplicate']){
-                        btnDuplicate.attr('onclick',"CreateDuplicate("+data['duplicate']+");");
-                        btnDuplicate.append($('<i>',{class:"far fa-copy"})).append(" Xem bản nháp");
-                    }
-                    else{
-                        btnDuplicate.attr({'data-toggle':"modal", 'data-target':"#modalCreateDuplicate"});
-                        btnDuplicate.append($('<i>',{class:"far fa-copy"})).append(" Tạo bản nháp");
-                    }
-                }
-                else{
-                    $('#divRightSideXfileCover').html('');
-                    if (data['history']){
-                        btnDuplicate.hide();
-                        tenDoiTuong+=" (Bản cũ gần nhất)";
-                        $('#divRightSideXfileCover').append($('<a>',{class:"btn btn-outline-info btn-sm", href:"/hsmt/edit-detail?id="+data['history']}).append($('<i>',{class:"fas fa-directions"}).text(" Xem bản gốc")));
-                    }
-                    else  if (data['duplicate']){
-                        tenDoiTuong+=" (Bản nháp)";
-                        $('#divRightSideXfileCover').append($('<a>',{class:"btn btn-outline-info btn-sm", href:"/hsmt/edit-detail?id="+data['duplicate']}).append($('<i>',{class:"fas fa-directions"}).text(" Xem bản gốc")));
-                    }
-                }
+            let btnDuplicate=$('#btnDuplicate');
+            btnDuplicate.html('')
+            let tenDoiTuong= 'Mô tả';
+            
+            $('#tenDoiTuong').text(tenDoiTuong);
+            $('#date_created').text(displayDatetime(data['date_created']));
+            $('#version').text(data['version']);
+            $('#department').text(data.department.name);
+            let maSo= '123-56/QD';
+            if (data['code'] ){
+                maSo=data['code'];
+            }
+            $('#maSo').text(maSo);
+            $('#xfileDescription').text(data['description']);
+            $('#nguoiLap').html('')
+            $('#nguoiLap').append($('<a>',{href:"/profile?u="+data['creator']['username']}).text(data['creator']['first_name']));
+            // Display Targets
+            const targets = {1:[], 2:[], 3:[]};
+            data['targets'].forEach((target) => {
+                targets[target.type].push(target) ;
+            });
+    
+            displayCalloutTargetType('txtTargetDirection',targets[1]);
+            displayCalloutTargetType('txtTargetGroup',targets[2]);
+            displayCalloutTargetType('txtTargetArea',targets[3]);
 
-                $('#tenDoiTuong').text(tenDoiTuong);
-                $('#date_created').text(displayDatetime(data['date_created']));
-                $('#version').text(data['version']);
-                $('#department').text(data['department']);
-                let maSo= '123-56/QD';
-                if (data['code'] ){
-                    maSo=data['code'];
-                }
-                $('#maSo').text(maSo);
-                $('#xfileDescription').text(data['description']);
-                $('#nguoiLap').html('')
-                $('#nguoiLap').append($('<a>',{href:"/profile?u="+data['user']['username']}).text(data['user']['first_name']));
-                // Display Target Types
-                let targetTypes=data['targetTypes'];
-     
-                displayCalloutTargetType('txtTargetDirection',targetTypes['target-direction']);
-                displayCalloutTargetType('txtTargetGroup',targetTypes['target-group']);
-                displayCalloutTargetType('txtTargetArea',targetTypes['target-area']);
+            // Display Status
+            $('#xfileStatus').html('').append(xfileStatusDisplay(data));
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    })
+}
 
-                // Display Status
-                $('#xfileStatus').html('');
-                for (let i in XFILE_STATUS){
-                    if (XFILE_STATUS[i][0]==data['status']){
-                        let spanTag='<span class="text-md badge badge-'+XFILE_STATUS[i][2]+'"  data-toggle="tooltip" data-placement="bottom" title="'+XFILE_STATUS[i][3]+'">'+XFILE_STATUS[i][1]+'</span>';
-                        $('#xfileStatus').append(spanTag);
-                        break;
-                    }
-                }
-               
-                // Display Value - Entry
-                if (onlyXfileCover==false){
-                    let values=data['values'];
-                    if (data['isDecrypted']){
+function InitXfileContent(xfileId) {
+    $.ajax({
+        type: 'GET',
+        url: `/api/hsmt/${xfileId}/content/`,
+        success: (data) => {
+            // Display Value - Entry
+            let values= JSON.parse(data['content']);
 
-                        $('#cardNotDetailDecrypted').hide();
-                        $('#setXfilePassword').attr('onclick',"");
-                        
-                        $('#cardDetailDecrypted').show();
-                        showNotification(data['msg']);
-                        let newTag='';
-                        if (data['original']){
-                            if (data['history']){
-                                newTag='<span class="badge badge-success">Mới</span>';
-                            }
-                            else if (data['duplicate']){
-                                newTag='<span class="badge badge-success">Thay đổi</span>';
-                            }
-                        }
-                        else{
-                            if (data['history']){
-                                newTag='<span class="badge badge-secondary">Cũ</span>';
-                            }
-                            else if (data['duplicate']){
-                                newTag='<span class="badge badge-secondary">Thay đổi</span>';
-                            }
-                        }
-                        for (let i in values){
-                            let tag=$('#'+values[i][0]);
-                            tag.val(values[i][1]);
-                            if (values[i][2]){
-                                if (tag.parent().find('label').length==0){
-                                    tag.parent().parent().find('label').append(newTag);
-                                }
-                                else{
-                                    tag.parent().find('label').append(newTag);
-                                }
-                            }
-                        }
-                    }
-                    else{
-                        $('#cardNotDetailDecrypted').show();
-                        $('#setXfilePassword').attr('onclick',"ConfirmXfilePwd();");
-                        $('#cardDetailDecrypted').hide();
-                        showNotification(data['msg']);
-                    }   
+            $('#cardNotDetailDecrypted').hide();
+            $('#setXfilePassword').attr('onclick',"");
+            
+            $('#cardDetailDecrypted').show();
+            // showNotification(data['msg']);
+            let newTag='';
+            if (data['original']){
+                if (data['history']){
+                    newTag='<span class="badge badge-success">Mới</span>';
+                }
+                else if (data['duplicate']){
+                    newTag='<span class="badge badge-success">Thay đổi</span>';
                 }
             }
             else{
-                showNotification(resp['msg'],NOTIFICATION_ERROR);
+                if (data['history']){
+                    newTag='<span class="badge badge-secondary">Cũ</span>';
+                }
+                else if (data['duplicate']){
+                    newTag='<span class="badge badge-secondary">Thay đổi</span>';
+                }
             }
-        })
-        .fail(() => {
-            showNotification("Server không phản hồi",NOTIFICATION_ERROR);
-        });
+            for (let i in values){
+                let tag=$('#'+values[i][0]);
+                tag.val(values[i][1]);
+                if (values[i][2]){
+                    if (tag.parent().find('label').length==0){
+                        tag.parent().parent().find('label').append(newTag);
+                    }
+                    else{
+                        tag.parent().find('label').append(newTag);
+                    }
+                }
+            }  
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
 }
 
 
@@ -271,7 +203,7 @@ $('#xfile-note-tab').on('click',function(){
    ReloadNotes();
 });
 $('#xfile-role-tab').on('click',function(){
-     //Display Xfile Roles
+    //Display Xfile Roles
     InitXfileRole($('#xfileId').val());
  });
  $('#xfile-tracking-tab').on('click',function(){
@@ -284,186 +216,33 @@ $('#xfile-update-tab').on('click',function(){
 });
 
 
-
-$('#modalSendXfile').on('show.bs.modal', function (event) {
-    if ($('#sendXfileStatus').val()=='11'){
-
-        $.ajax({
-            type: 'POST',
-            url: '/get-xfile-user-role',
-            headers: {'X-CSRFToken': getCookie('csrftoken')},
-    
-            data: {
-                'xfileId':$('#xfileId').val(),
-                'fetchAllUsers':'1'
-            },
-        })
-            .done((resp) => {
-                if(resp['status']===0){
-                    let data=resp['data'];
-                    let allUsers=data['allUsers'];
-                    let checkers=data['checkers'];
-                    let count=0;
-                    let selectElement=$('#selectCheckerInModal');
-                    selectElement.html('');
-                    for (let i=0;i<allUsers.length;i++){
-                        let flag=false;
-                        for (let j=0;j<data['editors'].length;j++){
-                            if (allUsers[i]['id']==data['editors'][j]['id']){
-                                // Loại bỏ các user  CREATOR và EDITOR
-                                flag=true;
-                                data['editors'].splice(j, 1); 
-                                break;
-                            }
-                        }
-                        if (flag==true){continue;}
-                        count+=1;
-                        let isSelected=false;
-                        for (let j in checkers){
-                            if (allUsers[i]['id']==checkers[j]['id']){
-                                isSelected=true;
-                                checkers.splice(j, 1); 
-                                break;
-                            }
-                        }
-                        let newOption = new Option(allUsers[i]['first_name'], allUsers[i]['id'], false, isSelected);
-                        selectElement.append(newOption).trigger('change');
-                    }
-                
-                    showNotification("Lấy được "+count+" người dùng cùng phòng");
-    
-                }
-                else{
-                    showNotification(resp['msg'],NOTIFICATION_ERROR);
-                }
-        
-            })
-            .fail(() => {
-                showNotification("Server không phản hồi",NOTIFICATION_ERROR);
-            });
-    }
-   
-});
-function getListCheckerId(){
-    var data=$('#selectCheckerInModal').select2('data');    
-    var ret=[];
-    for (let i in data){
-        ret.push(data[i]['id']);
-    }
-    return ret;
-
-}
-function SendXfile(type='forward'){
-    var xfileId=$('#xfileId').val();
-    
-    var newStatus =$('#sendXfileStatus').val();
-    if (type!='forward'){
-        newStatus =$('#sendBackXfileStatus').val();
-    }
-    if (newStatus==""){
-        return;
-    }
-    var data={
-        'xfileId':xfileId,
-        'new-status':newStatus,
-    }
-    if (newStatus=='11'){
-        // Only Troly send to CHecker
-        var listChecker=getListCheckerId();
-        data['listChecker']=JSON.stringify(listChecker);
-    }
-
-    $.ajax({
-        type: 'POST',
-        url: '/send-xfile',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: data,
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                if (resp['data']['new-xfile-id'] !=''){
-                    window.location.href="/hsmt/edit-detail?id="+resp['data']['new-xfile-id'];
-                    return;
-                }
-                InitXfileData(xfileId,true);
-                let new_xfile_status='1';
-                // ''' 10= CLOSED, 11= to Checker, 20 = back Editor, 21= to Approver, 30=back Checker, 31 = DONE '''
-                // INIT=1, CHECKNG=2, APPROING=3, DONE=4
-                switch(newStatus) {
-                    case '11':
-                        new_xfile_status='2';
-                      break;
-                    case '20':
-                        new_xfile_status='1';
-                      break;
-                    case '21':
-                        new_xfile_status='3';
-                      break;
-                    case '30':
-                        new_xfile_status='2';
-                      break;
-                    case '31':
-                        new_xfile_status='4';
-                      break;
-                    default:
-                        new_xfile_status='1';
-                  }
-                $('#template_xfile_status').val(new_xfile_status);
-                InitFrontEndForUserGroup();
-                showNotification(resp['data']['msg']);
-                $('#modalSendXfile').modal('hide');
-            }
-            else{
-                showNotification(resp['msg'],NOTIFICATION_ERROR);
-            }
-    
-        })
-        .fail(() => {
-            showNotification("Server không phản hồi",NOTIFICATION_ERROR);
-        });
-
-};
 function InitXfileRole(xfileId){
     $.ajax({
-        type: 'POST',
-        url: '/get-xfile-user-role/',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: {
-            'xfileId':xfileId,
+        type: 'GET',
+        url: `/api/hsmt/${xfileId}/general/`,
+        success: (data) => {
+            $('#txtEditors').html('');
+            for (let i in data['editors']){
+                if (i!=0)   {$('#txtEditors').append(', ');}
+                $('#txtEditors').append($('<a>',{href:"/profile?u="+data['editors'][i]['username']}).text(data['editors'][i]['first_name']))
+            }
+            
+            $('#txtCheckers').html('');
+            for (let i in data['checkers']){
+                if (i!=0)   {$('#txtCheckers').append(', ');}
+                $('#txtCheckers').append($('<a>',{href:"/profile?u="+data['checkers'][i]['username']}).text(data['checkers'][i]['first_name']))
+            }
+
+            $('#txtApprovers').html('');
+            for (let i in data['approvers']){
+                if (i!=0)   {$('#txtApprovers').append(', ');}
+                $('#txtApprovers').append($('<a>',{href:"/profile?u="+data['approvers'][i]['username']}).text(data['approvers'][i]['first_name']))
+            }
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
         }
-    })
-        .done((resp) => {
-
-            if(resp['status']===0){
-                let data=resp['data'];
-                // dataEditors.push({'id':data['creator']['id'],'text':data['creator']['first_name']})
-                $('#txtEditors').html('');
-                for (let i in data['editors']){
-                    if (i!=0)   {$('#txtEditors').append(', ');}
-                    $('#txtEditors').append($('<a>',{href:"/profile?u="+data['editors'][i]['username']}).text(data['editors'][i]['first_name']))
-                }
-                
-                $('#txtCheckers').html('');
-                for (let i in data['checkers']){
-                    if (i!=0)   {$('#txtCheckers').append(', ');}
-                    $('#txtCheckers').append($('<a>',{href:"/profile?u="+data['checkers'][i]['username']}).text(data['checkers'][i]['first_name']))
-                }
-
-                $('#txtApprovers').html('');
-                for (let i in data['approvers']){
-                    if (i!=0)   {$('#txtApprovers').append(', ');}
-                    $('#txtApprovers').append($('<a>',{href:"/profile?u="+data['approvers'][i]['username']}).text(data['approvers'][i]['first_name']))
-                }
-  
-            }
-            else{
-                showNotification(resp['msg'],NOTIFICATION_ERROR);
-            }
-    
-        })
-        .fail(() => {
-            showNotification("Server không phản hồi",NOTIFICATION_ERROR);
-        });
+    });
 };
 
 function standardDatetime(s){
@@ -473,71 +252,143 @@ function standardDatetime(s){
     return s;
 }
 
-function ConfirmXfilePwd(isReConfirm=''){
-    let xfilePassword='';
-    xfilePassword=$('#xfilePassword').val();
+// function ConfirmXfilePwd(isReConfirm=''){
+//     let xfilePassword='';
+//     xfilePassword=$('#xfilePassword').val();
 
-    if (xfilePassword ==''){
-        showNotification("Hãy nhập mật khẩu");
-        return;
-    }
-    $.ajax({
-        type: 'POST',
-        url: '/confirm-dp',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: {
-            'dp':xfilePassword,
-            'xfileId':$('#xfileId').val()
-        },
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                // Xử lý giao diện
-                if (isReConfirm == ''){
-                    InitXfileData($('#xfileId').val());
+//     if (xfilePassword ==''){
+//         showNotification("Hãy nhập mật khẩu");
+//         return;
+//     }
+//     $.ajax({
+//         type: 'POST',
+//         url: '/confirm-dp',
+//         headers: {'X-CSRFToken': getCookie('csrftoken')},
+//         data: {
+//             'dp':xfilePassword,
+//             'xfileId':$('#xfileId').val()
+//         },
+//     })
+//         .done((resp) => {
+//             if(resp['status']===0){
+//                 // Xử lý giao diện
+//                 if (isReConfirm == ''){
+//                     InitXfileData($('#xfileId').val());
                     
-                }
-                else{
-                    $('#cardNotDetailDecrypted').hide();
-                    $('#setXfilePassword').attr('onclick',"")
-                }
-                // End - Xử lý giao diện
-                showNotification(resp["data"],NOTIFICATION_SUCCESS);
-            }
-            else{
-                showNotification(resp["msg"],NOTIFICATION_ERROR);
+//                 }
+//                 else{
+//                     $('#cardNotDetailDecrypted').hide();
+//                     $('#setXfilePassword').attr('onclick',"")
+//                 }
+//                 // End - Xử lý giao diện
+//                 showNotification(resp["data"],NOTIFICATION_SUCCESS);
+//             }
+//             else{
+//                 showNotification(resp["msg"],NOTIFICATION_ERROR);
     
-            }
-        })
-        .fail(() => {
-            showNotification("Server không phản hồi",NOTIFICATION_ERROR);
-        });
-}
-function CreateDuplicate(redirect=''){
-    if (redirect!=''){
-        window.location.href='/hsmt/edit-detail?id='+redirect;
-        return;
-    }
-    let xfileId= $('#xfileId').val();
+//             }
+//         })
+//         .fail(() => {
+//             showNotification("Server không phản hồi",NOTIFICATION_ERROR);
+//         });
+// }
+
+function submit_xfile(xfileId) {
     $.ajax({
-        type: 'POST',
-        url: '/create-xfile-duplicate',
-        headers: {'X-CSRFToken': getCookie('csrftoken')},
-        data: {'xfileId':xfileId},
-    })
-        .done((resp) => {
-            if(resp['status']===0){
-                let data=resp['data'];
-                showNotification(data["msg"],NOTIFICATION_SUCCESS);
-                let newId=data['new-xfile-id'];
-                window.location.href='/hsmt/edit-detail?id='+newId;
-            }
-            else{
-                showNotification(resp["msg"],NOTIFICATION_ERROR);
-    
-            }
-        })
-        .fail(() => {
-            showNotification("Server không phản hồi",NOTIFICATION_ERROR);
-        });
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/submit/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: (data) => {
+            showNotification('Gửi HSMT thành công', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
+}
+
+function check_xfile(xfileId) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/check/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: (data) => {
+            showNotification('Kiểm định HSMT thành công', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
+}
+
+function approve_xfile(xfileId) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/approve/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: (data) => {
+            showNotification('Phê duyệt HSMT thành công', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
+}
+
+function reject_check_xfile(xfileId) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/reject-check/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: (data) => {
+            showNotification('Đã yêu cầu sửa lại HSMT', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
+}
+
+function reject_approve_xfile(xfileId) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/reject-approve/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: (data) => {
+            showNotification('Đã yêu cầu kiểm định lại HSMT', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
+}
+
+function cancel_change_xfile(xfileId) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/cancel-change/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: (data) => {
+            showNotification('Đã hủy bản cập nhật HSMT', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
+}
+
+function create_change_xfile(xfileId) {
+    $.ajax({
+        type: 'PUT',
+        url: `/api/hsmt/${xfileId}/create-change/`,
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        processData: false,
+        data: $('#formCreateChangeXFile').serialize(),
+        success: (data) => {
+            showNotification('Đã tạo bản cập nhật HSMT', 2);
+        },
+        error: (xhr, status, error) => {
+            showNotification(HTML_CODE_MESSAGE[xhr.status], 3);
+        }
+    });
 }
