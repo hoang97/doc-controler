@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include('users.urls')),
     path('', include('hsmt.urls')),
     path('', include('notifications.urls')),
+    path('', include('todolist.urls')),
 ]

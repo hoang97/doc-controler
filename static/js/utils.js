@@ -63,6 +63,7 @@ function getCookie(name)
             }
         }
     }
+    console.log('Cookie: ' + cookieValue);
     return cookieValue;
 }
 const DATATABLE_LANGUAGE={
