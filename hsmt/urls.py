@@ -1,5 +1,5 @@
 from django.urls import path
-from . import api_views, test_views
+from . import api_views, views
 
 # just for debug
 from django.conf import settings
@@ -8,10 +8,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     # Views
-    path('', test_views.target_list_view, name='index'),
-    path('hsmt/list/', test_views.hsmt_list_view, name='hsmt-list'),
-    path('hsmt/edit-detail/', test_views.hsmt_edit_detail, name='hsmt-detail'),
-    path('target/list/', test_views.target_list_view, name='target-list'),
+    path('', views.target_list_view, name='index'),
+    path('hsmt/list/', views.hsmt_list_view, name='hsmt-list'),
+    path('hsmt/edit-detail/', views.hsmt_edit_detail, name='hsmt-detail'),
+    path('target/list/', views.target_list_view, name='target-list'),
 
     # XFile API
     path('api/hsmt/', api_views.XFileListView.as_view()),

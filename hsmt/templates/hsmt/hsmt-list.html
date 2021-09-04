@@ -18,7 +18,7 @@
   <div class="container-fluid">
     <div class="row">
       <!--Chỉ trợ lí có thể thêm mới HSMT-->
-      {% if request.user.info.position.alias == 'tl' %}
+      {% if request.user.position.alias == 'tl' %}
       <div class="col-lg-12">
         <button type="button" class="btn btn-success mb-2" data-toggle="modal" data-target="#modalCreate"
         data-url="/api/hsmt/create/">Thêm mới</button>
@@ -31,7 +31,7 @@
               {% for xfile_type in xfile_types %}
                 <li class="nav-item">
                   <a class="nav-link {% if forloop.first %}active{% endif %}" id="tab{{xfile_type.id}}" data-toggle="pill" role="tab" href="#tblWrapper{{xfile_type.id}}" aria-controls="ho-so"
-                    aria-selected="false">{{xfile_type.name}}</a>
+                    aria-selected="false">{{xfile_type.name|capfirst}}</a>
                 </li>
               {% endfor %}
             </ul>
@@ -130,7 +130,7 @@
             <div class="select2-yellow" >
               <select class="select2 select2-hidden-accessible" multiple="multiple" data-placeholder="Chọn người chỉnh sửa" data-dropdown-css-class="select2-yellow" style="width: 100%;" tabindex="-1" aria-hidden="true" id="inputEditorsCreate" name="editors">
                 {% for user in users %}
-                  {% if user.info.position.alias == 'tl' %}
+                  {% if user.position.alias == 'tl' %}
                     <option value="{{user.id}}">{{user.first_name}}</option>
                   {% endif %}
                 {% endfor %}
@@ -142,7 +142,7 @@
             <div class="select2-yellow" >
               <select class="select2 select2-hidden-accessible" multiple="multiple" data-placeholder="Chọn người kiểm định" data-dropdown-css-class="select2-yellow" style="width: 100%;" tabindex="-1" aria-hidden="true" id="inputCheckersCreate" name="checkers">
                 {% for user in users %}
-                  {% if user.info.position.alias == 'tl' %}
+                  {% if user.position.alias == 'tl' %}
                     <option value="{{user.id}}">{{user.first_name}}</option>
                   {% endif %}
                 {% endfor %}
@@ -154,7 +154,7 @@
             <div class="select2-yellow" >
               <select class="select2 select2-hidden-accessible" multiple="multiple" data-placeholder="Chọn người phê duyệt" data-dropdown-css-class="select2-yellow" style="width: 100%;" tabindex="-1" aria-hidden="true" id="inputApproversCreate" name="approvers">
                 {% for user in users %}
-                  {% if user.info.position.alias == 'tp' %}
+                  {% if user.position.alias == 'tp' %}
                     <option value="{{user.id}}">{{user.first_name}}</option>
                   {% endif %}
                 {% endfor %}

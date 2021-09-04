@@ -17,7 +17,7 @@ def hsmt_list_view(request):
         'breadcrumb':title,
         'h1header':title,
         'xfile_types': XFileType.objects.all(),
-        'users': User.objects.filter(info__department=request.user.info.department).select_related('info__position'),
+        'users': User.objects.filter(department=request.user.department).select_related('position'),
         'targets': Target.objects.all()
     }
     return render(request, 'hsmt/hsmt-list.html',context)

@@ -7,7 +7,8 @@ from rest_framework.decorators import api_view, permission_classes
 
 from .models import *
 from .serializers import *
-from .permissions import *
+from hsmt.permissions import *
+from users.permissions import *
 from notifications.utils import notify, VERB
 
 # Support functions
@@ -18,7 +19,7 @@ def get_xfiles_can_view(user):
         xfiles_can_check = user.xfiles_can_check.all()
         return (xfiles_can_edit | xfiles_can_check).distinct()
     if is_truongphong(user):
-        return XFile.objects.filter(department=user.info.department)
+        return XFile.objects.filter(department=user.department)
     if is_giamdoc(user):
         return XFile.objects.all()
 

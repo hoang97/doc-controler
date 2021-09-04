@@ -2,14 +2,13 @@ from copy import deepcopy
 import json
 from datetime import datetime, date
 from django.db import models
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from users.models import Department
 from .utils import decode
 from django_fsm import transition, GET_STATE, FSMIntegerField
+from users.models import User, Department
 
 # Choices
 class STATUS(models.IntegerChoices):
