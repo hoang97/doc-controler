@@ -1,6 +1,6 @@
 $(document).ready(function () {
     initXFileList();
-    setCreateModalForm(initCreateModal);
+    setCreateModalForm();
     setDeleteModalForm();
 });
 
@@ -70,8 +70,8 @@ function initXFileList() {
     });
 };
 
-function initCreateModal() {
-    $("#inputEditorsCreate").val(null).trigger('change');
-    $("#inputCheckersCreate").val(null).trigger('change');
-    $("#inputApproversCreate").val(null).trigger('change');
-};
+// function initCreateModal() {
+//     $("#inputEditorsCreate").val(null).trigger('change');
+//     $("#inputCheckersCreate").val(null).trigger('change');
+//     $("#inputApproversCreate").val(null).trigger('change');
+// };

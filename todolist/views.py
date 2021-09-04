@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from users.models import User
 from django.http import JsonResponse
 
 from todolist.models import Task, MiniTask

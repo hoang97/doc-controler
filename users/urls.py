@@ -1,5 +1,6 @@
 from django.urls import path
-from . import views
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from . import views, api_views
 
 # just for debug
 from django.conf import settings
@@ -23,8 +24,17 @@ urlpatterns = [
     path('delete-user/', views.delete_user, name='delete-user'),
     path('edit-user-info/', views.edit_user_info, name='edit-user-info'),
     path('change-password/', views.change_password, name='change-password'),
-    
 
+    # REST APIs
+    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/department/', api_views.DepartmentListView.as_view()),
+    path('api/position/', api_views.PositionListView.as_view()),
+    path('api/user/', api_views.UserListView.as_view()),
+    path('api/user/<int:pk>/', api_views.UserRetrieveUpdateView.as_view()),
+    path('api/user/<int:pk>/manage/', api_views.UserManageView.as_view()),
+    path('api/user/register/', api_views.UserRegisterForAnyView.as_view()),
+    path('api/user/register-for-other/', api_views.UserRegisterForOtherView.as_view()),
 ]
 
 if settings.DEBUG :

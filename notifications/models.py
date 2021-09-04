@@ -3,9 +3,9 @@ from django.db.models.fields.related import ForeignKey
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from users.models import User
 
 class DETAIL_URL(models.TextChoices):
     USER = 'user', 'user-profile'

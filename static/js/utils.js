@@ -66,7 +66,7 @@ function getCookie(name)
             }
         }
     }
-    console.log('Cookie: ' + cookieValue);
+    // console.log('Cookie: ' + cookieValue);
     return cookieValue;
 }
 const XFILE_STATUS=[
@@ -227,6 +227,7 @@ function setCreateModalForm(custom_modal_func=null) {
         let button = $(event.relatedTarget); // Button that triggered the modal
         let full_url = button.data('url'); // Extract info from data-* attributes
         let createForm = document.getElementById('modalCreateForm');
+        createForm.reset();
         if (custom_modal_func != null) {custom_modal_func();}
         createForm.onsubmit = (event) => {  
             event.preventDefault();
@@ -255,6 +256,7 @@ function setDeleteModalForm() {
         let button = $(event.relatedTarget); // Button that triggered the modal
         let full_url = button.data('url'); // Extract info from data-* attributes
         let deleteForm = document.getElementById('modalDeleteForm');
+        deleteForm.reset();
         deleteForm.onsubmit = (event) => {  
             event.preventDefault();
             $.ajax({
@@ -282,12 +284,13 @@ function setEditModalForm(custom_modal_func) {
         let full_url = button.data('url'); // Extract info from data-* attributes
         let item_id = button.data('id');
         let tbl_id = button.data('tbl');
+        let editForm = document.getElementById('modalEditForm');
+        editForm.reset();
         // Extract row info with given id
         row_data = $('#'+tbl_id).DataTable().rows((index, data, node) => {
             return data.id === item_id;
         }).data()[0];
         custom_modal_func(row_data);
-        let editForm = document.getElementById('modalEditForm');
         editForm.onsubmit = (event) => {  
             event.preventDefault();
             $.ajax({

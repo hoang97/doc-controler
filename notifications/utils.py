@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import date, datetime
+from datetime import datetime
 from copy import deepcopy
 from asgiref.sync import async_to_sync
 from django.db import models
