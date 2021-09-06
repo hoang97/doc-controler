@@ -34,7 +34,6 @@ def get_notifications(request):
             'notification_id': notification.id,
             'actor_name': notification.log.actor.first_name,
             'actor_username': notification.log.actor.username,
-            
         })
     data['notifications'] = notifications
     return JsonResponse(data)

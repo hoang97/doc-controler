@@ -5,6 +5,7 @@ from .models import (
     Comment,
     XFileType,
     Target,
+    AttackLog
 )
 
 # Register your models here.
@@ -13,3 +14,4 @@ admin.site.register(XFileChange)
 admin.site.register(Comment)
 admin.site.register(XFileType)
 admin.site.register(Target)
+admin.site.register(AttackLog)

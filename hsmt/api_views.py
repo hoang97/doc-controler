@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
+from django.contrib.contenttypes.models import ContentType
 
-from rest_framework import generics, status
+from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -142,8 +143,12 @@ class XFileCreateView(generics.CreateAPIView):
     def get_queryset(self):
         return get_xfiles_can_view(self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    # Ghi đè function create để khởi tạo giá trị mặc định cho XFile
+    def create(self, request, *args, **kwargs):
+        request.data['department'] = request.user.department.id
+        request.data['creator'] = request.user.id
+        request.data['content'] = XFileType.objects.get(id = request.data['type']).example_content
+        return super().create(request, *args, **kwargs)
 
 class XFileRetrieveDestroyView(generics.RetrieveDestroyAPIView):
     '''
@@ -156,18 +161,149 @@ class XFileRetrieveDestroyView(generics.RetrieveDestroyAPIView):
     def get_queryset(self):
         return get_xfiles_can_view(self.request.user)
 
+class XFilePermUpdateView(generics.UpdateAPIView):
+    '''fields = ('id', 'editors', 'checkers', 'approvers')'''
+    serializer_class = XFileGeneralUpdateSerializer
+    permission_classes = [IsAuthenticated, IsTruongPhong]
+
+    def get_queryset(self):
+        return get_xfiles_can_view(self.request.user)
+
 class XFileGeneralUpdateView(generics.UpdateAPIView):
-    '''fields = ('id', 'code', 'description', 'targets', 'editors', 'checkers', 'approvers')'''
+    '''fields = ('id', 'code', 'description', 'targets')'''
     serializer_class = XFileGeneralUpdateSerializer
     permission_classes = [IsAuthenticated, CanEditXFile]
 
     def get_queryset(self):
         return get_xfiles_can_view(self.request.user)
+    
+    # Ghi đè function perform_update để cập nhật XFileChange
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        old_content = get_old_xfile_content(instance)
+        new_instance = serializer.save()
+        new_content = new_instance.get_xfile_content()
+        save_to_xfile_change(instance, old_content, new_content)
+
+class XFileCommentListView(generics.ListAPIView):
+    '''fields = ('id', 'author', 'body', 'date_created')'''
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, CanViewXFile]
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return xfile.comments
+
+class XFileCommentCreateView(generics.CreateAPIView):
+    '''fields = ('body')'''
+    serializer_class = CommentGeneralSerializer
+    permission_classes = [IsAuthenticated, CanViewXFile]
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return xfile.comments
+
+    # Ghi đè function create để khởi tạo giá trị mặc định cho Comment
+    def create(self, request, *args, **kwargs):
+        request.data['author'] = request.user.id
+        request.data['content_type'] = ContentType.objects.get_for_model(XFile).id
+        request.data['object_id'] = self.kwargs['pk']
+        return super().create(request, *args, **kwargs)
+
+class XFileCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    '''fields = ('body')'''
+    serializer_class = CommentGeneralSerializer
+    permission_classes = [IsAuthenticated, CanViewXFile]
+    lookup_url_kwarg = 'comment_id'
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return xfile.comments
+
+    # Ghi đè function update để khởi tạo giá trị mặc định cho Comment
+    def update(self, request, *args, **kwargs):
+        request.data['author'] = self.get_object().author.id
+        request.data['content_type'] = ContentType.objects.get_for_model(XFile).id
+        request.data['object_id'] = self.kwargs['pk']
+        return super().update(request, *args, **kwargs)
+
+
+# Cần có mật khẩu phòng mới sử dụng đc
+
+class AttackLogListView(generics.ListAPIView):
+    '''fields = ('id', 'timestamp', 'process', 'result', 'attacker', 'file')'''
+    serializer_class = AttackLogSerializer
+    permission_classes = [IsAuthenticated, CanEditXFile]
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return AttackLog.objects.filter(file=xfile)
+
+class AttackLogCreateView(generics.CreateAPIView):
+    '''fields = ('timestamp', 'process', 'result', 'attacker')'''
+    serializer_class = AttackLogGeneralSerializer
+    permission_classes = [IsAuthenticated, CanEditXFile]
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return AttackLog.objects.filter(file=xfile)
+    
+    # Ghi đè function create để khởi tạo giá trị mặc định cho AttackLog
+    def create(self, request, *args, **kwargs):
+        request.data['file'] = self.kwargs['pk']
+        return super().create(request, *args, **kwargs)
+
+    # Ghi đè function perform_create để cập nhật XFileChange
+    def perform_create(self, serializer):
+        instance = self.get_object().file
+        old_content = get_old_xfile_content(instance)
+        new_instance = serializer.save().file
+        new_content = new_instance.get_xfile_content()
+        save_to_xfile_change(instance, old_content, new_content)
+
+class AttackLogRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    '''fields = ('id', 'timestamp', 'process', 'result', 'attacker', 'file')'''
+    serializer_class = AttackLogGeneralSerializer
+    permission_classes = [IsAuthenticated, CanEditXFile]
+    lookup_url_kwarg = 'attacklog_id'
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return AttackLog.objects.filter(file=xfile)
+    
+    # Ghi đè function perform_destroy để cập nhật XFileChange
+    def perform_destroy(self, instance):
+        xfile = instance.file
+        old_content = get_old_xfile_content(xfile)
+        instance.delete()
+        new_content = xfile.get_xfile_content()
+        save_to_xfile_change(xfile, old_content, new_content)
+
+
+class XFileChangeListView(generics.ListAPIView):
+    '''fields = ('id', 'name', 'content', 'date_created', 'date_edited', 'editor', 'checker', 'approver')'''
+    serializer_class = XFileChangeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return XFileChange.objects.filter(file=xfile)
+
+class XFileChangeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    '''fields = ('id', 'name', 'content', 'date_created', 'date_edited', 'editor', 'checker', 'approver')'''
+    serializer_class = XFileChangeSerializer
+    permission_classes = [IsAuthenticated, CanEditXFile]
+    lookup_field = 'version'
+    lookup_url_kwarg = 'version'
+
+    def get_queryset(self):
+        xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
+        return XFileChange.objects.filter(file=xfile)
 
 class XFileContentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
-    '''fields = ('id', 'content')
-    - Trả ra JSON_dict thể hiện các trường dữ liệu
-    - Nhận vào JSON_string để update
+    '''fields = ('id', 'content', 'changes', 'attack_logs')
+    - Content nhận vào JSON_string để update
+    - Content trả ra JSON_dict thể hiện các trường dữ liệu
     '''
     serializer_class = XFileContentSerializer
     permission_classes = [IsAuthenticated, CanEditXFile]
@@ -175,6 +311,15 @@ class XFileContentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         return get_xfiles_can_view(self.request.user)
 
+    # Ghi đè function perform_update để cập nhật XFileChange
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        old_content = get_old_xfile_content(instance)
+        new_instance = serializer.save()
+        new_content = new_instance.get_xfile_content()
+        save_to_xfile_change(instance, old_content, new_content)
+
+# chỉ giám đốc có quyền sửa, xóa
 
 class XFileTypeListCreateView(generics.ListCreateAPIView):
     '''fields = ('id', 'name', 'example_content')'''
@@ -188,6 +333,8 @@ class XFileTypeRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = XFileTypeSerializer
     permission_classes = [IsAuthenticated, IsGiamdoc]
 
+# Ai cx có quyền xem, sửa, xóa
+
 class TargetListCreateView(generics.ListCreateAPIView):
     '''fields = ('id', 'name', 'description', 'get_type_display', 'type')'''
     queryset = Target.objects.all()
@@ -198,4 +345,4 @@ class TargetRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
     '''fields = ('id', 'name', 'description', 'get_type_display', 'type')'''
     queryset = Target.objects.all()
     serializer_class = TargetSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsNotInUse]

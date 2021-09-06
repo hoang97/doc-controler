@@ -67,7 +67,7 @@ class XFile(models.Model):
         default = STATUS.INIT,
         protected = True
     )
-    date_created = models.DateField(default=timezone.now)
+    date_created = models.DateField(default=date.today)
     type = models.ForeignKey(XFileType, on_delete=models.CASCADE)
     targets = models.ManyToManyField(Target)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
@@ -81,6 +81,7 @@ class XFile(models.Model):
     editors = models.ManyToManyField(User, related_name='xfiles_can_edit')
     checkers = models.ManyToManyField(User, related_name='xfiles_can_check')
     approvers = models.ManyToManyField(User, related_name='xfiles_can_approve')
+    comments = GenericRelation('Comment')
     
     def __str__(self):
         return f'hồ sơ {self.code}'
@@ -91,7 +92,7 @@ class XFile(models.Model):
         Trả lại JSON dict thể hiện tất cả nội dung của XFile theo cấu trúc
         '''
         content = {}
-        general_content = ['code', 'description', 'targets', 'department', 'editors', 'checkers', 'approvers']
+        general_content = ['code', 'description', 'targets', 'department', 'attack_logs', 'editors', 'checkers', 'approvers']
         for field in general_content:
             record = {}
             value = getattr(self, field)
@@ -104,6 +105,9 @@ class XFile(models.Model):
                 record['type'] = 'department'
             elif field in ['editors', 'checkers', 'approvers']:
                 record['type'] = 'user'
+                value = list(value.all())
+            elif field == 'attack_logs':
+                record['type'] = 'attacklog'
                 value = list(value.all())
             record['value'] = value
             content[field] = record
@@ -195,7 +199,7 @@ class XFile(models.Model):
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.editor = by
-        xfilechange.date_submited = timezone.now()
+        xfilechange.date_submited = datetime.date.today()
         xfilechange.save()
 
     @transition(
@@ -211,7 +215,7 @@ class XFile(models.Model):
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.checker = by
-        xfilechange.date_checked = timezone.now()
+        xfilechange.date_checked = date.today()
         xfilechange.save()
 
     @transition(
@@ -227,7 +231,7 @@ class XFile(models.Model):
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.approver = by
-        xfilechange.date_approved = timezone.now()
+        xfilechange.date_approved = date.today()
         xfilechange.save()
 
     @transition(
@@ -243,7 +247,7 @@ class XFile(models.Model):
         - Apply change to XFile
         '''
         new_change = self.changes.create(name = change_name)
-        new_change.date_created = timezone.now()
+        new_change.date_created = date.today()
         new_change.editor = by
         new_change.apply_to_xfile()
         new_change.save()
@@ -297,7 +301,7 @@ class XFileChange(models.Model):
     '''
     # Nội dung được tự động tạo
     version = models.PositiveIntegerField(default=None, null=True, blank=True)
-    date_created = models.DateField(default=timezone.now)
+    date_created = models.DateField(default=date.today)
     date_edited = models.DateField(blank=True, null=True)
     date_submited = models.DateField(blank=True, null=True)
     date_checked = models.DateField(blank=True, null=True)
@@ -310,7 +314,6 @@ class XFileChange(models.Model):
     # Nội dung được User chỉnh sửa
     name = models.CharField(max_length=120)
     content = models.TextField(blank=True)
-    comments = GenericRelation('Comment')
 
     def __str__(self):
         return f'thay đổi {self.version} của {str(self.file)}'
@@ -319,7 +322,7 @@ class XFileChange(models.Model):
     def save(self, *args, **kwargs):
         if self.version is None:
             self.version = self.file.version + 1
-        self.date_edited = timezone.now()
+        self.date_edited = date.today()
         super().save(*args, **kwargs)
 
     # Chức năng riêng
@@ -328,7 +331,7 @@ class XFileChange(models.Model):
         Áp dụng thay đổi vào XFile
         '''
         xfile = self.file
-        general_content = ['code', 'description', 'targets', 'department', 'editors', 'checkers', 'approvers']
+        general_content = ['code', 'description', 'targets', 'department', 'attack_logs', 'editors', 'checkers', 'approvers']
         secret_content = json.loads(xfile.content)
         xfile.version = self.version - backward
         try:
@@ -357,6 +360,9 @@ class XFileChange(models.Model):
                 if type == 'user':
                     attr = getattr(xfile, field)
                     attr.set(User.objects.filter(id__in = value))
+                if type == 'attacklog':
+                    attr = getattr(xfile, field)
+                    attr.set(AttackLog.objects.filter(id__in = value))
             # Nếu thay đổi trong secret_content -> lưu vào secret_content
             if field in secret_content.keys():
                 secret_content[field]['type'] = type
@@ -376,7 +382,7 @@ class XFileChange(models.Model):
             old_value = record['old']
             new_value = record['new']
             # Nếu dữ liệu thuộc class đặc biệt -> thay đổi để serialize ra JSON string
-            if type in ['target', 'user']:
+            if type in ['target', 'user', 'attacklog']:
                 record['old'] = [object.id for object in old_value]
                 record['new'] = [object.id for object in new_value]
             if type == 'department':
@@ -395,7 +401,7 @@ class Comment(models.Model):
     '''
     # Nội dung được tự động tạo
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    date_created = models.DateField(default=timezone.now)
+    date_created = models.DateField(default=date.today)
     
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -411,12 +417,12 @@ class AttackLog(models.Model):
     '''
     Biểu diễn bảng IV: theo dõi quá trình theo dõi/tấn công
     '''
-    timestamp = models.DateField()
-    name = models.TextField(blank=True)
-    content = models.TextField(blank=True)
-    attacker = models.TextField(blank=True)
+    timestamp = models.DateField(default=date.today)
+    process = models.TextField(blank=True)
+    result = models.TextField(blank=True)
+    attacker = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True)
 
-    file = models.ForeignKey(XFile, on_delete=models.CASCADE, related_name='attack_logs')
+    file = models.ForeignKey(XFile, on_delete=models.CASCADE, related_name='attack_logs', null=True, blank=True)
 
     def __str__(self):
-        return f'quá trình {self.name}'
+        return f'quá trình {self.process}'

@@ -1,10 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from .models import *
-from .serializers import *
+from users.models import *
+from users.serializers import *
 from users.permissions import *
 from notifications.utils import notify, VERB
+
 
 class UserListView(generics.ListAPIView):
     '''

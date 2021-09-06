@@ -20,8 +20,6 @@ class Log(models.Model):
         - giám đốc (actor) đã tạo mới (verb) tài khoản C (target) lúc 20h21 20/1/2021 (timestamp)
     '''
     timestamp = models.DateTimeField(default=timezone.now)
-    # actor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
-    # target = models.ForeignKey(XFile, on_delete=models.CASCADE)
     actor_ct = ForeignKey(ContentType, on_delete=models.CASCADE, related_name='log_actors')
     actor_id = models.PositiveIntegerField()
     target_ct = ForeignKey(ContentType, on_delete=models.CASCADE, related_name='log_targets')

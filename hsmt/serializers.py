@@ -1,5 +1,7 @@
+import datetime
+
 from rest_framework import serializers
-from hsmt.models import XFile, XFileType, XFileChange, Target
+from hsmt.models import AttackLog, XFile, XFileType, XFileChange, Target, Comment
 from users.serializers import DepartmentSerializer, UserGeneralSerializer
 
 # Support functions
@@ -43,6 +45,30 @@ def save_to_xfile_change(xfile, old_content, new_content):
 
 # Serializers
 
+class CommentSerializer(serializers.ModelSerializer):
+    author = UserGeneralSerializer(read_only=True)
+    class Meta:
+        model = Comment
+        fields = ('id', 'author', 'body', 'date_created')
+        read_only_fields = ('id', 'date_created')
+
+class CommentGeneralSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('id', 'author', 'body', 'date_created', 'content_type', 'object_id')
+        read_only_fields = ('id', 'date_created')
+
+class AttackLogSerializer(serializers.ModelSerializer):
+    attacker = UserGeneralSerializer()
+    class Meta:
+        model = AttackLog
+        fields = ('id', 'timestamp', 'process', 'result', 'attacker', 'file')
+
+class AttackLogGeneralSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttackLog
+        fields = ('id', 'timestamp', 'process', 'result', 'attacker', 'file')
+
 class XFileTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = XFileType
@@ -54,27 +80,28 @@ class TargetSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'get_type_display', 'type')
 
 class XFileChangeSerializer(serializers.ModelSerializer):
-    editor = UserGeneralSerializer()
-    checker = UserGeneralSerializer()
-    approver = UserGeneralSerializer()
+    editor = UserGeneralSerializer(read_only=True)
+    checker = UserGeneralSerializer(read_only=True)
+    approver = UserGeneralSerializer(read_only=True)
+    date_edited = serializers.DateField(read_only=True)
     
     class Meta:
         model = XFileChange
-        fields = ('id', 'name', 'content', 'date_edited', 'editor', 'checker', 'approver')
-        read_only_fields = ('id', 'content', 'date_edited', 'editor', 'checker', 'approver')
+        fields = ('id', 'name', 'content', 'date_created', 'date_edited', 'editor', 'checker', 'approver')
+        read_only_fields = ('id', 'content', 'date_created', 'date_edited', 'editor', 'checker', 'approver')
 
 class XFileCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = XFile
         fields = ('code', 'description', 'type', 'targets', 'department', 'creator', 'editors', 'checkers', 'approvers', 'content')
-        read_only_fields = ('department', 'creator', 'content')
+    #     read_only_fields = ('department', 'creator', 'content')
 
-    # Ghi đè function save để khởi tạo giá trị mặc định cho XFile
-    def save(self, **kwargs):
-        self.validated_data['department'] = kwargs.get('user').department
-        self.validated_data['creator'] = kwargs.get('user')
-        self.validated_data['content'] = self.validated_data['type'].example_content
-        return super().save()
+    # # Ghi đè function save để khởi tạo giá trị mặc định cho XFile
+    # def save(self, **kwargs):
+    #     self.validated_data['department'] = kwargs.get('user').department
+    #     self.validated_data['creator'] = kwargs.get('user')
+    #     self.validated_data['content'] = self.validated_data['type'].example_content
+    #     return super().save()
 
 class XFileGeneralSerializer(serializers.ModelSerializer):
     type = XFileTypeSerializer(read_only=True)
@@ -84,39 +111,24 @@ class XFileGeneralSerializer(serializers.ModelSerializer):
     editors = UserGeneralSerializer(many=True)
     checkers = UserGeneralSerializer(many=True)
     approvers = UserGeneralSerializer(many=True)
-    changes = XFileChangeSerializer(many=True)
+    # comments = CommentSerializer(many=True)
 
     class Meta:
         model = XFile
-        fields = ('id', 'code', 'status', 'get_status_display', 'version', 'description', 'date_created', 'type', 'targets', 'department', 'creator', 'editors', 'checkers', 'approvers', 'changes')
-        read_only_fields = ('id', 'status', 'get_status_display', 'version', 'date_created', 'department', 'creator', 'changes')
-    
+        fields = ('id', 'code', 'status', 'get_status_display', 'version', 'description', 'date_created', 'type', 'targets', 'department', 'creator', 'editors', 'checkers', 'approvers')
+        read_only_fields = ('id', 'status', 'get_status_display', 'version', 'date_created', 'department', 'creator')
+
+class XFilePermUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = XFile
+        fields = ('id', 'editors', 'checkers', 'approvers')
 
 class XFileGeneralUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = XFile
-        fields = ('id', 'code', 'description', 'targets', 'editors', 'checkers', 'approvers')
-
-    # Ghi đè function update để cập nhật XFileChange
-    def update(self, instance, validated_data):
-        new_instance = super().update(instance, validated_data)
-        
-        old_content = get_old_xfile_content(instance)
-        new_content = new_instance.get_xfile_content()
-        save_to_xfile_change(instance, old_content, new_content)
-
-        return new_instance
+        fields = ('id', 'code', 'description', 'targets')
 
 class XFileContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = XFile
         fields = ('id', 'content')
-
-    def update(self, instance, validated_data):
-        new_instance = super().update(instance, validated_data)
-
-        old_content = get_old_xfile_content(instance)
-        new_content = new_instance.get_xfile_content()
-        save_to_xfile_change(instance, old_content, new_content)
-
-        return new_instance
