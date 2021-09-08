@@ -1,7 +1,5 @@
 import base64, json, hmac, hashlib
-from users.models import Department
 from test_hsmt import settings
-from hsmt.serializers import XFileChangeSerializer
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from django_fsm import has_transition_perm
 from django.utils import timezone

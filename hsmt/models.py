@@ -199,7 +199,7 @@ class XFile(models.Model):
         '''
         xfilechange = self.changes.get(version = self.version)
         xfilechange.editor = by
-        xfilechange.date_submited = datetime.date.today()
+        xfilechange.date_submited = date.today()
         xfilechange.save()
 
     @transition(
