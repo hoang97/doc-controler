@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, api_views
 
 urlpatterns = [
     # Views
@@ -21,4 +21,16 @@ urlpatterns = [
 
     path('switch-status/', views.switch_status, name='switch-status'),
     path('switch-status-mini-task/', views.switch_status_mini_task, name='switch-status-mini-task'),
+
+    # REST APIs
+    path('api/task/', api_views.TaskListView.as_view()),
+    path('api/task/create/', api_views.TaskCreateView.as_view()),
+    path('api/task/<int:pk>/', api_views.TaskUpdateDestroyView.as_view()),
+    path('api/task/<int:pk>/detail/', api_views.TaskRetrieveView.as_view()),
+
+    path('api/task/<int:pk>/minitask/', api_views.MiniTaskListView.as_view()),
+    path('api/task/<int:pk>/minitask/create/', api_views.MiniTaskCreateView.as_view()),
+    path('api/task/<int:pk>/minitask/<int:minitask_id>/', api_views.MiniTaskUpdateDeleteView.as_view()),
+    path('api/task/<int:pk>/minitask/<int:minitask_id>/detail/', api_views.MiniTaskRetrieveView.as_view()),
+    path('api/task/<int:pk>/minitask/<int:minitask_id>/status/', api_views.MiniTaskSwitchStatus.as_view()),
 ]

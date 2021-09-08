@@ -1,4 +1,5 @@
 import hmac, hashlib, base64, json
+from copy import deepcopy
 from test_hsmt import settings
 
 from rest_framework import generics, status
@@ -54,7 +55,7 @@ class UserRegisterForOtherView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         # Mặc định user được tạo cùng phòng với ng tạo, chức vụ nhỏ hơn
-        data = request.data
+        data = deepcopy(request.data) 
         data['department'] = request.user.department.id
         if not data.get('position') or int(data['position']) < request.user.position.id:
             return Response({'detail': 'Không thể tạo user có chức vụ cao hơn mình'}, status=status.HTTP_400_BAD_REQUEST)
@@ -74,11 +75,12 @@ class UserRegisterForAnyView(generics.CreateAPIView):
     '''
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
+    permission_classes = [~IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         # Mặc định user được tạo có chức vụ trợ lí
-        data = request.data
-        data['position'] = Position.objects.get(alias='tl')
+        data = deepcopy(request.data)
+        data['position'] = Position.objects.get(alias='tl').id
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -90,6 +92,11 @@ class UserManageView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserGeneralSerializer
     permission_classes = [IsAuthenticated, IsNotOwner, IsGiamdoc | (InSameDepartment & IsTruongPhong)]
+
+    def update(self, request, *args, **kwargs):
+        if not request.data.get('position') or int(request.data['position']) < request.user.position.id:
+            return Response({'detail': 'Không thể tạo user có chức vụ cao hơn mình'}, status=status.HTTP_400_BAD_REQUEST)
+        return super().update(request, *args, **kwargs)
 
 class DepartmentListView(generics.ListAPIView):
     '''fields = ('id', 'name', 'alias')'''
