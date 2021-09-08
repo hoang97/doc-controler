@@ -1,9 +1,46 @@
+import base64, json, hmac, hashlib
+from users.models import Department
+from test_hsmt import settings
 from hsmt.serializers import XFileChangeSerializer
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from django_fsm import has_transition_perm
+from django.utils import timezone
+from rest_framework.generics import get_object_or_404
 from hsmt.models import XFile, AttackLog, Comment, XFileChange
 
 # Custom permissions
+
+class IsDepartmentAuthenticated(BasePermission):
+    def has_permission(self, request, view):
+        token = request.META.get('HTTP_DAUTHORIZATION')
+        if not token:
+            return False
+        # giải mã token
+        token_data = base64.urlsafe_b64decode(token)
+        token_data = json.loads(token_data)
+        expiration_time = token_data['exp']
+        # Nếu hết tgian hiệu lực => false
+        if expiration_time < timezone.now().timestamp():
+            return False
+
+        department_id = token_data['department_id']
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = get_object_or_404(XFile, id=xfile_id)
+        department = xfile.department
+        # Nếu không đúng phòng của xfile thì không được sửa
+        if department_id != department.id:
+            return False
+
+        # Kiểm tra chữ kí
+        signature_msg = f'{str(expiration_time)}{str(department_id)}{str(department.password)}'
+        signature = hmac.new(
+            bytes(settings.SECRET_KEY, 'latin-1'),
+            msg=bytes(signature_msg, 'latin-1'),
+            digestmod=hashlib.sha256
+        ).hexdigest().upper()
+        if signature != token_data['signature']:
+            return False
+        return True
 
 class IsNotInUse(BasePermission):
     def has_object_permission(self, request, view, obj):

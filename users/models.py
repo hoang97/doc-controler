@@ -15,6 +15,7 @@ class Department(models.Model):
     '''
     name = models.TextField()
     alias = models.CharField(max_length=100, unique=True)
+    password = models.CharField(max_length=150)
 
     def __str__(self):
         return self.name

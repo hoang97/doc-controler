@@ -29,6 +29,9 @@ urlpatterns = [
     path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/department/', api_views.DepartmentListView.as_view()),
+    path('api/department/change-pwd/', api_views.department_change_pwd),
+    path('api/department/login/', api_views.department_login),
+
     path('api/position/', api_views.PositionListView.as_view()),
     path('api/user/', api_views.UserListView.as_view()),
     path('api/user/<int:pk>/', api_views.UserRetrieveUpdateView.as_view()),

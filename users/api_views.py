@@ -1,5 +1,13 @@
+import hmac, hashlib, base64, json
+from test_hsmt import settings
+
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.hashers import check_password, make_password
 
 from users.models import *
 from users.serializers import *
@@ -94,3 +102,49 @@ class PositionListView(generics.ListAPIView):
     queryset = Position.objects.all()
     serializer_class = PositionSerializer
     permission_classes = [IsAuthenticated]
+
+def department_check_pwd(id, password):
+    department = get_object_or_404(Department, id=id)
+    return check_password(password, department.password)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsTruongPhong])
+def department_change_pwd(request):
+    '''fields=('department_id', 'password_old', 'password_new')'''
+    department_id = request.data.get('department_id')
+    password_old = request.data.get('password_old')
+    password_new = request.data.get('password_new')
+    department = get_object_or_404(Department, id=department_id)
+
+    # chỉ trưởng phòng của phòng tương ứng được đổi
+    if request.user.position.alias != 'tp' and request.user.department != department:
+        return Response('', status=status.HTTP_403_FORBIDDEN)
+    if check_password(password_old, department.password):
+        department.password = make_password(password_new)
+        department.save()
+        return Response('', status= status.HTTP_200_OK)
+    return Response('Sai mật khẩu', status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def department_login(request):
+    '''fields=('department_id', 'password')'''
+    department_id = request.data.get('department_id')
+    password = request.data.get('password')
+    department = get_object_or_404(Department, id=department_id)
+    if check_password(password, department.password):
+        expiration_time = (timezone.now() + timezone.timedelta(minutes=5)).timestamp()
+        signature_msg = f'{str(expiration_time)}{str(department_id)}{str(department.password)}'
+        signature = hmac.new(
+            bytes(settings.SECRET_KEY, 'latin-1'),
+            msg=bytes(signature_msg, 'latin-1'),
+            digestmod=hashlib.sha256
+        ).hexdigest().upper()
+        token_data = {
+            'exp': expiration_time,
+            'department_id': department_id,
+            'signature': signature
+        }
+        token = base64.urlsafe_b64encode(bytes(json.dumps(token_data), 'latin-1'))
+        return Response({'access': token}, status=status.HTTP_200_OK)
+    return Response('Sai mật khẩu', status=status.HTTP_400_BAD_REQUEST)

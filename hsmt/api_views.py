@@ -233,7 +233,7 @@ class XFileCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
 class AttackLogListView(generics.ListAPIView):
     '''fields = ('id', 'timestamp', 'process', 'result', 'attacker', 'file')'''
     serializer_class = AttackLogSerializer
-    permission_classes = [IsAuthenticated, CanEditXFile]
+    permission_classes = [IsAuthenticated, CanEditXFile, IsDepartmentAuthenticated]
 
     def get_queryset(self):
         xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
@@ -242,7 +242,7 @@ class AttackLogListView(generics.ListAPIView):
 class AttackLogCreateView(generics.CreateAPIView):
     '''fields = ('timestamp', 'process', 'result', 'attacker')'''
     serializer_class = AttackLogGeneralSerializer
-    permission_classes = [IsAuthenticated, CanEditXFile]
+    permission_classes = [IsAuthenticated, CanEditXFile, IsDepartmentAuthenticated]
 
     def get_queryset(self):
         xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
@@ -264,7 +264,7 @@ class AttackLogCreateView(generics.CreateAPIView):
 class AttackLogRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     '''fields = ('id', 'timestamp', 'process', 'result', 'attacker', 'file')'''
     serializer_class = AttackLogGeneralSerializer
-    permission_classes = [IsAuthenticated, CanEditXFile]
+    permission_classes = [IsAuthenticated, CanEditXFile, IsDepartmentAuthenticated]
     lookup_url_kwarg = 'attacklog_id'
 
     def get_queryset(self):
@@ -279,11 +279,10 @@ class AttackLogRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         new_content = xfile.get_xfile_content()
         save_to_xfile_change(xfile, old_content, new_content)
 
-
 class XFileChangeListView(generics.ListAPIView):
     '''fields = ('id', 'name', 'content', 'date_created', 'date_edited', 'editor', 'checker', 'approver')'''
     serializer_class = XFileChangeSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsDepartmentAuthenticated]
 
     def get_queryset(self):
         xfile = get_object_or_404(XFile, id=self.kwargs['pk'])
@@ -292,7 +291,7 @@ class XFileChangeListView(generics.ListAPIView):
 class XFileChangeRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     '''fields = ('id', 'name', 'content', 'date_created', 'date_edited', 'editor', 'checker', 'approver')'''
     serializer_class = XFileChangeSerializer
-    permission_classes = [IsAuthenticated, CanEditXFile]
+    permission_classes = [IsAuthenticated, CanEditXFile, IsDepartmentAuthenticated]
     lookup_field = 'version'
     lookup_url_kwarg = 'version'
 
@@ -306,7 +305,7 @@ class XFileContentRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     - Content trả ra JSON_dict thể hiện các trường dữ liệu
     '''
     serializer_class = XFileContentSerializer
-    permission_classes = [IsAuthenticated, CanEditXFile]
+    permission_classes = [IsAuthenticated, CanEditXFile, IsDepartmentAuthenticated]
 
     def get_queryset(self):
         return get_xfiles_can_view(self.request.user)

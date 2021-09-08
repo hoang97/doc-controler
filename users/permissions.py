@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
-from django_fsm import has_transition_perm
 
 
 def is_troly(user):
