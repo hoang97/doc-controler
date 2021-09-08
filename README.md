@@ -22,7 +22,7 @@ tp2 | test1805
 tp3 | test1805
 # Department and password
 Department | id | Password
------------|-----------
+-----------|----|-----------
 giamdoc | 1 | abc
 phong1 | 2 | abc
 phong2 | 3 | abc
