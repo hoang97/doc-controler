@@ -32,7 +32,7 @@ class LogSerializer(serializers.ModelSerializer):
     target = LogTargetSerializer(read_only=True)
     class Meta:
         model = Log
-        fields = ('id', 'timestamp', 'actor', 'target', 'verb')
+        fields = ('id', 'timestamp', 'actor', 'target', 'verb', '__str__')
 
 class NotificationSerializer(serializers.ModelSerializer):
     recipient = UserGeneralSerializer()
