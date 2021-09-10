@@ -1,0 +1,13 @@
+# Install dependencies
+pip install -r requirements.txt
+
+# django commands
+py manage.py runserver # start django server
+py manage.py createsuperuser # create a super user
+py manage.py makemigrations # make migrations file when models.py change
+py manage.py migrate # migrate changes to database
+py manage.py test <app_name> # run test for specific app
+
+# run coverage for testing testcases
+coverage run --omit='*/env/*' manage.py test
+coverage html

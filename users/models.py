@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import PermissionsMixin, AbstractBaseUser, UserManager
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
 
@@ -9,6 +10,13 @@ def get_user_dir_path(instance, filename):
     return f"user_{instance.user.id}/{filename}"
 
 # Create your models here.
+class DepartmentManager(models.Manager):
+    def create_department(self, alias, password, name, **kwargs):
+        department = self.model(alias=alias, name=name, **kwargs)
+        department.password = make_password(password)
+        department.save(using=self._db)
+        return department
+
 class Department(models.Model):
     '''
     Biểu diễn các phòng trong cơ quan
@@ -16,6 +24,7 @@ class Department(models.Model):
     name = models.TextField()
     alias = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=150)
+    objects = DepartmentManager()
 
     def __str__(self):
         return self.name
@@ -44,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     date_joined = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     objects = UserManager()
     USERNAME_FIELD = 'username'
 

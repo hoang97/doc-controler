@@ -91,11 +91,11 @@ class UserManageView(generics.RetrieveUpdateDestroyAPIView):
     '''fields = ('id', 'username', 'first_name', 'is_active', 'position', 'department')'''
     queryset = User.objects.all()
     serializer_class = UserGeneralSerializer
-    permission_classes = [IsAuthenticated, IsNotOwner, IsGiamdoc | (InSameDepartment & IsTruongPhong)]
+    permission_classes = [IsAuthenticated, HasHigherPosition, IsGiamdoc | InSameDepartment]
 
     def update(self, request, *args, **kwargs):
         if not request.data.get('position') or int(request.data['position']) < request.user.position.id:
-            return Response({'detail': 'Không thể tạo user có chức vụ cao hơn mình'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Không thể đổi chức vụ cao hơn mình'}, status=status.HTTP_400_BAD_REQUEST)
         return super().update(request, *args, **kwargs)
 
 class DepartmentListView(generics.ListAPIView):
@@ -124,8 +124,8 @@ def department_change_pwd(request):
     department = get_object_or_404(Department, id=department_id)
 
     # chỉ trưởng phòng của phòng tương ứng được đổi
-    if request.user.position.alias != 'tp' and request.user.department != department:
-        return Response('', status=status.HTTP_403_FORBIDDEN)
+    if request.user.department != department:
+        return Response('Không thể đổi mật khẩu của phòng khác', status=status.HTTP_403_FORBIDDEN)
     if check_password(password_old, department.password):
         department.password = make_password(password_new)
         department.save()

@@ -26,18 +26,19 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change-password'),
 
     # REST APIs
-    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/department/', api_views.DepartmentListView.as_view()),
-    path('api/department/change-pwd/', api_views.department_change_pwd),
-    path('api/department/login/', api_views.department_login),
+    path('api/department/', api_views.DepartmentListView.as_view(), name='api_department_list'),
+    path('api/department/change-pwd/', api_views.department_change_pwd, name='api_department_change_pwd'),
+    path('api/department/login/', api_views.department_login, name='api_department_login'),
 
-    path('api/position/', api_views.PositionListView.as_view()),
-    path('api/user/', api_views.UserListView.as_view()),
-    path('api/user/<int:pk>/', api_views.UserRetrieveUpdateView.as_view()),
-    path('api/user/<int:pk>/manage/', api_views.UserManageView.as_view()),
-    path('api/user/register/', api_views.UserRegisterForAnyView.as_view()),
-    path('api/user/register-for-other/', api_views.UserRegisterForOtherView.as_view()),
+    path('api/position/', api_views.PositionListView.as_view(), name='api_list_position'),
+
+    path('api/login/', TokenObtainPairView.as_view(), name='api_user_login'),
+    path('api/login/refresh/', TokenRefreshView.as_view(), name='api_user_refresh'),
+    path('api/user/', api_views.UserListView.as_view(), name='api_user_list'),
+    path('api/user/<int:pk>/', api_views.UserRetrieveUpdateView.as_view(), name='api_user_detail_update'),
+    path('api/user/<int:pk>/manage/', api_views.UserManageView.as_view(), name='api_user_manage'),
+    path('api/user/register/', api_views.UserRegisterForAnyView.as_view(), name='api_user_register'),
+    path('api/user/register-for-other/', api_views.UserRegisterForOtherView.as_view(), name='api_user_register_for_other'),
 ]
 
 if settings.DEBUG :
