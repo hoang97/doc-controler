@@ -9,17 +9,17 @@ from users.api_views import department_check_pwd
 def create_troly(department_id, username):
     department = Department.objects.get(id=department_id)
     position = Position.objects.get(alias='tl')
-    return User.objects.create_user(username=username, password='test1805', department=department, position=position, first_name='troly1')
+    return User.objects.create_user(username=username, password='test1805', department=department, position=position, first_name=username+'_name')
 
 def create_truongphong(department_id, username):
     department = Department.objects.get(id=department_id)
     position = Position.objects.get(alias='tp')
-    return User.objects.create_user(username=username, password='test1805', department=department, position=position, first_name='truongphong1')
+    return User.objects.create_user(username=username, password='test1805', department=department, position=position, first_name=username+'_name')
 
 def create_giamdoc(department_id, username):
     department = Department.objects.get(id=department_id)
     position = Position.objects.get(alias='gd')
-    return User.objects.create_user(username=username, password='test1805', department=department, position=position, first_name='giamdoc1')
+    return User.objects.create_user(username=username, password='test1805', department=department, position=position, first_name=username+'_name')
 
 class BaseTests(APITestCase):
     def setUp(self) -> None:
@@ -27,10 +27,11 @@ class BaseTests(APITestCase):
         self.chucvutp = Position.objects.create(name='trưởng phòng', alias='tp')
         self.chucvutl = Position.objects.create(name='trợ lý', alias='tl')
         self.phonggiamdoc = Department.objects.create_department(name='giám đốc', alias='giamdoc', password='abc')
-        self.phong1 = Department.objects.create_department(name='phòng 1', alias='phong1', password='abc')
+        self.phong1 = Department.objects.create_department(alias='phong1', password='abc', name='phòng 1')
+        self.phong2 = Department.objects.create_department(alias='phong2', password='abc', name='phòng 2')
         self.giamdoc = create_giamdoc(1, 'giamdoc')
-        self.truongphong = create_truongphong(2, 'truongphong')
-        self.troly = create_troly(2, 'troly')
+        self.truongphong1 = create_truongphong(2, 'truongphong1')
+        self.troly1 = create_troly(2, 'troly1')
 
     def user_login_jwt(self, username, password):
         data = {
@@ -104,7 +105,7 @@ class UserTests(BaseTests):
         '''
         Ensure position model is working
         '''
-        self.assertEqual(str(self.troly), f"Tài khoản {self.troly.username}")
+        self.assertEqual(str(self.troly1), f"Tài khoản {self.troly1.username}")
 
     def test_user_register_for_other(self):
         '''
@@ -112,12 +113,12 @@ class UserTests(BaseTests):
         - new_user.department = user.department
         - new_user.position less important than user.position
         '''
-        response = self.register_user_for_other(self.troly, 'test_user', self.chucvutl)
+        response = self.register_user_for_other(self.troly1, 'test_user', self.chucvutl)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         new_user = User.objects.get(username='test_user')
-        self.assertEqual(new_user.department.alias, self.troly.department.alias)
+        self.assertEqual(new_user.department.alias, self.troly1.department.alias)
         self.assertEqual(new_user.position.alias, 'tl')
-        response = self.register_user_for_other(self.troly, 'test_user1', self.chucvutp)
+        response = self.register_user_for_other(self.troly1, 'test_user1', self.chucvutp)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_user_register_for_any(self):
@@ -135,21 +136,17 @@ class UserTests(BaseTests):
         '''
         Ensure that can't set higher position than your position
         '''
-        response = self.manage_user(self.truongphong, self.troly, {'position': self.chucvugd.id})
+        response = self.manage_user(self.truongphong1, self.troly1, {'position': self.chucvugd.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response = self.manage_user(self.truongphong, self.troly, {'position': self.chucvutp.id, 'is_active': False, 'department': self.phonggiamdoc.id})
+        response = self.manage_user(self.truongphong1, self.troly1, {'position': self.chucvutp.id, 'is_active': False, 'department': self.phonggiamdoc.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['position'], self.chucvutp.id)
         self.assertEqual(response.data['is_active'], False)
         self.assertEqual(response.data['department'], self.phonggiamdoc.id)
-        response = self.manage_user(self.giamdoc, self.troly, {'position': self.chucvutl.id, 'is_active': True, 'department': self.phong1.id})
+        response = self.manage_user(self.giamdoc, self.troly1, {'position': self.chucvutl.id, 'is_active': True, 'department': self.phong1.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 class DepartmentTests(BaseTests):
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.phong2 = Department.objects.create_department(name='phòng 2', alias='phong2', password='abc')
 
     def change_pwd_department(self, manager, data):
         response = self.user_login_jwt(manager.username, 'test1805')
@@ -177,7 +174,7 @@ class DepartmentTests(BaseTests):
         '''
         response = self.department_login_jwt(self.phong1.id, 'abc')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        response = self.user_login_jwt(self.troly.username, 'test1805')
+        response = self.user_login_jwt(self.troly1.username, 'test1805')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response = self.department_login_jwt(self.phong1.id, 'abc')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -189,11 +186,11 @@ class DepartmentTests(BaseTests):
         '''
         Ensure that only truongphong of department can change password
         '''
-        response = self.change_pwd_department(self.troly, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'xyz'})
+        response = self.change_pwd_department(self.troly1, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'xyz'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        response = self.change_pwd_department(self.truongphong, {'department_id': self.phong2.id, 'password_old': 'abc', 'password_new': 'xyz'})
+        response = self.change_pwd_department(self.truongphong1, {'department_id': self.phong2.id, 'password_old': 'abc', 'password_new': 'xyz'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        response = self.change_pwd_department(self.truongphong, {'department_id': self.phong1.id, 'password_old': 'xyz', 'password_new': 'xyz'})
+        response = self.change_pwd_department(self.truongphong1, {'department_id': self.phong1.id, 'password_old': 'xyz', 'password_new': 'xyz'})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        response = self.change_pwd_department(self.truongphong, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'abc'})
+        response = self.change_pwd_department(self.truongphong1, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'abc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

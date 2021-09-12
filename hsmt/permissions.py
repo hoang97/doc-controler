@@ -3,8 +3,7 @@ from test_hsmt import settings
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from django_fsm import has_transition_perm
 from django.utils import timezone
-from rest_framework.generics import get_object_or_404
-from hsmt.models import XFile, AttackLog, Comment, XFileChange
+from hsmt.models import XFile
 
 # Custom permissions
 
@@ -23,7 +22,9 @@ class IsDepartmentAuthenticated(BasePermission):
 
         department_id = token_data['department_id']
         xfile_id = request.resolver_match.kwargs.get('pk')
-        xfile = get_object_or_404(XFile, id=xfile_id)
+        xfile = XFile.objects.get(id=xfile_id)
+        if not xfile:
+            return False
         department = xfile.department
         # Nếu không đúng phòng của xfile thì không được sửa
         if department_id != department.id:
@@ -45,84 +46,92 @@ class IsNotInUse(BasePermission):
         return obj.xfile_set.count() == 0
 
 class CanViewXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-        elif isinstance(obj, XFile):
-            xfile = obj
-        elif isinstance(obj, XFileChange):
-            xfile = obj.file
-        elif isinstance(obj, AttackLog):
-            xfile = obj.file
-        elif isinstance(obj, Comment):
-            xfile = obj.content_object
-        else:
-            raise Exception('Unexpected type of tagged object')
-        return xfile.can_view(request.user)
+    def has_permission(self, request, view):
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return xfile.can_view(request.user)
+        return False
 
 class CanEditXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        elif isinstance(obj, XFile):
-            return has_transition_perm(obj.submit_change, request.user)
-        elif isinstance(obj, XFileChange):
-            return has_transition_perm(obj.file.submit_change, request.user)
-        elif isinstance(obj, AttackLog):
-            return has_transition_perm(obj.file.submit_change, request.user)
-        elif isinstance(obj, Comment):
-            return has_transition_perm(obj.content_object.submit_change, request.user)
-        else:
-            raise Exception('Unexpected type of tagged object')
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.submit_change, request.user)
+        return False
 
 class CanSubmitXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.submit_change, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.submit_change, request.user)
+        return False
 
 class CanCheckXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.check_change, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.check_change, request.user)
+        return False
 
 class CanApproveXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.approve_change, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.approve_change, request.user)
+        return False
 
 class CanRejectCheckXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.reject_check, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.reject_check, request.user)
+        return False
 
 class CanRejectApproveXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.reject_approve, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.reject_approve, request.user)
+        return False
 
 class CanCreateChangeXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.create_change, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.create_change, request.user)
+        return False
 
 class CanCancelChangeXFile(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        else:
-            return has_transition_perm(obj.cancel_change, request.user)
+        xfile_id = request.resolver_match.kwargs.get('pk')
+        xfile = XFile.objects.get(id=xfile_id)
+        if xfile:
+            return has_transition_perm(xfile.cancel_change, request.user)
+        return False
 
 
 

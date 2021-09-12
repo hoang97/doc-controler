@@ -94,14 +94,6 @@ class XFileCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = XFile
         fields = ('code', 'description', 'type', 'targets', 'department', 'creator', 'editors', 'checkers', 'approvers', 'content')
-    #     read_only_fields = ('department', 'creator', 'content')
-
-    # # Ghi đè function save để khởi tạo giá trị mặc định cho XFile
-    # def save(self, **kwargs):
-    #     self.validated_data['department'] = kwargs.get('user').department
-    #     self.validated_data['creator'] = kwargs.get('user')
-    #     self.validated_data['content'] = self.validated_data['type'].example_content
-    #     return super().save()
 
 class XFileGeneralSerializer(serializers.ModelSerializer):
     type = XFileTypeSerializer(read_only=True)

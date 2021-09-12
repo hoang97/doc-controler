@@ -1,12 +1,10 @@
-from copy import deepcopy
 import json
+from copy import deepcopy
 from datetime import datetime, date
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
-from .utils import decode
 from django_fsm import transition, GET_STATE, FSMIntegerField
 from users.models import User, Department
 
@@ -60,7 +58,7 @@ class XFile(models.Model):
     Biểu diễn XFile
     '''
     # Nội dung bìa
-    code = models.CharField(max_length=120)
+    code = models.CharField(max_length=120, unique=True)
     description = models.TextField(blank=True)
     status = FSMIntegerField(
         choices = STATUS.choices,
@@ -112,8 +110,7 @@ class XFile(models.Model):
             record['value'] = value
             content[field] = record
         
-        secret_content = decode(self.content, key=None)
-        secret_content = json.loads(secret_content)
+        secret_content = json.loads(self.content)
         for field, record in secret_content.items():
             if record.get('type') == 'datetime':
                 try:
@@ -160,7 +157,7 @@ class XFile(models.Model):
             return True
         if user in list(self.approvers.all()):
             return True
-        if user.info.department.alias == 'giamdoc':
+        if user.department.alias == 'giamdoc':
             return True
         return False
 

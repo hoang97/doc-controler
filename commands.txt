@@ -11,3 +11,4 @@ py manage.py test <app_name> # run test for specific app
 # run coverage for testing testcases
 coverage run --omit='*/env/*' manage.py test
 coverage html
+D:\projects\test_hsmt\htmlcov\index.html
