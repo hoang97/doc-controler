@@ -95,6 +95,14 @@ class UserTests(BaseTests):
         self.client.logout()
         return response
 
+    def retrieve_me_user(self, viewer):
+        response = self.user_login_jwt(viewer.username, 'test1805')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('api_user_me')
+        response = self.client.get(url, format='json')
+        self.client.logout()
+        return response
+
     def test_position_model(self):
         '''
         Ensure position model is working
@@ -145,6 +153,20 @@ class UserTests(BaseTests):
         self.assertEqual(response.data['department'], self.phonggiamdoc.id)
         response = self.manage_user(self.giamdoc, self.troly1, {'position': self.chucvutl.id, 'is_active': True, 'department': self.phong1.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_me(self):
+        '''
+        Ensure that authenticated user can get their own user information
+        '''
+        response = self.retrieve_me_user(self.troly1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.troly1.id)
+        response = self.retrieve_me_user(self.truongphong1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.truongphong1.id)
+        response = self.retrieve_me_user(self.giamdoc)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.giamdoc.id)
 
 class DepartmentTests(BaseTests):
 

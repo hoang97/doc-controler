@@ -28,6 +28,14 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserDetailSerializer
     permission_classes = [IsAuthenticated]
 
+class UserMeView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
 class UserRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     '''
     - fields = ('id', 'username', 'is_active', 'date_joined', 'last_login', 
