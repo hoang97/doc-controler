@@ -1,8 +1,9 @@
 import json
 from django.urls.base import reverse
 from rest_framework import status
-from users.tests import BaseTests, create_troly, create_giamdoc, create_truongphong
+from users.tests import DepartmentTests, create_troly, create_giamdoc, create_truongphong
 from hsmt.models import *
+from hsmt.utils import *
 
 xfile_fake_content = {
     "1. Tên gọi và các tên gọi khác": {
@@ -50,7 +51,7 @@ def create_type(name, content):
 def create_target(name, type, description=''):
     return Target.objects.create(name=name, type=type, description=description)
 
-class XFileTests(BaseTests):
+class XFileTests(DepartmentTests):
     def setUp(self) -> None:
         super().setUp()
         self.troly11 = create_troly(self.phong1.id, 'troly11')
@@ -308,6 +309,39 @@ class XFileTests(BaseTests):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         url = reverse('api_xfile_RUD_attacklog', kwargs={'pk': xfile_id, 'attacklog_id': attacklog_id})
         response = self.client.delete(url, format='json')
+        self.client.logout()
+        return response
+    
+    def list_change_xfile(self, viewer, xfile_id, department_id=None):
+        response = self.user_login_jwt(viewer.username, 'test1805')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        if department_id:
+            response = self.department_login_jwt(department_id, 'abc')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('api_xfile_L_change', kwargs={'pk': xfile_id})
+        response = self.client.get(url, format='json')
+        self.client.logout()
+        return response
+
+    def retrieve_change_xfile(self, viewer, xfile_id, version, department_id=None):
+        response = self.user_login_jwt(viewer.username, 'test1805')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        if department_id:
+            response = self.department_login_jwt(department_id, 'abc')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('api_xfile_RU_change', kwargs={'pk': xfile_id, 'version': version})
+        response = self.client.get(url, format='json')
+        self.client.logout()
+        return response
+
+    def update_change_xfile(self, viewer, xfile_id, version, data, department_id=None):
+        response = self.user_login_jwt(viewer.username, 'test1805')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        if department_id:
+            response = self.department_login_jwt(department_id, 'abc')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('api_xfile_RU_change', kwargs={'pk': xfile_id, 'version': version})
+        response = self.client.put(url, data, format='json')
         self.client.logout()
         return response
 
@@ -736,39 +770,6 @@ class XFileTests(BaseTests):
         response = self.destroy_attacklog_xfile(self.troly11, xfile_for_update_destroy_attacklog.id, attacklog_id, self.phong1.id)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def list_change_xfile(self, viewer, xfile_id, department_id=None):
-        response = self.user_login_jwt(viewer.username, 'test1805')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        if department_id:
-            response = self.department_login_jwt(department_id, 'abc')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        url = reverse('api_xfile_L_change', kwargs={'pk': xfile_id})
-        response = self.client.get(url, format='json')
-        self.client.logout()
-        return response
-
-    def retrieve_change_xfile(self, viewer, xfile_id, version, department_id=None):
-        response = self.user_login_jwt(viewer.username, 'test1805')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        if department_id:
-            response = self.department_login_jwt(department_id, 'abc')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        url = reverse('api_xfile_RU_change', kwargs={'pk': xfile_id, 'version': version})
-        response = self.client.get(url, format='json')
-        self.client.logout()
-        return response
-
-    def update_change_xfile(self, viewer, xfile_id, version, data, department_id=None):
-        response = self.user_login_jwt(viewer.username, 'test1805')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        if department_id:
-            response = self.department_login_jwt(department_id, 'abc')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-        url = reverse('api_xfile_RU_change', kwargs={'pk': xfile_id, 'version': version})
-        response = self.client.put(url, data, format='json')
-        self.client.logout()
-        return response
-
     def test_xfile_workflow(self):
         '''
         Ensure that:
@@ -881,6 +882,67 @@ class XFileTests(BaseTests):
         #---------------create_change--------------------#
         response = self.create_change_xfile(self.troly11, self.xfile1.id, {'change_name': 'test_create_change3'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_cryptographic_system(self):
+        '''
+        Ensure encoding and decoding functions are working
+        '''
+        raw = 'Đỗ Bảo Hoàng'
+        key = 'phòng 123'
+        cipher = encode(raw, key)
+        decoded_cipher = decode(cipher, key)
+        self.assertEqual(decoded_cipher, raw)
+        decoded_cipher = decode(cipher, key+'1')
+        self.assertNotEqual(decoded_cipher, raw)
+        xfile = XFile.objects.first()
+        raw_content = deepcopy(xfile.content)
+        encoded_xfile = encode_for_object(xfile, key)
+        # print(raw_content)
+        # print(xfile.content)
+        decoded_xfile = decode_for_object(encoded_xfile, key)
+        self.assertEqual(raw_content, decoded_xfile.content)
+        # print(raw_content)
+        # print(decoded_xfile.content)
+        response = self.change_pwd_department(self.truongphong1, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'def'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_xfile_department_change_pwd(self):
+        xfile_data = {
+            'code': 'test_code_for_update_department_pwd',
+            'description': '',
+            'type': self.xfiletype1.id,
+            'targets': [self.target1.id, self.target2.id, self.target3.id],
+            'editors': [self.troly11.id],
+            'checkers': [self.troly1.id],
+            'approvers': [self.truongphong1.id]
+        }
+        xfile_fake1_content = deepcopy(xfile_fake_content)
+        fake1_value = encode('updated test_name', 'abc')
+        xfile_fake1_content['1. Tên gọi và các tên gọi khác']['value'] = fake1_value
+        data_for_update_content = {
+            'content': json.dumps(xfile_fake1_content),
+        }
+        data_changes = {
+            "1. Tên gọi và các tên gọi khác": {"type": "string", "old": "", "new": fake1_value}
+        }
+        response = self.create_xfile(self.troly1, xfile_data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        xfile_for_update_department_pwd = XFile.objects.get(code=xfile_data['code'])
+        # create change
+        response = self.create_change_xfile(self.troly11, xfile_for_update_department_pwd.id, {'change_name': 'test_create_change'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # update secret content
+        response = self.update_content_xfile(self.troly11, xfile_for_update_department_pwd.id, data_for_update_content, self.phong1.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(xfile_for_update_department_pwd.changes.first().content), data_changes)
+        # change pwd of department
+        response = self.change_pwd_department(self.truongphong1, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'nguyễn văn A'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # check if decode function is working
+        xfile_for_update_department_pwd = XFile.objects.get(code=xfile_data['code'])
+        raw_secret_content = json.loads(decode_for_object(xfile_for_update_department_pwd, 'nguyễn văn A').content)
+        # print(raw_secret_content)
+        self.assertEqual(raw_secret_content['1. Tên gọi và các tên gọi khác']['value'], 'updated test_name')
 
 # '{"1. T\u00ean g\u1ecdi v\u00e0 c\u00e1c t\u00ean g\u1ecdi kh\u00e1c": {"type": "string", "value": ""}, "2a. Th\u1eddi gian t\u1ed5 ch\u1ee9c th\u00e0nh l\u1eadp": {"type": "datetime", "value": ""}, "2b. Th\u1eddi gian xu\u1ea5t hi\u1ec7n tr\u00ean KGM": {"type": "datetime", "value": ""}, "3. M\u1ee5c ti\u00eau tr\u00ean m\u1ea1ng": {"type": "string", "value": ""}, "4. N\u1ec1n t\u1ea3ng \u1ee9ng d\u1ee5ng (b\u1ed5 sung)": {"type": "string", "value": ""}, "5. \u0110\u1ecba ch\u1ec9 v\u00e0 s\u1ed1 \u0111i\u1ec7n tho\u1ea1i": {"type": "string", "value": ""}, "6. T\u00f4n ch\u1ec9, m\u1ee5c \u0111\u00edch": {"type": "string", "value": ""}, "7. Qu\u00e1 tr\u00ecnh h\u00ecnh th\u00e0nh, ho\u1ea1t \u0111\u1ed9ng": {"type": "string", "value": ""}, "8. N\u1ed9i dung \u0111\u0103ng t\u1ea3i ch\u1ee7 y\u1ebfu": {"type": "string", "value": ""}}'
 

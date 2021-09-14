@@ -15,6 +15,8 @@ from users.serializers import *
 from users.permissions import *
 from notifications.utils import notify, VERB
 
+from hsmt.utils import update_pwd_for_xfile_department
+
 
 class UserListView(generics.ListAPIView):
     '''
@@ -137,6 +139,7 @@ def department_change_pwd(request):
     if check_password(password_old, department.password):
         department.password = make_password(password_new)
         department.save()
+        update_pwd_for_xfile_department(department_id, password_old, password_new)
         return Response('', status= status.HTTP_200_OK)
     return Response('Sai mật khẩu', status=status.HTTP_400_BAD_REQUEST)
 

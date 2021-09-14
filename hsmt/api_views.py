@@ -183,12 +183,17 @@ class XFileCreateView(generics.CreateAPIView):
 
     # Ghi đè function create để khởi tạo giá trị mặc định cho XFile
     def create(self, request, *args, **kwargs):
-        request.data['department'] = request.user.department.id
-        request.data['creator'] = request.user.id
-        if not request.data.get('type'):
+        data = deepcopy(request.data)
+        data['department'] = request.user.department.id
+        data['creator'] = request.user.id
+        if not data.get('type'):
             return Response('Thiếu loại hồ sơ', status.HTTP_400_BAD_REQUEST)
-        request.data['content'] = XFileType.objects.get(id = request.data['type']).example_content
-        return super().create(request, *args, **kwargs)
+        data['content'] = XFileType.objects.get(id = data['type']).example_content
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class XFileRetrieveDestroyView(generics.RetrieveDestroyAPIView):
     '''
@@ -241,10 +246,15 @@ class XFileCommentCreateView(generics.CreateAPIView):
 
     # Ghi đè function create để khởi tạo giá trị mặc định cho Comment
     def create(self, request, *args, **kwargs):
-        request.data['author'] = request.user.id
-        request.data['content_type'] = ContentType.objects.get_for_model(XFile).id
-        request.data['object_id'] = self.kwargs['pk']
-        return super().create(request, *args, **kwargs)
+        data = deepcopy(request.data)
+        data['author'] = request.user.id
+        data['content_type'] = ContentType.objects.get_for_model(XFile).id
+        data['object_id'] = self.kwargs['pk']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class XFileCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     '''fields = ('body')'''
@@ -258,11 +268,22 @@ class XFileCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
 
     # Ghi đè function update để khởi tạo giá trị mặc định cho Comment
     def update(self, request, *args, **kwargs):
-        request.data['author'] = self.get_object().author.id
-        request.data['content_type'] = ContentType.objects.get_for_model(XFile).id
-        request.data['object_id'] = self.kwargs['pk']
-        return super().update(request, *args, **kwargs)
+        data = deepcopy(request.data)
+        data['author'] = self.get_object().author.id
+        data['content_type'] = ContentType.objects.get_for_model(XFile).id
+        data['object_id'] = self.kwargs['pk']
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
 # Cần có mật khẩu phòng mới sử dụng đc
 
@@ -282,8 +303,13 @@ class AttackLogCreateView(generics.CreateAPIView):
     
     # Ghi đè function create để khởi tạo giá trị mặc định cho AttackLog
     def create(self, request, *args, **kwargs):
-        request.data['file'] = self.kwargs['pk']
-        return super().create(request, *args, **kwargs)
+        data = deepcopy(request.data)
+        data['file'] = self.kwargs['pk']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     # Ghi đè function perform_create để cập nhật XFileChange
     def perform_create(self, serializer):

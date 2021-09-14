@@ -39,7 +39,10 @@ class InSameDepartment(BasePermission):
 class IsGiamdoc(BasePermission):
     message = 'Người dùng phải là giám đốc'
     def has_object_permission(self, request, view, obj):
-        return is_giamdoc(request.user)
+        if request.method in SAFE_METHODS:
+            return True
+        else:
+            return is_giamdoc(request.user)
 
     def has_permission(self, request, view):
         return self.has_object_permission(request, view, None)
