@@ -888,6 +888,7 @@ class XFileTests(DepartmentTests):
         Ensure encoding and decoding functions are working
         '''
         raw = 'Đỗ Bảo Hoàng'
+        cipher = 'QrpTwfkX/QZMBy3tJHuPkr+0CECMAIvWJcdON6+AD/dZLEUIQEzl+xDqgUzktcjM'
         key = 'phòng 123'
         cipher = encode(raw, key)
         decoded_cipher = decode(cipher, key)
@@ -903,6 +904,7 @@ class XFileTests(DepartmentTests):
         self.assertEqual(raw_content, decoded_xfile.content)
         # print(raw_content)
         # print(decoded_xfile.content)
+        # print(decode(cipher, key))
         response = self.change_pwd_department(self.truongphong1, {'department_id': self.phong1.id, 'password_old': 'abc', 'password_new': 'def'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

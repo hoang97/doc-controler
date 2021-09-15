@@ -36,12 +36,11 @@ def encode(raw, key):
         return raw
     encoder = AESCipher(key)
     return encoder.encrypt(raw).decode('utf-8')
-
 def decode(cipher, key):
     if cipher == '':
         return cipher
     decoder = AESCipher(key)
-    return decoder.decrypt(cipher.encode('utf-8'))
+    return decoder.decrypt(cipher)
 
 def encode_for_object(obj, key):
     if isinstance(obj, XFile):
